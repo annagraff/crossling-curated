@@ -1,0 +1,8 @@
+load("/Users/Anna 1/Desktop/lang-density-sparsity/variable-selection/typ-list-just-glottocodes-14oct21.RDS")
+~/Desktop/lang-density-sparsity/variable-selection/typ-list-just-glottocodes-14oct21.RDS
+xx<- readRDS(~/Desktop/lang-density-sparsity/variable-selection/typ-list-just-glottocodes-14oct21.RDS)
+> xx<- readRDS(~/Desktop/lang-density-sparsity/variable-selection/typ-list-just-glottocodes-14oct21.RDS)#
+> x  <- readRDS(~/Desktop/lang-density-sparsity/variable-selection/typ-list-just-glottocodes-14oct21.RDS)
+1+1
+x<-readRDS(~Desktop/lang-density-sparsity/variable-selection/typ-list-just-glottocodes-14oct21.RDS)
+load("/Users/Anna 1/Desktop/lang-density-sparsity/variable-selection/matrix-07oct21.RDS")
