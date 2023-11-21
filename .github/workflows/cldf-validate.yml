@@ -1,14 +1,11 @@
-name: CLDF-validation
-
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -26,7 +23,7 @@ jobs:
         pip install pycldf
     - name: Test with cldf validate
       run: |
-	cldf validate mega-merge/output/logicalMM/cldf
+        cldf validate mega-merge/output/logicalMM/cldf
         cldf validate mega-merge/output/statisticalMM/cldf
-	cldf validate grambank-modified/output/logicalGBM/cldf
-	cldf validate grambank-modified/output/statisticalGBM/cldf
+        cldf validate grambank-modified/output/logicalGBM/cldf
+        cldf validate grambank-modified/output/statisticalGBM/cldf
