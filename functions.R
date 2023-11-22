@@ -155,7 +155,7 @@ implement_conditioning <- function(variable_to_be_conditioned, condition, equato
   } else if (equator == " != "){ ## this applies if the condition in question is negative (" != ")
     # if the condition in question is negative (" != "), we want to keep all languages that do not have the specified state of conditioned_upon_variable
     # select languages which do not have the specified state in conditioned_upon_variable
-    condition_applies <- setdiff(conditioned_upon_variable,filter(conditioned_upon_variable,conditioned_upon_variable[,2]==condition[2]))$glottocode
+    condition_applies <- setdiff(conditioned_upon_variable$glottocode,filter(conditioned_upon_variable,conditioned_upon_variable[,2]==condition[2])$glottocode)
     
     # select languages in variable_to_be_conditioned to which condition applies
     conditioned_data <- filter(variable_to_be_conditioned, glottocode %in% as.character(condition_applies))

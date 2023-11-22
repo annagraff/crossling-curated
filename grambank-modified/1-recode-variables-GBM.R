@@ -25,7 +25,7 @@ taxonomy <- as_flat_taxonomy_matrix(glottolog_languoids)
 expect_true(all(original_variable_matrix$glottocode %in% taxonomy$id))
 
 # read in the file specifying the maintained variables, the and the recoded variables with their recoding patterns
-recode_patterns <- read_sheet("https://docs.google.com/spreadsheets/d/1XAiDoMYAWgC6Ig-qpF-d0MQtpLvv-ZnoArAlr9KHlb8/edit#gid=0","variables")
+recode_patterns <- read.csv("input/gb-recode-patterns-variables.csv")
 
 ########## include without modification ########## 
 # extract the features that we don't need to recode because we recode.operation.type them as they are
@@ -580,8 +580,8 @@ recoded_data <- full_join(tenth_set_rec, recoded_data, by=c(glottocode="glottoco
 recoded_data[is.na(recoded_data)]<-"NA"
 
 # subset full data into original layer; logical/design layer and logical/design/statistical layer
-recode_patterns <- read_sheet("https://docs.google.com/spreadsheets/d/1XAiDoMYAWgC6Ig-qpF-d0MQtpLvv-ZnoArAlr9KHlb8/edit#gid=0","variables")
-all_decisions <- read_sheet("https://docs.google.com/spreadsheets/d/1XAiDoMYAWgC6Ig-qpF-d0MQtpLvv-ZnoArAlr9KHlb8/edit#gid=0","decisions_log")
+recode_patterns <- read.csv("input/gb-recode-patterns-variables.csv")
+all_decisions <- read.csv("input/gb-recode-patterns-decisions-log.csv")
 logical_decisions <- all_decisions %>% filter(modification.type %in% c("logical","design"))
 statistical_decisions <- all_decisions %>% filter(modification.type == "statistical")
 
@@ -606,7 +606,7 @@ expect_true(all(original_names_is%in%original_names_should))
 expect_true(all(original_names_should%in%original_names_is))
 
 ### logical/design: check all original variables that should be in the logical/design filter are in there and vice versa
-design_add <- c(unique(unlist(str_split(filter(logical_decisions,is.added.variable.kept == "yes")$resulting.added.variables,", "))),"NA")
+design_add <- c(unique(unlist(str_split(filter(logical_decisions,is.added.variable.kept == "yes")$resulting.added.variables,", "))),NA)
 design_remove <- unique(unlist(str_split(logical_decisions$resulting.removed.variables,", ")))
 # logical/design is: a) original variables, plus b) all design/logical additions, minus c) all design/logical removals
 logical_names_should <- unique(c(original_names_is,design_add))[unique(c(original_names_is,design_add))%in%design_remove==F]
@@ -627,6 +627,7 @@ expect_true(all(statistical_names_should %in% statistical_names_is))
 
 ### modification ID match --> ensure all modification IDs in the variables sheet are in the modification sheet and vice versa
 mod_IDs_is <- na.omit(unique(c(unlist(str_split(recode_patterns$modification.IDs,";")),(unlist(str_split(recode_patterns$associated.modification.IDs.without.resulting.action,";"))))))
+mod_IDs_is <- mod_IDs_is[mod_IDs_is!=""]
 mod_IDs_should <- na.omit(all_decisions$modification.ID)
 expect_true(all(mod_IDs_is %in% mod_IDs_should))
 expect_true(all(mod_IDs_should %in% mod_IDs_is))
@@ -740,8 +741,7 @@ write.csv(lg_samples_500,"output/500_diversity_samples_seed_2023.csv")
 proportion_languages_must_be_in_applicable_state <- 1/3 # for a sample to be considered for evaluation, at least 1/3 of languages need to be coded for the second variable given the relevant state(s) of the first
 
 # load expectations
-expectations <- read_sheet("https://docs.google.com/spreadsheets/d/1XAiDoMYAWgC6Ig-qpF-d0MQtpLvv-ZnoArAlr9KHlb8/edit#gid=0",
-                           sheet = "decisions_log") %>%
+expectations <- read.csv("input/gb-recode-patterns-decisions-log.csv") %>%
   filter(modification.type == "statistical")
 
 # run all tests
@@ -751,14 +751,18 @@ results <- evaluate_XOR_AND_THEN(recoded_data = recoded_data,
                                  diversity_samples = lg_samples_500,
                                  proportion_languages_must_be_in_applicable_state = proportion_languages_must_be_in_applicable_state)
 
-# write to file
-range_write("https://docs.google.com/spreadsheets/d/1XAiDoMYAWgC6Ig-qpF-d0MQtpLvv-ZnoArAlr9KHlb8/edit#gid=1240375291", 
-            sheet = "decisions_log", 
-            data = results, range = "Z1")
+results <- na_convert(results)
+results$maximum.sum <- apply(results,1,function(x)if(is.na(x[13])){x[10]}else if(x[10]>x[13]){x[10]}else{x[13]})
+results$minimum.cohensd <- apply(results,1,function(x)if(is.na(x[17])){x[16]}else if(x[16]>x[17]){x[17]}else{x[16]})
+results$minimum.sum <- apply(results,1,function(x)if(is.na(x[13])){x[10]}else if(x[10]>x[13]){x[13]}else{x[10]})
+results$maximum.cohensd <- apply(results,1,function(x)if(is.na(x[17])){x[16]}else if(x[16]>x[17]){x[16]}else{x[17]})
+
+# check the results logged in the file are correct
+expect_true(all(round(results,digits=7) == round(expectations[,26:46],digits=7), na.rm = T))
 
 ########## make cldf ########## 
 # languages.csv
-taxonomy_for_csv <- build_flat_taxonomy_matrix(id=glottolog_languoids$id,parent_id=glottolog_languoids$parent_id)
+taxonomy_for_csv <- as_flat_taxonomy_matrix(glottolog_languoids)
 names(taxonomy_for_csv)[1] <- "glottocode"
 macroareas <- read.csv("../input/glottolog_v.4.8/languages_and_dialects_geo.csv")
 
@@ -773,10 +777,13 @@ taxonomy_statistical <- left_join(taxonomy_statistical,taxonomy_for_csv)
 write.csv(taxonomy_statistical,"output/statisticalGBM/cldf/languages.csv",fileEncoding="UTF-8",row.names = F)
 
 # parameters.csv
-parameters <- read_sheet("https://docs.google.com/spreadsheets/d/1XAiDoMYAWgC6Ig-qpF-d0MQtpLvv-ZnoArAlr9KHlb8/edit#gid=894950261",sheet = "variables") %>%
-  select(1:17)
-write.csv(parameters,"output/logicalGBM/cldf/parameters.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(parameters,"output/statisticalGBM/cldf/parameters.csv",fileEncoding="UTF-8",row.names = F)
+parameters <- read.csv("input/gb-recode-patterns-variables.csv") %>% select(1:17)
+
+parameters_logical <- parameters %>% filter(design.logical==T)
+parameters_statistical <- parameters %>% filter(design.logical.statistical==T)
+
+write.csv(parameters_logical,"output/logicalGBM/cldf/parameters.csv",fileEncoding="UTF-8",row.names = F)
+write.csv(parameters_statistical,"output/statisticalGBM/cldf/parameters.csv",fileEncoding="UTF-8",row.names = F)
 
 # values.csv
 library(reshape2)
@@ -805,13 +812,7 @@ statistical_codes <- statistical_long %>% select(c("code_ID","new.name","value")
 write.csv(statistical_codes,"output/statisticalGBM/cldf/codes.csv",fileEncoding="UTF-8",row.names = F)
 
 # modifications.csv
-modifications <- read_sheet("https://docs.google.com/spreadsheets/d/1XAiDoMYAWgC6Ig-qpF-d0MQtpLvv-ZnoArAlr9KHlb8/edit#gid=894950261",sheet = "decisions_log") %>%
-  select(1:46)
-
-modifications$v1.equals.for.test <-  c(unlist(modifications$v1.equals.for.test), rep(NA,nrow(modifications)-length(unlist(modifications$v1.equals.for.test))))
-modifications$v1.unequals.for.test <-  c(unlist(modifications$v1.unequals.for.test), rep(NA,nrow(modifications)-length(unlist(modifications$v1.unequals.for.test))))
-modifications$v2.equals.for.test <-  c(unlist(modifications$v2.equals.for.test), rep(NA,nrow(modifications)-length(unlist(modifications$v2.equals.for.test))))
-modifications$v2.unequals.for.test <-  c(unlist(modifications$v2.unequals.for.test), rep(NA,nrow(modifications)-length(unlist(modifications$v2.unequals.for.test))))
+modifications <- read.csv("input/gb-recode-patterns-decisions-log.csv")
 
 write.csv(modifications,"output/logicalGBM/cldf/modifications.csv",fileEncoding="UTF-8",row.names = F)
 write.csv(modifications,"output/statisticalGBM/cldf/modifications.csv",fileEncoding="UTF-8",row.names = F)

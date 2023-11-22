@@ -54,8 +54,8 @@ logfile_gblogical_logodds_taxtrue_09990995_seed8765 <-
                 max_steps = max_steps_logical,
                 variability_threshold = variability_threshold,
                 mean_type = mean_type,
-                taxonomy = T,
-                taxonomy_matrix = taxonomy_matrix,
+                use_taxonomy = T,
+                taxonomy = glottolog_languoids,
                 taxonomy_weight = taxonomy_weight,
                 coding_weight = coding_weight)
 write.csv(logfile_gblogical_logodds_taxtrue_09990995_seed8765,"output/logicalGBM/logfile_gblogical_logodds_taxtrue_09990995_seed8765.csv")
@@ -66,8 +66,8 @@ logfile_gbstatistical_logodds_taxtrue_09990995_seed8765 <-
                 max_steps = max_steps_statistical,
                 variability_threshold = variability_threshold,
                 mean_type = mean_type,
-                taxonomy = T,
-                taxonomy_matrix = taxonomy_matrix,
+                use_taxonomy = T,
+                taxonomy = glottolog_languoids,
                 taxonomy_weight = taxonomy_weight,
                 coding_weight = coding_weight)
 write.csv(logfile_gbstatistical_logodds_taxtrue_09990995_seed8765,"output/statisticalGBM/logfile_gbstatistical_logodds_taxtrue_09990995_seed8765.csv")

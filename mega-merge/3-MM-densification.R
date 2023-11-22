@@ -21,7 +21,7 @@ lgs_st <- statistical$glottocode
 statistical <- statistical %>% select(-glottocode)
 rownames(statistical) <- lgs_st
 
-# gererate taxonomy matrix
+# generate taxonomy matrix
 taxonomy_matrix <- as_flat_taxonomy_matrix(glottolog_languoids)
 
 # subset logical and statistical MM data to those languages with language coordinates (for plotting later)
@@ -33,13 +33,8 @@ logical_for_pruning <- logical[which(rownames(logical)%in%tax_with_coords$id),]
 statistical_for_pruning <- statistical[which(rownames(statistical)%in%tax_with_coords$id),]
 
 # for densification, ensure all blanks, ? and "NA" are coded as NA
-logical_for_pruning[logical_for_pruning==""] <- NA
-logical_for_pruning[logical_for_pruning=="?"] <- NA
-logical_for_pruning[logical_for_pruning=="NA"] <- NA
-
-statistical_for_pruning[statistical_for_pruning==""] <- NA
-statistical_for_pruning[statistical_for_pruning=="?"] <- NA
-statistical_for_pruning[statistical_for_pruning=="NA"] <- NA
+logical_for_pruning <- na_convert(logical_for_pruning)
+statistical_for_pruning <- na_convert(statistical_for_pruning)
 
 # group both logical and statistical data in 4 sets: (1) full (grammar+phonology+lexicon), (2) grammar only, (3) phonology only, (4) lexicon only
 logical_parameters <- read.csv("output/logicalMM/cldf/parameters.csv")
@@ -84,8 +79,8 @@ logfile_full_mmlogical_logodds_taxtrue_09990999_seed2222 <-
                 max_steps = max_steps_logical_full,
                 variability_threshold = variability_threshold,
                 mean_type = mean_type,
-                taxonomy = T,
-                taxonomy_matrix = taxonomy_matrix,
+                use_taxonomy = T,
+                taxonomy = glottolog_languoids,
                 taxonomy_weight = taxonomy_weight_full,
                 coding_weight = coding_weight_full)
 write.csv(logfile_full_mmlogical_logodds_taxtrue_09990999_seed2222,"output/logicalMM/full/logfile_full_mmlogical_logodds_taxtrue_09990999_seed2222.csv")
@@ -96,8 +91,8 @@ logfile_full_mmstatistical_logodds_taxtrue_09990999_seed2222 <-
                 max_steps = max_steps_statistical_full,
                 variability_threshold = variability_threshold,
                 mean_type = mean_type,
-                taxonomy = T,
-                taxonomy_matrix = taxonomy_matrix,
+                use_taxonomy = T,
+                taxonomy = glottolog_languoids,
                 taxonomy_weight = taxonomy_weight_full,
                 coding_weight = coding_weight_full)
 write.csv(logfile_full_mmstatistical_logodds_taxtrue_09990999_seed2222,"output/statisticalMM/full/logfile_full_mmstatistical_logodds_taxtrue_09990999_seed2222.csv")
@@ -194,8 +189,8 @@ logfile_grammar_mmlogical_logodds_taxtrue_09990999_seed2222 <-
                 max_steps = max_steps_logical_grammar,
                 variability_threshold = variability_threshold,
                 mean_type = mean_type,
-                taxonomy = T,
-                taxonomy_matrix = taxonomy_matrix,
+                use_taxonomy = T,
+                taxonomy = glottolog_languoids,
                 taxonomy_weight = taxonomy_weight_grammar,
                 coding_weight = coding_weight_grammar)
 write.csv(logfile_grammar_mmlogical_logodds_taxtrue_09990999_seed2222,"output/logicalMM/grammar/logfile_grammar_mmlogical_logodds_taxtrue_09990999_seed2222.csv")
@@ -206,8 +201,8 @@ logfile_grammar_mmstatistical_logodds_taxtrue_09990999_seed2222 <-
                 max_steps = max_steps_statistical_grammar,
                 variability_threshold = variability_threshold,
                 mean_type = mean_type,
-                taxonomy = T,
-                taxonomy_matrix = taxonomy_matrix,
+                use_taxonomy = T,
+                taxonomy = glottolog_languoids,
                 taxonomy_weight = taxonomy_weight_grammar,
                 coding_weight = coding_weight_grammar)
 write.csv(logfile_grammar_mmstatistical_logodds_taxtrue_09990999_seed2222,"output/statisticalMM/grammar/logfile_grammar_mmstatistical_logodds_taxtrue_09990999_seed2222.csv")
@@ -306,8 +301,8 @@ logfile_phonology_mmlogical_logodds_taxtrue_0909_seed4444 <-
                 max_steps = max_steps_logical_phonology,
                 variability_threshold = variability_threshold,
                 mean_type = mean_type,
-                taxonomy = T,
-                taxonomy_matrix = taxonomy_matrix,
+                use_taxonomy = T,
+                taxonomy = glottolog_languoids,
                 taxonomy_weight = taxonomy_weight_phonology,
                 coding_weight = coding_weight_phonology)
 write.csv(logfile_phonology_mmlogical_logodds_taxtrue_0909_seed4444,"output/logicalMM/phonology/logfile_phonology_mmlogical_logodds_taxtrue_0909_seed4444.csv")
@@ -318,8 +313,8 @@ logfile_phonology_mmstatistical_logodds_taxtrue_0909_seed4444 <-
                 max_steps = max_steps_statistical_phonology,
                 variability_threshold = variability_threshold,
                 mean_type = mean_type,
-                taxonomy = T,
-                taxonomy_matrix = taxonomy_matrix,
+                use_taxonomy = T,
+                taxonomy = glottolog_languoids,
                 taxonomy_weight = taxonomy_weight_phonology,
                 coding_weight = coding_weight_phonology)
 write.csv(logfile_phonology_mmstatistical_logodds_taxtrue_0909_seed4444,"output/statisticalMM/phonology/logfile_phonology_mmstatistical_logodds_taxtrue_0909_seed4444.csv")
@@ -387,8 +382,8 @@ logfile_lexicon_mmlogical_logodds_taxtrue_099099_seed3333 <-
                 max_steps = max_steps_logical_lexicon,
                 variability_threshold = variability_threshold,
                 mean_type = mean_type,
-                taxonomy = T,
-                taxonomy_matrix = taxonomy_matrix,
+                use_taxonomy = T,
+                taxonomy = glottolog_languoids,
                 taxonomy_weight = taxonomy_weight_lexicon,
                 coding_weight = coding_weight_lexicon)
 write.csv(logfile_lexicon_mmlogical_logodds_taxtrue_099099_seed3333,"output/logicalMM/lexicon/logfile_lexicon_mmlogical_logodds_taxtrue_099099_seed3333.csv")
@@ -399,8 +394,8 @@ logfile_lexicon_mmstatistical_logodds_taxtrue_099099_seed3333 <-
                 max_steps = max_steps_statistical_lexicon,
                 variability_threshold = variability_threshold,
                 mean_type = mean_type,
-                taxonomy = T,
-                taxonomy_matrix = taxonomy_matrix,
+                use_taxonomy = T,
+                taxonomy = glottolog_languoids,
                 taxonomy_weight = taxonomy_weight_lexicon,
                 coding_weight = coding_weight_lexicon)
 write.csv(logfile_lexicon_mmstatistical_logodds_taxtrue_099099_seed3333,"output/statisticalMM/lexicon/logfile_lexicon_mmstatistical_logodds_taxtrue_099099_seed3333.csv")

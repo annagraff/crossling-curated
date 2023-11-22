@@ -819,6 +819,7 @@
                         "null": [
                             "NA"
                         ],
+                        "separator": ";",
                         "name": "resulting.modification"
                     },
                     {
@@ -974,15 +975,6 @@
                             "NA"
                         ],
                         "name": "relative.overlap.vlarge.in.vsmall"
-                    },
-                    {
-                        "dc:description": "Proportion of languages coded (not '?' or NA) in the variable state under scrutiny, which is also coded (not '?' or NA) in the the other variable, if applicable (statistical modification.type only)",
-                        "datatype": "number",
-                        "required": false,
-                        "null": [
-                            "NA"
-                        ],
-                        "name": "proportion.overlap.applicable.vs.non.applicable"
                     },
                     {
                         "dc:description": "Number of samples discarded for the test, because under 1/3 of the languages in the applicable state of v1 are not also coded for v2",

@@ -1222,7 +1222,7 @@ results$minimum.sum <- apply(results,1,function(x)if(is.na(x[13])){x[10]}else if
 results$maximum.cohensd <- apply(results,1,function(x)if(is.na(x[17])){x[16]}else if(x[16]>x[17]){x[16]}else{x[17]})
 
 # check the results logged in the file are correct
-expect_true(all(round(resultstbc,digits=7) == round(expectations[,26:46],digits=7), na.rm = T))
+expect_true(all(round(results,digits=7) == round(expectations[,26:46],digits=7), na.rm = T))
 
 ########## make cldf ########## 
 # languages.csv
@@ -1240,7 +1240,7 @@ taxonomy_statistical <- left_join(taxonomy_statistical,macroareas)
 taxonomy_statistical <- left_join(taxonomy_statistical,taxonomy_for_csv)
 write.csv(taxonomy_statistical,"output/statisticalMM/cldf/languages.csv",fileEncoding="UTF-8",row.names = F)
 
-# parameters.csv is directly from google sheets
+# parameters.csv
 parameters <- read.csv("input/recode-patterns-variables.csv") %>% select(1:23)
 
 parameters_logical <- parameters %>% filter(design.logical==T)
@@ -1275,7 +1275,7 @@ write.csv(logical_codes,"output/logicalMM/cldf/codes.csv",fileEncoding="UTF-8",r
 statistical_codes <- statistical_long %>% select(c("code_ID","new.name","value")) %>% unique()
 write.csv(statistical_codes,"output/statisticalMM/cldf/codes.csv",fileEncoding="UTF-8",row.names = F)
 
-# modifications.csv is directly from google sheets (columns B-AI)
+# modifications.csv
 modifications <- read.csv("input/recode-patterns-decisions-log.csv")
 
 write.csv(modifications,"output/logicalMM/cldf/modifications.csv",fileEncoding="UTF-8",row.names = F)

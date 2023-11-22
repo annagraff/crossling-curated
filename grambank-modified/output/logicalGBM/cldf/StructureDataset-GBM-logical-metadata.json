@@ -394,7 +394,7 @@
         },
         {
             "dc:conformsTo": "http://cldf.clld.org/v1.0/terms.rdf#ParameterTable",
-            "dc:extent": 345,
+            "dc:extent": 203,
             "tableSchema": {
                 "columns": [
                     {
@@ -449,7 +449,7 @@
                         "separator": ";",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "modification.IDs"
                     },
@@ -458,25 +458,25 @@
                         "separator": ";",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "associated.modification.IDs.without.resulting.action"
                     },
                     {
-                        "dc:description": "Known remaining dependencies after statistical treatment, referenced by a tested modification ID, separated by ', ' if applicable",
+                        "dc:description": "Known remaining dependencies after statistical treatment, referenced by a tested modification ID, separated by ';' if applicable",
                         "separator": ";",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "known.remaining.dependencies.after.statistical.treatment"
                     },
                     {
-                        "dc:description": "Networks of dependencies encompassing more than two variables, separated by ', ' if applicable",
+                        "dc:description": "Networks of dependencies encompassing more than two variables, separated by ';' if applicable",
                         "separator": ";",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "networks.of.dependencies"
                     },
@@ -494,7 +494,7 @@
                         "dc:description": "Specification of condition, if variable is conditioned",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "condition.if.variable.conditioned"
                     },
@@ -503,7 +503,7 @@
                         "separator": ";",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "recode.operation.Rcode"
                     },
@@ -512,7 +512,7 @@
                         "separator": ";",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "original.levels"
                     },
@@ -521,7 +521,7 @@
                         "separator": ";",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "new.levels"
                     },
@@ -530,7 +530,7 @@
                         "separator": "-",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "recode.pattern"
                     }
@@ -624,7 +624,7 @@
             "url": "codes.csv"
         },
         {
-            "dc:extent": 324,
+            "dc:extent": 327,
             "tableSchema": {
                 "columns": [
                     {
@@ -644,7 +644,7 @@
                         "datatype": "string",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "design.decision"
                     },
@@ -653,7 +653,7 @@
                         "datatype": "string",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "expectation.tested"
                     },
@@ -662,7 +662,7 @@
                         "datatype": "string",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "motivation.for.test"
                     },
@@ -673,7 +673,7 @@
                         "separator": ";",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "source"
                     },
@@ -682,7 +682,7 @@
                         "datatype": "string",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "statistical.action.or.logging.necessary"
                     },
@@ -694,7 +694,7 @@
                         },
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "requires.statistically.motivated.action"
                     },
@@ -706,7 +706,7 @@
                         },
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "logging.in.known.remaining.dependencies"
                     },
@@ -718,7 +718,7 @@
                         },
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "relative.overlap.vsmall.in.vlarge.sufficient"
                     },
@@ -730,7 +730,7 @@
                         },
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "sufficient.samples.applicable.for.test"
                     },
@@ -739,7 +739,7 @@
                         "datatype": "string",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "passes.bell.test"
                     },
@@ -748,7 +748,7 @@
                         "datatype": "string",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "passes.cohens.d"
                     },
@@ -759,6 +759,7 @@
                         "null": [
                             "NA"
                         ],
+                        "separator": ";",
                         "name": "resulting.modification"
                     },
                     {
@@ -808,7 +809,7 @@
                         "datatype": "string",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "variable.1.for.test"
                     },
@@ -817,7 +818,7 @@
                         "datatype": "string",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "variable.2.for.test"
                     },
@@ -826,7 +827,7 @@
                         "datatype": "string",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "name": "test"
                     },
@@ -835,7 +836,7 @@
                         "datatype": "string",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "separator": ", ",
                         "name": "v1.equals.for.test"
@@ -845,7 +846,7 @@
                         "datatype": "string",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "separator": ", ",
                         "name": "v1.unequals.for.test"
@@ -855,7 +856,7 @@
                         "datatype": "string",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "separator": ", ",
                         "name": "v2.equals.for.test"
@@ -865,7 +866,7 @@
                         "datatype": "string",
                         "required": false,
                         "null": [
-                            "NA"
+                            ""
                         ],
                         "separator": ", ",
                         "name": "v2.unequals.for.test"
