@@ -266,7 +266,6 @@ evaluate_XOR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversit
                                              baseline2_XOR_AND=NA),0) # this denotes whether the expected relationship is confirmed in the subsample in accordance with the defined thresholds
     
     for (ds in 1:ncol(diversity_samples)){ # loop through all diversity samples
-      
       # select the subset of languages in the diversity sample for the relevant variables and tabulate for both the full data (including ? and NA) and the non-Q/NA data.
       expectation_ds_sample_withqs <- raw_data %>% filter(glottocode%in%diversity_samples[,ds])
       sample_table_withqs <- table(unlist(expectation_ds_sample_withqs[,1]),unlist(expectation_ds_sample_withqs[,2])) # this is the table
@@ -622,10 +621,10 @@ compare_full_to_densified <- function(full, densified, densified2 = NULL, taxono
 
   
   # print and save the combined plot
-  ggsave(paste(directory,"comparison_plot.png",collapse="",sep=""), plot = combined_plot, width = 16, height = 8, dpi = 300)
+  ggsave(paste(directory,"_densification_plot.png",collapse="",sep=""), plot = combined_plot, width = 16, height = 8, dpi = 300)
   
   # save and return comparison table
-  write.csv(comparison,paste(directory,"comparison_table.csv",collapse="",sep=""))
+  write.csv(comparison,paste(directory,"_densification_table.csv",collapse="",sep=""))
   return(comparison)
 }
 
@@ -652,7 +651,11 @@ generate_per_family_prop_table <- function(data,taxonomy_matrix){
 # explained variances from PCA
 explained_variance <- function(pca_object) {
   variances <- pca_object@sDev^2
-  cumsum(variances/sum(variances))
+  r2cum <- pca_object@R2cum
+  
+  explvar <- rbind(cumsum(variances/sum(variances)),r2cum)
+  rownames(explvar) <- c("explained variance", "R2cum")
+  return(explvar)
 }
 
 
@@ -733,6 +736,42 @@ RGB_mapping <- function(pca.object, taxonomy_matrix) {
   return(geo.world)
 }
 
+
+# Groups of PCs are mapped to 2-D space and visualised according to macroarea
+dim_mapping <- function(pca.object, taxonomy_matrix) {
+  library(scales)
+  library(lattice)
+  
+  gg <- as.data.frame(taxonomy_matrix)[ , c('level1','macroarea')] %>% filter(level1 %in% rownames(pca.object@scores))
+  gg <- data.frame(Macroarea = apply(table(gg),1,function(x)colnames(table(gg))[which(x==max(x))]))
+  gg$family <- rownames(gg)
+  
+  df <- data.frame(scores(pca.object), family=rownames(scores(pca.object)))
+  df <- left_join(df, gg)
+  
+  # scale PCs:
+  df$pc1 <- with(df, rescale_mid(PC1))
+  df$pc2 <- with(df, rescale_mid(PC2))
+  
+  p <- ggplot(df, aes(x=pc1,y=pc2,group=Macroarea))+
+    geom_point(aes(shape=Macroarea))+
+    scale_shape_manual(values=c(1,15,2,3,8,4))+
+    theme_bw()+
+    labs(subtitle = "Families in PC-space")
+  
+  # # if 3d-plot desired:
+  # library(lattice)
+  # df$pc3 <- with(df, rescale_mid(PC3))
+  # cube <- cloud(pc1~pc2*pc3, data=df,
+  #       pch=1,
+  #       cex=.4,
+  #       groups = macroarea,
+  #       auto.key = TRUE,
+  #       par.box=list(lty=3),
+  #       main = "Families in PC-space, by macroregion")
+
+  return(p)
+}
 
 ### Natural Earth data download function (optimised for sf)
 download_ne <- function (scale = 110,
@@ -937,7 +976,7 @@ rgb_map <- function(rgb_data_frame, world_map_initial, main, plot){
 }
 
 # create a network of grid points, associated to a map and a taxonomy matrix of coordinates
-gridpointwise_entropies <- function(taxonomy_matrix, data_trimmed_to_lgs_with_coords, world_map, lon, coordinate_scaling, buffer_distance, verbose=T, directory, data_type, robust_errors, robust){
+gridpointwise_entropies <- function(taxonomy_matrix, data_trimmed_to_lgs_with_coords, world_map, coordinate_scaling, buffer_distance, verbose=T, data_type, main_fig){
   library(geosphere)
   library(sp)
   library(sf)
@@ -950,25 +989,27 @@ gridpointwise_entropies <- function(taxonomy_matrix, data_trimmed_to_lgs_with_co
   library(lmtest)
   library(sandwich)
   library(jtools)
-  
+  library(modelsummary)
+  library(lmls)
+
   # generate grid points using the regularCoordinates() function from the geosphere package - the function solves the Thompson Problem, cf. Derungs et al. 2018
-  reg_coords <- regularCoordinates(coordinate_scaling)
+  reg_coords <- regularCoordinates(coordinate_scaling) %>% as.data.frame()
   
-  # shift grid points, languages and world map by lon
-  pacific_centred_world_map <- shift_map(world_map, lon=lon)
-  reg_coords <- shift_points(reg_coords, lon=lon)
-  taxonomy_matrix_for_plot <- shift_points(taxonomy_matrix, lon=lon)
-  
+  # shift all (coordinates, languages, maps)
+  shifted <- project_data(df = reg_coords, world_map_initial = world_map_initial)
+  shifted2 <- project_data(df = taxonomy_matrix, world_map_initial = world_map_initial)
+  shifted$language_locations <- shifted2$data
+
   # intersect regular coordinates with continental polygons, including a buffer to keep islands
-  pacific_centred_world_map_buffered <- st_buffer(pacific_centred_world_map, dist = buffer_distance)
-  overlap <- st_intersection(reg_coords, pacific_centred_world_map_buffered)
+  shifted$base_map <- st_buffer(shifted$base_map, dist = buffer_distance)
+  overlap <- st_intersection(shifted$data, shifted$base_map)
   
   # there are some duplicates that have to be removed
   coordinates <- st_coordinates(overlap)
   duplicates <- duplicated(coordinates)
   overlap <- overlap[!duplicates, ]
   overlap$grid_point <- 1:nrow(overlap)
-    
+  
   # now compute distances between grid points
   gp_dist <- st_distance(overlap) # compute distance between each grid point
   diag(gp_dist) <- NA # diagonal is NA
@@ -980,8 +1021,8 @@ gridpointwise_entropies <- function(taxonomy_matrix, data_trimmed_to_lgs_with_co
   }
   
   # compute distance between grid points and all languages
-  language_gp_dist <- st_distance(overlap, taxonomy_matrix_for_plot) # compute distance between each language and each grid point 
-  colnames(language_gp_dist) <- taxonomy_matrix_for_plot$id
+  language_gp_dist <- st_distance(overlap, shifted$language_locations) # compute distance between each language and each grid point 
+  colnames(language_gp_dist) <- shifted$language_locations$id
   rownames(language_gp_dist) <- c(1:nrow(language_gp_dist))
   language_gp_dist_min <- apply(language_gp_dist,2,min) # compute distance for each language to its nearest neighbour grid point
   
@@ -991,7 +1032,7 @@ gridpointwise_entropies <- function(taxonomy_matrix, data_trimmed_to_lgs_with_co
   }
   
   # determine closest grid point for each language
-  nearest_grid_point_coord <- data.frame(glottocode=taxonomy_matrix_for_plot$id,
+  nearest_grid_point_coord <- data.frame(glottocode=shifted$language_locations$id,
                                          grid_point=apply(language_gp_dist,2,function(x)which(x==min(x))))
   
   # iterate through all grid points and count nearest languages and families
@@ -1005,7 +1046,7 @@ gridpointwise_entropies <- function(taxonomy_matrix, data_trimmed_to_lgs_with_co
     # get nearest languages and families, given the distance
     lgs <- filter(nearest_grid_point_coord,grid_point==i)$glottocode
     tax_fams <- filter(as.data.frame(taxonomy_matrix), id %in% lgs)$level1
-
+    
     # list the nearest languages and families
     nearest_lgs_and_fams_coord$lgs[i] <- paste(lgs, collapse=", ")
     nearest_lgs_and_fams_coord$fams[i] <- paste(unique(tax_fams), collapse=", ")
@@ -1018,23 +1059,23 @@ gridpointwise_entropies <- function(taxonomy_matrix, data_trimmed_to_lgs_with_co
     data_at_gp <- data_trimmed_to_lgs_with_coords[rownames(data_trimmed_to_lgs_with_coords)%in%lgs,]
     
     featurewise_entropies <- apply(data_at_gp,2,function(x)if(length(na.omit(x))<=0.5*length(x)|length(x)==1){NA}else{posterior::entropy(na.omit(x))}) # this is the normalized entropy, computed for those features coded for over 50% of languages at a grid point
-
+    
     nearest_lgs_and_fams_coord$mean.feature.entropy[i] <- featurewise_entropies %>% na.omit() %>% mean()
   }
-
+  
   # add data to grid points, create plots
   grid_points_with_data <- merge(overlap, nearest_lgs_and_fams_coord)
   
   raw_plot <- ggplot() +
-    geom_sf(data = pacific_centred_world_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = shifted2$base_map, fill = "white", color = "darkgrey") +
     geom_sf(data = grid_points_with_data) +
-    geom_sf(data = taxonomy_matrix_for_plot, color = "red", shape = 1) +
+    geom_sf(data = shifted$language_locations, color = "red", shape = 1) +
     ggtitle("Raw data: Grid points and language locations") +
     theme_minimal() +
     theme(panel.grid.major = element_blank())
   
   lang_at_point_plot <- ggplot() +
-    geom_sf(data = pacific_centred_world_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = shifted2$base_map, fill = "white", color = "darkgrey") +
     geom_sf(data = grid_points_with_data, aes(colour = log(nlg)), size = 1) +
     scale_color_viridis(option = "magma", direction = -1, na.value = "lightgrey") + 
     ggtitle("Language density: Logarithm of number of languages per grid point") +
@@ -1043,7 +1084,7 @@ gridpointwise_entropies <- function(taxonomy_matrix, data_trimmed_to_lgs_with_co
     theme(panel.grid.major = element_blank())
   
   fam_at_point_plot <- ggplot() +
-    geom_sf(data = pacific_centred_world_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = shifted2$base_map, fill = "white", color = "darkgrey") +
     geom_sf(data = grid_points_with_data, aes(colour = log(nfam)), size = 1) +
     scale_color_viridis(option = "magma", direction = -1, na.value = "lightgrey") + 
     ggtitle("Phylogenetic density: Logarithm of number of families per grid point") +
@@ -1052,7 +1093,7 @@ gridpointwise_entropies <- function(taxonomy_matrix, data_trimmed_to_lgs_with_co
     theme(panel.grid.major = element_blank())
   
   entropy_at_point_plot <- ggplot() +
-    geom_sf(data = pacific_centred_world_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = shifted2$base_map, fill = "white", color = "darkgrey") +
     geom_sf(data = grid_points_with_data, aes(colour = mean.feature.entropy), size = 1) +
     scale_color_viridis(option = "magma", direction = -1, na.value = "lightgrey") + 
     ggtitle("Mean entropy across features per grid point") +
@@ -1061,45 +1102,36 @@ gridpointwise_entropies <- function(taxonomy_matrix, data_trimmed_to_lgs_with_co
     theme(panel.grid.major = element_blank())
   
   # multiple linear regression should include only those gridpoints with at least 2 langauages
-  grid_points_with_data_for_model <- grid_points_with_data %>% filter(nlg>1)
+  grid_points_with_data_for_model <- grid_points_with_data %>% filter(nlg>1) %>% filter(!is.na(mean.feature.entropy))
+
+  # we use gam because we have heteroscedastictiy
+  library(mgcv)
+  model <- gam(mean.feature.entropy ~ ti(log(nlg)) + ti(log(nfam)) + ti(log(nlg), log(nfam)), data = grid_points_with_data_for_model)
+
+  for_plot <- data.frame(name = names(unlist(model$coefficients)), coefficients = unlist(model$coefficients))
   
-  # multiple linear regression with interaction term for those grid points with at least 2 languages
-  model <- lm(mean.feature.entropy ~ log(nlg)*log(nfam), data = grid_points_with_data_for_model)
-  
-  # however, note that there may be heteroscedasticity --> if so, compute robust standard errors (argument in function)
-  model_assumptions <- ggplot2::autoplot(model) + theme_bw()
-  
-  if(robust == T){
-    robust_summary <- coeftest(model, vcov = vcovHC(model, type = "HC3"))
-    coefficients_robust <- coef(robust_summary)
-    if(verbose == T){
-      print(robust_summary)
-    }
-    plotsum <- plot_summs(robust_summary, robust = TRUE, plot.distributions = TRUE)
-    
-    # function to calculate predicted values using coefficients, including the interaction term
-    predict_robust <- function(data) {
-      return(coefficients_robust[1] + coefficients_robust[2] * log(data$nlg) + coefficients_robust[3] * log(data$nfam) + coefficients_robust[4] * log(data$nlg) * log(data$nfam))
-    }
-    
-    # add residuals using the robust model with the interaction term
-    grid_points_with_data_for_model$entropy.residuals <- NA
-    grid_points_with_data_for_model$entropy.residuals <- grid_points_with_data_for_model %>% rowwise() %>% do(predict = .$mean.feature.entropy - predict_robust(.)) %>% pull(predict) %>% unlist()
-  
-    }
-  if(robust == F){ # if uncorrected model
-    plotsum <- plot_summs(model, robust = FALSE, plot.distributions = TRUE)
-    # add residuals
-    grid_points_with_data_for_model$entropy.residuals <- NA
-    grid_points_with_data_for_model$entropy.residuals <- model$residuals
+  if (verbose == T){
+    print(summary(model))
   }
+  
+  grid_points_with_data_for_model$entropy.residuals <- model$residuals
   
   grid_points_with_data <- st_join(grid_points_with_data, select(grid_points_with_data_for_model,c("grid_point","entropy.residuals")), left=T) %>% select(-"grid_point.y")
   names(grid_points_with_data)[1] <- "grid_point"
-  
-  # residuals map
+
+  # residuals map for main figure
   entropy_residuals_at_point_plot <- ggplot() +
-    geom_sf(data = pacific_centred_world_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = shifted2$base_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = grid_points_with_data, aes(colour = entropy.residuals), size = 2) +
+    scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey") +
+    ggtitle(paste("Residuals for mean entropy across features per grid point: ",data_type," data",sep="",collapse="")) +
+    labs(color = "Residuals") +
+    theme_minimal() +
+    theme(panel.grid.major = element_blank())
+  
+  # residuals map for sup figure
+  entropy_residuals_at_point_plot_sup <- ggplot() +
+    geom_sf(data = shifted2$base_map, fill = "white", color = "darkgrey") +
     geom_sf(data = grid_points_with_data, aes(colour = entropy.residuals), size = 1) +
     scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey") +
     ggtitle("Residuals for mean entropy across features per grid point") +
@@ -1107,15 +1139,21 @@ gridpointwise_entropies <- function(taxonomy_matrix, data_trimmed_to_lgs_with_co
     theme_minimal() +
     theme(panel.grid.major = element_blank())
   
-  # create a combined plot
-  combined_plot <- grid.arrange(
-    arrangeGrob(raw_plot, plotsum, nrow = 2),
-    arrangeGrob(model_assumptions@plots[[1]], model_assumptions@plots[[2]], model_assumptions@plots[[3]], model_assumptions@plots[[4]], ncol = 2),
-    arrangeGrob(lang_at_point_plot, fam_at_point_plot, entropy_at_point_plot, entropy_residuals_at_point_plot, ncol = 1), 
-    ncol = 3  # relative widths
+  # save plots
+  if(main_fig == T){
+    
+    main_plot <- grid.arrange(    
+      arrangeGrob(lang_at_point_plot, fam_at_point_plot, entropy_at_point_plot, entropy_residuals_at_point_plot_sup, ncol = 1)
+    )
+
+    ggsave(paste("../figures-for-paper/main/grid_points_entropy_map_",data_type,".png",collapse="",sep=""), plot = main_plot, width = 8, height = 12.5, dpi = 200)
+  }
+
+  combined_plot <- grid.arrange(    
+    arrangeGrob(raw_plot, lang_at_point_plot, fam_at_point_plot, entropy_at_point_plot, entropy_residuals_at_point_plot_sup, ncol = 1)
   )
   
-  ggsave(paste("output/",directory,"/grid_points_entropy_maps_",data_type,"_coefficients_",robust_errors,".png",collapse="",sep=""), plot = combined_plot, width = 20, height = 10, dpi = 200)
+  ggsave(paste("../figures-for-paper/supplementary//grid_points_entropy_maps_",data_type,".png",collapse="",sep=""), plot = combined_plot, width = 8, height = 12.5, dpi = 200)
  
   return(grid_points_with_data)
 }
@@ -1126,26 +1164,27 @@ grid_point_comparison_horizontal <- function(baseline_gp_frame, name_baseline,
                                              comparison_gp_frame_2=NULL, name_comparison_2=NULL, 
                                              lg_and_fam_comparison, fig_width, fig_height,
                                              name_for_plot,
-                                             world_map, lon){
+                                             world_map){
   
-  # shift world map by lon
-  pacific_centred_world_map <- shift_map(world_map, lon=lon)
+  # shift world map
+  shifted <- project_data(df = baseline_gp_frame, world_map_initial = world_map_initial)
   
+  # new data frame
   delta <- comparison_gp_frame
   
   # compute deltas: number lgs, number fams and mean entropy across features, at each grid point
   delta$delta.1.minus.0.lg <- comparison_gp_frame$nlg-baseline_gp_frame$nlg
   delta$delta.1.minus.0.fam <- comparison_gp_frame$nfam-baseline_gp_frame$nfam
-  delta$delta.1.minus.0.mean.feature.entropy <- comparison_gp_frame$mean.feature.entropy-baseline_gp_frame$mean.feature.entropy
+  delta$delta.1.minus.0.entropy.residuals <- comparison_gp_frame$entropy.residuals-baseline_gp_frame$entropy.residuals
   
   # if there are three curations to compare (grambank):
   if(!is.null(comparison_gp_frame_2)){
     delta$delta.2.minus.1.lg <- comparison_gp_frame_2$nlg-comparison_gp_frame$nlg
     delta$delta.2.minus.1.fam <- comparison_gp_frame_2$nfam-comparison_gp_frame$nfam
-    delta$delta.2.minus.1.mean.feature.entropy <- comparison_gp_frame_2$mean.feature.entropy-comparison_gp_frame$mean.feature.entropy
+    delta$delta.2.minus.1.entropy.residuals <- comparison_gp_frame_2$entropy.residuals-comparison_gp_frame$entropy.residuals
     delta$delta.2.minus.0.lg <- comparison_gp_frame_2$nlg-baseline_gp_frame$nlg
     delta$delta.2.minus.0.fam <- comparison_gp_frame_2$nfam-baseline_gp_frame$nfam
-    delta$delta.2.minus.0.mean.feature.entropy <- comparison_gp_frame_2$mean.feature.entropy-baseline_gp_frame$mean.feature.entropy
+    delta$delta.2.minus.0.entropy.residuals <- comparison_gp_frame_2$entropy.residuals-baseline_gp_frame$entropy.residuals
   }
   
   # min and max values are straightforward to compute if only two-way comparison requested (computed only for plots to work in any case)
@@ -1153,8 +1192,8 @@ grid_point_comparison_horizontal <- function(baseline_gp_frame, name_baseline,
   min_delta_lg <- min(na.omit(delta$delta.1.minus.0.lg))
   max_delta_fam <- max(na.omit(delta$delta.1.minus.0.fam))
   min_delta_fam <- min(na.omit(delta$delta.1.minus.0.fam))
-  max_delta_entropy <- max(na.omit(delta$delta.1.minus.0.mean.feature.entropy))
-  min_delta_entropy <- min(na.omit(delta$delta.1.minus.0.mean.feature.entropy))
+  max_delta_entropy <- max(na.omit(delta$delta.1.minus.0.entropy.residuals))
+  min_delta_entropy <- min(na.omit(delta$delta.1.minus.0.entropy.residuals))
   
   # determine minimum and maximum deltas for each type of comparison, if there are three curations to compare
   if(!is.null(comparison_gp_frame_2)){
@@ -1162,14 +1201,14 @@ grid_point_comparison_horizontal <- function(baseline_gp_frame, name_baseline,
     min_delta_lg <- min(min(na.omit(delta$delta.1.minus.0.lg)), min(na.omit(delta$delta.2.minus.1.lg)), min(na.omit(delta$delta.2.minus.0.lg)))
     max_delta_fam <- max(max(na.omit(delta$delta.1.minus.0.fam)), max(na.omit(delta$delta.2.minus.1.fam)), max(na.omit(delta$delta.2.minus.0.fam)))
     min_delta_fam <- min(min(na.omit(delta$delta.1.minus.0.fam)), min(na.omit(delta$delta.2.minus.1.fam)), min(na.omit(delta$delta.2.minus.0.fam)))
-    max_delta_entropy <- max(max(na.omit(delta$delta.1.minus.0.mean.feature.entropy)), max(na.omit(delta$delta.2.minus.1.mean.feature.entropy)), max(na.omit(delta$delta.2.minus.0.mean.feature.entropy)))
-    min_delta_entropy <- min(min(na.omit(delta$delta.1.minus.0.mean.feature.entropy)), min(na.omit(delta$delta.2.minus.1.mean.feature.entropy)), min(na.omit(delta$delta.2.minus.0.mean.feature.entropy)))
+    max_delta_entropy <- max(max(na.omit(delta$delta.1.minus.0.entropy.residuals)), max(na.omit(delta$delta.2.minus.1.entropy.residuals)), max(na.omit(delta$delta.2.minus.0.entropy.residuals)))
+    min_delta_entropy <- min(min(na.omit(delta$delta.1.minus.0.entropy.residuals)), min(na.omit(delta$delta.2.minus.1.entropy.residuals)), min(na.omit(delta$delta.2.minus.0.entropy.residuals)))
   }
   
   # delta languages maps
   delta_lgs_1_minus_0 <- ggplot() +
-    geom_sf(data = pacific_centred_world_map, fill = "white", color = "darkgrey") +
-    geom_sf(data = delta, aes(colour = delta.1.minus.0.lg), size = 1) +
+    geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = delta, aes(colour = delta.1.minus.0.lg), size = 2) +
     scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_lg, max_delta_lg)) +
     ggtitle(paste("Languages per gridpoint - difference between ", name_baseline, " and ", name_comparison, collapse = "", sep = "")) +
     labs(color = "Difference (# languages)") +
@@ -1178,8 +1217,8 @@ grid_point_comparison_horizontal <- function(baseline_gp_frame, name_baseline,
   
   if(!is.null(comparison_gp_frame_2)){
     delta_lgs_2_minus_1 <- ggplot() +
-      geom_sf(data = pacific_centred_world_map, fill = "white", color = "darkgrey") +
-      geom_sf(data = delta, aes(colour = delta.2.minus.1.lg), size = 1) +
+      geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+      geom_sf(data = delta, aes(colour = delta.2.minus.1.lg), size = 2) +
       scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_lg, max_delta_lg)) +
       ggtitle(paste("Languages per gridpoint - difference between ", name_comparison, " and ", name_comparison_2, collapse = "", sep = "")) +
       labs(color = "Difference (# languages)") +
@@ -1187,8 +1226,8 @@ grid_point_comparison_horizontal <- function(baseline_gp_frame, name_baseline,
       theme(panel.grid.major = element_blank())
     
     delta_lgs_2_minus_0 <- ggplot() +
-      geom_sf(data = pacific_centred_world_map, fill = "white", color = "darkgrey") +
-      geom_sf(data = delta, aes(colour = delta.2.minus.0.lg), size = 1) +
+      geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+      geom_sf(data = delta, aes(colour = delta.2.minus.0.lg), size = 2) +
       scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_lg, max_delta_lg)) +
       ggtitle(paste("Languages per gridpoint - difference between ", name_baseline, " and ", name_comparison_2, collapse = "", sep = "")) +
       labs(color = "Difference (# languages)") +
@@ -1198,8 +1237,8 @@ grid_point_comparison_horizontal <- function(baseline_gp_frame, name_baseline,
   
   # delta families maps
   delta_fams_1_minus_0 <- ggplot() +
-    geom_sf(data = pacific_centred_world_map, fill = "white", color = "darkgrey") +
-    geom_sf(data = delta, aes(colour = delta.1.minus.0.fam), size = 1) +
+    geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = delta, aes(colour = delta.1.minus.0.fam), size = 2) +
     scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_fam, max_delta_fam)) +
     ggtitle(paste("Families per gridpoint - difference between ", name_baseline, " and ", name_comparison, collapse = "", sep = "")) +
     labs(color = "Difference (# families)") +
@@ -1208,8 +1247,8 @@ grid_point_comparison_horizontal <- function(baseline_gp_frame, name_baseline,
   
   if(!is.null(comparison_gp_frame_2)){
     delta_fams_2_minus_1 <- ggplot() +
-      geom_sf(data = pacific_centred_world_map, fill = "white", color = "darkgrey") +
-      geom_sf(data = delta, aes(colour = delta.2.minus.1.fam), size = 1) +
+      geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+      geom_sf(data = delta, aes(colour = delta.2.minus.1.fam), size = 2) +
       scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_fam, max_delta_fam)) +
       ggtitle(paste("Families per gridpoint - difference between ", name_comparison, " and ", name_comparison_2, collapse = "", sep = "")) +
       labs(color = "Difference (# families)") +
@@ -1217,8 +1256,8 @@ grid_point_comparison_horizontal <- function(baseline_gp_frame, name_baseline,
       theme(panel.grid.major = element_blank())
     
     delta_fams_2_minus_0 <- ggplot() +
-      geom_sf(data = pacific_centred_world_map, fill = "white", color = "darkgrey") +
-      geom_sf(data = delta, aes(colour = delta.2.minus.0.fam), size = 1) +
+      geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+      geom_sf(data = delta, aes(colour = delta.2.minus.0.fam), size = 2) +
       scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_fam, max_delta_fam)) +
       ggtitle(paste("Families per gridpoint - difference between ", name_baseline, " and ", name_comparison_2, collapse = "", sep = "")) +
       labs(color = "Difference (# families)") +
@@ -1228,30 +1267,30 @@ grid_point_comparison_horizontal <- function(baseline_gp_frame, name_baseline,
   
   # delta entropies maps
   delta_entropies_1_minus_0 <- ggplot() +
-    geom_sf(data = pacific_centred_world_map, fill = "white", color = "darkgrey") +
-    geom_sf(data = delta, aes(colour = delta.1.minus.0.mean.feature.entropy), size = 1) +
+    geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = delta, aes(colour = delta.1.minus.0.entropy.residuals), size = 2) +
     scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_entropy, max_delta_entropy)) +
-    ggtitle(paste("Mean entropy across features per grid point - difference between ", name_baseline, " and ", name_comparison, collapse = "", sep = "")) +
-    labs(color = "Difference (mean entropy)") +
+    ggtitle(paste("Mean entropy residuals across features per grid point - difference between ", name_baseline, " and ", name_comparison, collapse = "", sep = "")) +
+    labs(color = "Difference (mean entropy residuals)") +
     theme_minimal() +
     theme(panel.grid.major = element_blank())
   
   if(!is.null(comparison_gp_frame_2)){
     delta_entropies_2_minus_1 <- ggplot() +
-      geom_sf(data = pacific_centred_world_map, fill = "white", color = "darkgrey") +
-      geom_sf(data = delta, aes(colour = delta.2.minus.1.mean.feature.entropy), size = 1) +
+      geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+      geom_sf(data = delta, aes(colour = delta.2.minus.1.entropy.residuals), size = 2) +
       scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_entropy, max_delta_entropy)) +
-      ggtitle(paste("Mean entropy across features per grid point - difference between ", name_comparison, " and ", name_comparison_2, collapse = "", sep = "")) +
-      labs(color = "Difference (mean entropy)") +
+      ggtitle(paste("Mean entropy residuals across features per grid point - difference between ", name_comparison, " and ", name_comparison_2, collapse = "", sep = "")) +
+      labs(color = "Difference (mean entropy residuals)") +
       theme_minimal() +
       theme(panel.grid.major = element_blank())
     
     delta_entropies_2_minus_0 <- ggplot() +
-      geom_sf(data = pacific_centred_world_map, fill = "white", color = "darkgrey") +
-      geom_sf(data = delta, aes(colour = delta.2.minus.0.mean.feature.entropy), size = 1) +
+      geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+      geom_sf(data = delta, aes(colour = delta.2.minus.0.entropy.residuals), size = 2) +
       scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_entropy, max_delta_entropy)) +
-      ggtitle(paste("Mean entropy across features per grid point - difference between ", name_baseline, " and ", name_comparison_2, collapse = "", sep = "")) +
-      labs(color = "Difference (mean entropy)") +
+      ggtitle(paste("Mean entropy residuals across features per grid point - difference between ", name_baseline, " and ", name_comparison_2, collapse = "", sep = "")) +
+      labs(color = "Difference (mean entropy residuals)") +
       theme_minimal() +
       theme(panel.grid.major = element_blank())
   }
@@ -1288,28 +1327,28 @@ grid_point_comparison_horizontal <- function(baseline_gp_frame, name_baseline,
   }
   
   # save plot
-  ggsave(paste("output/gridpoints_entropies_horizontal_comparison",name_for_plot,".png", collapse="", sep=""), plot = combined_plot, width = fig_width, height = fig_height, dpi = 200)
+  ggsave(paste("../figures-for-paper/main/",name_for_plot,".png", collapse="", sep=""), plot = combined_plot, width = fig_width, height = fig_height, dpi = 400)
 }
 
 # compare grid point plots vertically (full vs. densified)
 grid_point_comparison_vertical <- function(baseline_gp_frame, name_baseline, 
                                              comparison_gp_frame, name_comparison,
-                                             world_map, lon,
-                                             directory){
+                                             world_map,
+                                             directory=""){
   
-  # shift world map by lon
-  pacific_centred_world_map <- shift_map(world_map, lon=lon)
+  # shift world map
+  shifted <- project_data(df = baseline_gp_frame, world_map_initial = world_map_initial)
   
   delta <- comparison_gp_frame
   
   # compute deltas: number lgs, number fams and mean entropy across features, at each grid point
   delta$delta.1.minus.0.lg <- delta$nlg-baseline_gp_frame$nlg
   delta$delta.1.minus.0.fam <- delta$nfam-baseline_gp_frame$nfam
-  delta$delta.1.minus.0.mean.feature.entropy <- delta$mean.feature.entropy-baseline_gp_frame$mean.feature.entropy
+  delta$delta.1.minus.0.entropy.residuals <- delta$entropy.residuals-baseline_gp_frame$entropy.residuals
 
   # delta languages maps
   delta_lgs_1_minus_0 <- ggplot() +
-    geom_sf(data = pacific_centred_world_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
     geom_sf(data = delta, aes(colour = delta.1.minus.0.lg), size = 1) +
     scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey") +
     ggtitle(paste("Languages per gridpoint - difference between ", name_baseline, " and ", name_comparison, collapse = "", sep = "")) +
@@ -1319,7 +1358,7 @@ grid_point_comparison_vertical <- function(baseline_gp_frame, name_baseline,
   
   # delta families maps
   delta_fams_1_minus_0 <- ggplot() +
-    geom_sf(data = pacific_centred_world_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
     geom_sf(data = delta, aes(colour = delta.1.minus.0.fam), size = 1) +
     scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey") +
     ggtitle(paste("Families per gridpoint - difference between ", name_baseline, " and ", name_comparison, collapse = "", sep = "")) +
@@ -1329,11 +1368,11 @@ grid_point_comparison_vertical <- function(baseline_gp_frame, name_baseline,
   
   # delta entropies maps
   delta_entropies_1_minus_0 <- ggplot() +
-    geom_sf(data = pacific_centred_world_map, fill = "white", color = "darkgrey") +
-    geom_sf(data = delta, aes(colour = delta.1.minus.0.mean.feature.entropy), size = 1) +
+    geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = delta, aes(colour = delta.1.minus.0.entropy.residuals), size = 1) +
     scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey") +
-    ggtitle(paste("Mean entropy across features per grid point - difference between ", name_baseline, " and ", name_comparison, collapse = "", sep = "")) +
-    labs(color = "Difference (mean entropy)") +
+    ggtitle(paste("Mean entropy residuals across features per grid point - difference between ", name_baseline, " and ", name_comparison, collapse = "", sep = "")) +
+    labs(color = "Difference (mean entropy residuals)") +
     theme_minimal() +
     theme(panel.grid.major = element_blank())
  
@@ -1344,7 +1383,528 @@ grid_point_comparison_vertical <- function(baseline_gp_frame, name_baseline,
   )
 
   # save plot
-  ggsave(paste("output/",directory,"/gridpoints_entropies_vertical_comparison.png",sep="",collapse=""), plot = combined_plot, width = 15, height = 10, dpi = 200)
+  # ggsave(paste("output/",directory,"/gridpoints_entropies_vertical_comparison.png",sep="",collapse=""), plot = combined_plot, width = 15, height = 10, dpi = 200)
 }
 
+
+# produce combination of factors for RDA, based on Matsumae et al. 2021
+get_all_factor_combinations <- function(factor_names){
+  all_comb <- expand.grid(factor_names, factor_names) 
+  comb <- all_comb[!all_comb$Var1 == all_comb$Var2, ] 
+  comb <- as.data.frame(t(comb), stringsAsFactors=FALSE)
+  return(comb)}
+
+# retains k PCs/PCos which account for at least var_th percent of the explained variance, based on Matsumae et al. 2021
+pcos_to_factors <- function(var_th, language, language_ev, geo){
+  language_pc_rel <- language[, which(language_ev >= var_th)] 
+  factors = list(language = language_pc_rel[order(rownames(language_pc_rel)), ], 
+                 geo = geo)
+  return(factors)}
+
+# compute dbMEMs for each point, based on Matsumae et al. 2021
+points_to_dbmem <- function(points){
+  library(adespatial)
+  library(spdep)
+  library(vegan)
+  if (class(points)[1] != "SpatialPointsDataFrame") 
+  { stop("please provide a SpatialPointsDataFrame")
+  }
+  epsilon <- 0.1 
+  # Compute distances between all points in the sample
+  mat <- spDists(points, points)
+  # Compute the mst, find its longest edge and use as a threshold
+  mst_1 <- spantree(mat) 
+  mst_le <- max(mst_1$dist)
+  # Add a small epsilon (for numerical stability)
+  thresh <- mst_le + epsilon
+  # Find all nearest neighbors within the distance threshold
+  nb <- dnearneigh(points, 0, thresh) # Normalize the data
+  spwt <- lapply(nbdists(nb, points), function(x) 1 - (x/(4 * thresh))^2) # Compute weighted neighbor list
+  lw <- nb2listw(nb, style = "B", glist = spwt, zero.policy = TRUE) # Compute MEMs with a corresponding positive autocorrelation
+  res <- as.data.frame(scores.listw(lw, MEM.autocor = "positive"))
+  rownames(res) <- points$id
+  colnames(res) <- paste("geo_pco_", seq(1,ncol(res)), sep="") 
+  geo_pco <- res[order(rownames(res)), drop = FALSE, ]
+  return (geo_pco)}
+
+# perform RDA, adapted from Matsumae et al. 2021
+rda_wrapper_setup <- function(response, explanatory, n_perm){ 
+  if (is.null(rownames(response)) & is.null(rownames(explanatory))) {
+    stop("Row names of the response and the explanatory variable must be defined!")
+  }
+  if (any(rownames(response) != rownames(explanatory))) { stop("Row names of the response and the
+         explanatory variable must be identical and match in order!")
+  }
+  ex_name <- sub('\\_.*', '', colnames(explanatory)[1]) 
+  re_name <- sub('\\_.*', '', colnames(response)[1])
+  # Run the RDA (in vegan package explanatory variables are Y!)
+  rda <- rda(Y = explanatory, X = response)
+  # Compute the adjusted explained variance and the significance
+  r2 <- RsquareAdj(rda)$r.squared
+  r2_adj <- RsquareAdj(rda)$adj.r.squared
+  sig <- anova.cca(rda, step = n_perm)$`Pr(>F)`[1] 
+  rda_results <- list(r2=r2, r2_adj=r2_adj, sig=sig, explanatory=ex_name, response=re_name)}
+
+# perform RDA controlling for phylogeny, based on Matsumae et al. 2021
+rda_wrapper_setup_geneaology <- function (response, explanatory, n_perm, n_samples, taxonomy) {
+  if (is.null(rownames(response)) & is.null(rownames(explanatory))) {
+    stop("Row names of the response and the explanatory variable must be defined!")
+  }
+  if (any(rownames(response) != rownames(explanatory))) { stop("Row names of the response and the
+    explanatory variable must be identical and match in order!")
+  }
+  ex_name <- sub('\\_.*', '', colnames(explanatory)[1]) 
+  re_name <- sub('\\_.*', '', colnames(response)[1])
+  
+  # these are all families
+  fams <- unique(taxonomy$level1)
+  
+  rda_results <- list()
+  for (i in 1:n_samples){
+    #  sample one language from each language family
+    sample_lgs <- apply(as.data.frame(fams),1,function(x)sample(filter(taxonomy,level1==x[1])$id,1))
+    
+    # subset data
+    explanatory_sample = explanatory[rownames(explanatory) %in% sample_lgs, , drop=F] 
+    response_sample = response[rownames(response) %in% sample_lgs, , drop=F] 
+    
+    # run the RDA (in vegan package explanatory variables are Y!)
+    rda <- rda(Y = explanatory_sample, X = response_sample)
+    
+    r2 <- RsquareAdj(rda)$r.squared
+    r2_adj <- RsquareAdj(rda)$adj.r.squared
+    sig <- anova.cca(rda, step = n_perm)$`Pr(>F)`[1] 
+    
+    rda_results[[i]] <- list(r2=r2, r2_adj=r2_adj, sig=sig, explanatory=ex_name, response=re_name)}
+  return(rda_results)}
+
+# turn results from an RDA into a correlation matrix; adjust the significance values using False Discovery Rate (FDR)
+rda_to_correlation_matrix <- function(rda, adjust_significance=TRUE){
+  # simplify RDA results
+  rda_mat <- sapply(rda, function(x){
+    simp <- c(r2=x$r2, r2_adj=x$r2_adj, sig=x$sig,
+              explanatory=x$explanatory, response=x$response) 
+    return(simp)})
+  rda_mat <- data.frame(t(rda_mat))
+  rda_mat <- transform(rda_mat, sig=as.numeric(as.character(sig)),
+                       r2=as.numeric(as.character(r2)), r2_adj=as.numeric(as.character(r2_adj)))
+  # Adjusting significance (False discovery rate)
+  if (adjust_significance==T)
+    rda_mat$sig <- p.adjust(rda_mat$sig, method = "fdr")
+  # Significance
+  rda_mat[rda_mat$sig > 0.05, "sig_level"] <- ""
+  rda_mat[rda_mat$sig <= 0.001 , "sig_level"] <- "***"
+  rda_mat[rda_mat$sig > 0.001 & rda_mat$sig <= 0.01 , "sig_level"] <- "**"
+  rda_mat[rda_mat$sig > 0.01 & rda_mat$sig <= 0.05 , "sig_level"] <- "*"
+  return(rda_mat)}
+
+
+
+# create a network of grid points, associated to a map and a taxonomy matrix of coordinates
+genetics_vs_typology <- function(gelato_pops,
+                                 lgs_in_gelato,
+                                 fst_matrix,
+                                 seed=7,
+                                 world_map, 
+                                 coordinate_scaling, 
+                                 buffer_distance,
+                                 verbose=T, 
+                                 data_type, 
+                                 main_fig){
+
+  library(geosphere)
+  library(sp)
+  library(sf)
+  library(viridis)
+  library(ggplot2)
+  library(posterior)
+  library(ggfortify)
+  library(gridExtra)
+  library(RColorBrewer)
+  library(lmtest)
+  library(sandwich)
+  library(jtools)
+  library(modelsummary)
+
+  # generate grid points using the regularCoordinates() function from the geosphere package - the function solves the Thompson Problem, cf. Derungs et al. 2018
+  reg_coords <- regularCoordinates(coordinate_scaling) %>% as.data.frame()
+
+  # shift all (coordinates, languages, maps)
+  shifted <- project_data(df = reg_coords, world_map_initial = world_map_initial)
+  shifted$base_map <- shifted$base_map[105,]
+  shifted2 <- project_data(df = gelato_pops, world_map_initial = world_map_initial)
+  shifted$pop_locations <- shifted2$data
+  
+  # intersect regular coordinates with continental polygons, including a buffer to keep islands
+  shifted$base_map <- st_buffer(shifted$base_map, dist = buffer_distance)
+  overlap <- st_intersection(shifted$data, shifted$base_map)
+
+  # there are some duplicates that have to be removed
+  coordinates <- st_coordinates(overlap)
+  duplicates <- duplicated(coordinates)
+  overlap <- overlap[!duplicates, ]
+  # overlap <- overlap[-c(52,41,42,43,66,56,57,58,59,79,71,72,73,74,75,76,80,81,82,83,67,68,69,70,53,54,55,40,39,15,16,27,7),] # if coordinate_scaling = 7 and buffer_distance = 300000
+  overlap <- overlap[-c(1,2,51,36,27,28,29,47,40,41,42,43,44,48,49,50,37,38,39,25,26),] # if coordinate_scaling = 7 and buffer_distance = 300000
+  overlap$grid_point <- 1:nrow(overlap)
+
+  # now compute distances between grid points
+  gp_dist <- st_distance(overlap) # compute distance between each grid point
+  diag(gp_dist) <- NA # diagonal is NA
+  gp_dist_min <- apply(gp_dist,2,function(x){min(x,na.rm=T)}) # retrieve distance between each grid point and its nearest neighbour
+  
+  if(verbose==T){
+    print("Here are some characteristics about grid points: distances between all gridpoints:")
+    print(summary(gp_dist_min))
+  }
+  
+  # compute distance between grid points and all languages
+  pop_gp_dist <- st_distance(overlap, shifted$pop_locations) # compute distance between each language and each grid point 
+  colnames(pop_gp_dist) <- shifted$pop_locations$PopName
+  rownames(pop_gp_dist) <- c(1:nrow(pop_gp_dist))
+  pop_gp_dist_min <- apply(pop_gp_dist,2,min) # compute distance for each language to its nearest neighbour grid point
+  
+  if(verbose==T){
+    print("Here are some characteristics about grid points: distances between populations from GeLaTo with coordinates and gridpoints:")
+    print(summary(pop_gp_dist_min))
+  }
+  
+  # determine closest grid point for each language
+  nearest_grid_point_coord <- data.frame(PopName=shifted$pop_locations$PopName,
+                                         grid_point=apply(pop_gp_dist,2,function(x)which(x==min(x))))
+  
+  # iterate through all grid points and count nearest languages and families
+  nearest_pops_and_fams_coord <- data.frame(grid_point=1:nrow(overlap), npop=NA, pops=NA, nlg=NA, lgs=NA, nfam=NA, fams=NA, mean.feature.entropy=NA, mean.fst=NA, mean.fst.samples=NA)
+  
+  #iteration over grid points
+  for(i in 1:nrow(nearest_pops_and_fams_coord)){
+    if(verbose==T){
+      print(i)
+    }
+    # get nearest languages and families, given the distance
+    pops <- filter(nearest_grid_point_coord,grid_point==i)$PopName
+    lgs <- filter(gelato_pops, PopName %in% filter(nearest_grid_point_coord,grid_point==i)$PopName)[,9]
+    tax_fams <- unique(filter(gelato_pops, PopName %in% filter(nearest_grid_point_coord,grid_point==i)$PopName)[,7])
+    
+    # list the nearest populations, languages and families
+    nearest_pops_and_fams_coord$pops[i] <- paste(pops, collapse=", ")
+    nearest_pops_and_fams_coord$lgs[i] <- paste(lgs, collapse=", ")
+    nearest_pops_and_fams_coord$fams[i] <- paste(unique(tax_fams), collapse=", ")
+    
+    # tabulate the number of populations, languages and families associated to each grid point
+    nearest_pops_and_fams_coord$npop[i] <- ifelse(length(pops)>0,length(pops),NA)
+    nearest_pops_and_fams_coord$nlg[i] <- ifelse(length(unique(lgs))>0,length(unique(lgs)),NA)
+    nearest_pops_and_fams_coord$nfam[i] <- ifelse(length(unique(tax_fams))>0,length(unique(tax_fams)),NA)
+    
+    # get gridpoint-wise entropies for all features and log the arithmetic mean
+    data_at_gp <- lgs_in_gelato[rownames(lgs_in_gelato)%in%lgs,]
+    featurewise_entropies <- apply(data_at_gp,2,function(x)if(length(na.omit(x))<=0.5*length(x)|length(x)==1){NA}else{posterior::entropy(na.omit(x))}) # this is the normalized entropy, computed for those features coded for over 50% of languages at a grid point
+    nearest_pops_and_fams_coord$mean.feature.entropy[i] <- featurewise_entropies %>% na.omit() %>% mean()
+    
+    # get gridpoints-wise FST-values among populations and log the arithmetic mean
+    gp_fst <- fst_matrix[which(rownames(fst_matrix)%in%pops),which(colnames(fst_matrix)%in%pops)]
+    nearest_pops_and_fams_coord$mean.fst[i] <- mean(gp_fst, na.rm=T)
+
+    # get gridpoints-wise FST-values among populations, sampling one population for the same language if there are several populations with the same glottocode assigned, and log the arithmetic mean of the arithmetic mean
+    for_sampling <- gelato_pops %>% filter(PopName %in% pops) %>% select(1,9)
+    names(for_sampling)[2] <- "glottocode"
+    n <- 1000
+    samples <- numeric(length=n)
+    set.seed(seed)
+    for (j in 1:n){
+      s <- slice_sample(group_by(for_sampling,glottocode),n=1)$PopName
+      samples[j]<-mean(fst_matrix[which(rownames(fst_matrix)%in%s),which(colnames(fst_matrix)%in%s)], na.rm=T)
+    }
+    nearest_pops_and_fams_coord$mean.fst.samples[i]<-mean(samples, na.rm = T)
+  }
+  
+  # add data to grid points, create plots
+  grid_points_with_data <- merge(overlap, nearest_pops_and_fams_coord)
+
+  raw_plot <- ggplot() +
+    geom_sf(data = shifted2$base_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = grid_points_with_data) +
+    geom_sf_text(data = grid_points_with_data, aes(label = grid_point))+
+    geom_sf(data = shifted$pop_locations, color = "red", shape = 1) +
+    ggtitle("Raw data: Grid points and population locations (Eurasia only)") +
+    theme_minimal() +
+    theme(panel.grid.major = element_blank())
+
+  pop_at_point_plot <- ggplot() +
+    geom_sf(data = shifted2$base_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = grid_points_with_data, aes(colour = npop), size = 3) +
+    geom_sf(data = shifted$pop_locations, color = "blue", shape = 4, size = 0.1) +
+    scale_color_viridis(option = "magma", direction = -1, na.value = "lightgrey") + 
+    ggtitle("Population density: Number of populations per grid point") +
+    labs(color = "# populations") +
+    theme_minimal() +
+    theme(panel.grid.major = element_blank())
+    
+  lang_at_point_plot <- ggplot() +
+    geom_sf(data = shifted2$base_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = grid_points_with_data, aes(colour = nlg), size = 3) +
+    geom_sf(data = shifted$pop_locations, color = "blue", shape = 4, size = 0.1) +
+    scale_color_viridis(option = "magma", direction = -1, na.value = "lightgrey") + 
+    ggtitle("Language density: Number of languages per grid point") +
+    labs(color = "# languages") +
+    theme_minimal() +
+    theme(panel.grid.major = element_blank())
+  
+  fam_at_point_plot <- ggplot() +
+    geom_sf(data = shifted2$base_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = grid_points_with_data, aes(colour = nfam), size = 3) +
+    geom_sf(data = shifted$pop_locations, color = "blue", shape = 4, size = 0.1) +
+    scale_color_viridis(option = "magma", direction = -1, na.value = "lightgrey") + 
+    ggtitle("Phylogenetic density: Number of families per grid point") +
+    labs(color = "# families") +
+    theme_minimal() +
+    theme(panel.grid.major = element_blank())
+  
+  lang_per_pop_at_point_plot <- ggplot() +
+    geom_sf(data = shifted2$base_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = grid_points_with_data, aes(colour = nlg/npop), size = 3) +
+    geom_sf(data = shifted$pop_locations, color = "blue", shape = 4, size = 0.1) +
+    scale_color_viridis(option = "magma", direction = -1, na.value = "lightgrey") + 
+    ggtitle("Language/population ratio per grid point") +
+    labs(color = "nlg/npop") +
+    theme_minimal() +
+    theme(panel.grid.major = element_blank())
+  
+  entropy_at_point_plot <- ggplot() +
+    geom_sf(data = shifted2$base_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = grid_points_with_data, aes(colour = mean.feature.entropy), size = 3) +
+    geom_sf(data = shifted$pop_locations, color = "blue", shape = 4, size = 0.1) +
+    scale_color_viridis(option = "magma", direction = -1, na.value = "lightgrey") + 
+    ggtitle("Mean entropy across features per grid point") +
+    labs(color = "Mean entropy") +
+    theme_minimal() +
+    theme(panel.grid.major = element_blank())
+  
+  meanfst_at_point_plot <- ggplot() +
+    geom_sf(data = shifted2$base_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = grid_points_with_data, aes(colour = mean.fst), size = 3) +
+    geom_sf(data = shifted$pop_locations, color = "blue", shape = 4, size = 0.1) +
+    scale_color_viridis(option = "magma", direction = -1, na.value = "lightgrey") + 
+    ggtitle("Mean FST (all populations) per grid point") +
+    labs(color = "Mean FST\n(all populations)") +
+    theme_minimal() +
+    theme(panel.grid.major = element_blank())
+  
+  meanfst_sampled_at_point_plot <- ggplot() +
+    geom_sf(data = shifted2$base_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = grid_points_with_data, aes(colour = mean.fst.samples), size = 3) +
+    geom_sf(data = shifted$pop_locations, color = "blue", shape = 4, size = 0.1) +
+    scale_color_viridis(option = "magma", direction = -1, na.value = "lightgrey") + 
+    ggtitle("Mean FST (one pop per lg) per grid point") +
+    labs(color = "Mean FST") +
+    theme_minimal() +
+    theme(panel.grid.major = element_blank())
+
+  # multiple linear regression should include only those gridpoints with at least 2 langauages
+  grid_points_with_data_for_model <- grid_points_with_data %>% filter(nlg>1) %>% filter(!is.na(mean.feature.entropy))
+  
+  # simple linear model
+  model_genetics_predicts_typology <- lm(mean.feature.entropy ~ mean.fst.samples, data = grid_points_with_data_for_model)
+  model_typology_predicts_genetics <- lm(mean.fst.samples ~ mean.feature.entropy, data = grid_points_with_data_for_model)
+  
+  if (verbose == T){
+    print(summary(model_genetics_predicts_typology))
+    print(summary(model_typology_predicts_genetics))
+  }
+  
+ genetics_predicts_typology <- ggplot(grid_points_with_data_for_model, aes(x = mean.fst.samples, y = mean.feature.entropy)) + 
+   geom_point() +
+   stat_smooth(method = "lm")+
+   labs(x="mean FST-value, sampling one population per glottocode", y = "mean entropy across typological features")+
+   theme_bw()
+ 
+ typology_predicts_genetics <- ggplot(grid_points_with_data_for_model, aes(x = mean.feature.entropy, y = mean.fst.samples)) + 
+   geom_point() +
+   stat_smooth(method = "lm") +
+   labs(y="mean FST-value, sampling one population per glottocode", x = "mean entropy across typological features")+
+   theme_bw()
+  
+  
+ # combine plots into panel
+  combined_plot <- grid.arrange(    
+    arrangeGrob(pop_at_point_plot, lang_at_point_plot, lang_per_pop_at_point_plot, fam_at_point_plot, ncol = 1),
+    arrangeGrob(meanfst_sampled_at_point_plot, entropy_at_point_plot, genetics_predicts_typology, typology_predicts_genetics, ncol = 1),
+    ncol = 2
+  )
+  
+  ggsave(paste("../figures-for-paper/main/genetic_typological_distances_",data_type,".png",collapse="",sep=""), plot = combined_plot, width = 15, height = 18, dpi = 300)
+  
+  return(grid_points_with_data)
+}
+
+# compare grid point plots horizontally (original/logical/statistical curations)
+grid_point_comparison_horizontal <- function(baseline_gp_frame, name_baseline, 
+                                             comparison_gp_frame, name_comparison, 
+                                             comparison_gp_frame_2=NULL, name_comparison_2=NULL, 
+                                             lg_and_fam_comparison, fig_width, fig_height,
+                                             name_for_plot,
+                                             world_map){
+  
+  # shift world map
+  shifted <- project_data(df = baseline_gp_frame, world_map_initial = world_map_initial)
+  
+  # new data frame
+  delta <- comparison_gp_frame
+  
+  # compute deltas: number lgs, number fams and mean entropy across features, at each grid point
+  delta$delta.1.minus.0.lg <- comparison_gp_frame$nlg-baseline_gp_frame$nlg
+  delta$delta.1.minus.0.fam <- comparison_gp_frame$nfam-baseline_gp_frame$nfam
+  delta$delta.1.minus.0.entropy.residuals <- comparison_gp_frame$entropy.residuals-baseline_gp_frame$entropy.residuals
+  
+  # if there are three curations to compare (grambank):
+  if(!is.null(comparison_gp_frame_2)){
+    delta$delta.2.minus.1.lg <- comparison_gp_frame_2$nlg-comparison_gp_frame$nlg
+    delta$delta.2.minus.1.fam <- comparison_gp_frame_2$nfam-comparison_gp_frame$nfam
+    delta$delta.2.minus.1.entropy.residuals <- comparison_gp_frame_2$entropy.residuals-comparison_gp_frame$entropy.residuals
+    delta$delta.2.minus.0.lg <- comparison_gp_frame_2$nlg-baseline_gp_frame$nlg
+    delta$delta.2.minus.0.fam <- comparison_gp_frame_2$nfam-baseline_gp_frame$nfam
+    delta$delta.2.minus.0.entropy.residuals <- comparison_gp_frame_2$entropy.residuals-baseline_gp_frame$entropy.residuals
+  }
+  
+  # min and max values are straightforward to compute if only two-way comparison requested (computed only for plots to work in any case)
+  max_delta_lg <- max(na.omit(delta$delta.1.minus.0.lg))
+  min_delta_lg <- min(na.omit(delta$delta.1.minus.0.lg))
+  max_delta_fam <- max(na.omit(delta$delta.1.minus.0.fam))
+  min_delta_fam <- min(na.omit(delta$delta.1.minus.0.fam))
+  max_delta_entropy <- max(na.omit(delta$delta.1.minus.0.entropy.residuals))
+  min_delta_entropy <- min(na.omit(delta$delta.1.minus.0.entropy.residuals))
+  
+  # determine minimum and maximum deltas for each type of comparison, if there are three curations to compare
+  if(!is.null(comparison_gp_frame_2)){
+    max_delta_lg <- max(max(na.omit(delta$delta.1.minus.0.lg)), max(na.omit(delta$delta.2.minus.1.lg)), max(na.omit(delta$delta.2.minus.0.lg)))
+    min_delta_lg <- min(min(na.omit(delta$delta.1.minus.0.lg)), min(na.omit(delta$delta.2.minus.1.lg)), min(na.omit(delta$delta.2.minus.0.lg)))
+    max_delta_fam <- max(max(na.omit(delta$delta.1.minus.0.fam)), max(na.omit(delta$delta.2.minus.1.fam)), max(na.omit(delta$delta.2.minus.0.fam)))
+    min_delta_fam <- min(min(na.omit(delta$delta.1.minus.0.fam)), min(na.omit(delta$delta.2.minus.1.fam)), min(na.omit(delta$delta.2.minus.0.fam)))
+    max_delta_entropy <- max(max(na.omit(delta$delta.1.minus.0.entropy.residuals)), max(na.omit(delta$delta.2.minus.1.entropy.residuals)), max(na.omit(delta$delta.2.minus.0.entropy.residuals)))
+    min_delta_entropy <- min(min(na.omit(delta$delta.1.minus.0.entropy.residuals)), min(na.omit(delta$delta.2.minus.1.entropy.residuals)), min(na.omit(delta$delta.2.minus.0.entropy.residuals)))
+  }
+  
+  # delta languages maps
+  delta_lgs_1_minus_0 <- ggplot() +
+    geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = delta, aes(colour = delta.1.minus.0.lg), size = 2) +
+    scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_lg, max_delta_lg)) +
+    ggtitle(paste("Languages per gridpoint - difference between ", name_baseline, " and ", name_comparison, collapse = "", sep = "")) +
+    labs(color = "Difference (# languages)") +
+    theme_minimal() +
+    theme(panel.grid.major = element_blank())
+  
+  if(!is.null(comparison_gp_frame_2)){
+    delta_lgs_2_minus_1 <- ggplot() +
+      geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+      geom_sf(data = delta, aes(colour = delta.2.minus.1.lg), size = 2) +
+      scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_lg, max_delta_lg)) +
+      ggtitle(paste("Languages per gridpoint - difference between ", name_comparison, " and ", name_comparison_2, collapse = "", sep = "")) +
+      labs(color = "Difference (# languages)") +
+      theme_minimal() +
+      theme(panel.grid.major = element_blank())
+    
+    delta_lgs_2_minus_0 <- ggplot() +
+      geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+      geom_sf(data = delta, aes(colour = delta.2.minus.0.lg), size = 2) +
+      scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_lg, max_delta_lg)) +
+      ggtitle(paste("Languages per gridpoint - difference between ", name_baseline, " and ", name_comparison_2, collapse = "", sep = "")) +
+      labs(color = "Difference (# languages)") +
+      theme_minimal() +
+      theme(panel.grid.major = element_blank())
+  }
+  
+  # delta families maps
+  delta_fams_1_minus_0 <- ggplot() +
+    geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = delta, aes(colour = delta.1.minus.0.fam), size = 2) +
+    scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_fam, max_delta_fam)) +
+    ggtitle(paste("Families per gridpoint - difference between ", name_baseline, " and ", name_comparison, collapse = "", sep = "")) +
+    labs(color = "Difference (# families)") +
+    theme_minimal() +
+    theme(panel.grid.major = element_blank())
+  
+  if(!is.null(comparison_gp_frame_2)){
+    delta_fams_2_minus_1 <- ggplot() +
+      geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+      geom_sf(data = delta, aes(colour = delta.2.minus.1.fam), size = 2) +
+      scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_fam, max_delta_fam)) +
+      ggtitle(paste("Families per gridpoint - difference between ", name_comparison, " and ", name_comparison_2, collapse = "", sep = "")) +
+      labs(color = "Difference (# families)") +
+      theme_minimal() +
+      theme(panel.grid.major = element_blank())
+    
+    delta_fams_2_minus_0 <- ggplot() +
+      geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+      geom_sf(data = delta, aes(colour = delta.2.minus.0.fam), size = 2) +
+      scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_fam, max_delta_fam)) +
+      ggtitle(paste("Families per gridpoint - difference between ", name_baseline, " and ", name_comparison_2, collapse = "", sep = "")) +
+      labs(color = "Difference (# families)") +
+      theme_minimal() +
+      theme(panel.grid.major = element_blank())
+  }
+  
+  # delta entropies maps
+  delta_entropies_1_minus_0 <- ggplot() +
+    geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+    geom_sf(data = delta, aes(colour = delta.1.minus.0.entropy.residuals), size = 2) +
+    scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_entropy, max_delta_entropy)) +
+    ggtitle(paste("Mean entropy residuals across features per grid point - difference between ", name_baseline, " and ", name_comparison, collapse = "", sep = "")) +
+    labs(color = "Difference (mean entropy residuals)") +
+    theme_minimal() +
+    theme(panel.grid.major = element_blank())
+  
+  if(!is.null(comparison_gp_frame_2)){
+    delta_entropies_2_minus_1 <- ggplot() +
+      geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+      geom_sf(data = delta, aes(colour = delta.2.minus.1.entropy.residuals), size = 2) +
+      scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_entropy, max_delta_entropy)) +
+      ggtitle(paste("Mean entropy residuals across features per grid point - difference between ", name_comparison, " and ", name_comparison_2, collapse = "", sep = "")) +
+      labs(color = "Difference (mean entropy residuals)") +
+      theme_minimal() +
+      theme(panel.grid.major = element_blank())
+    
+    delta_entropies_2_minus_0 <- ggplot() +
+      geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+      geom_sf(data = delta, aes(colour = delta.2.minus.0.entropy.residuals), size = 2) +
+      scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_entropy, max_delta_entropy)) +
+      ggtitle(paste("Mean entropy residuals across features per grid point - difference between ", name_baseline, " and ", name_comparison_2, collapse = "", sep = "")) +
+      labs(color = "Difference (mean entropy residuals)") +
+      theme_minimal() +
+      theme(panel.grid.major = element_blank())
+  }
+  
+  # create combined plot according to specifications
+  if(!is.null(comparison_gp_frame_2)){
+    if(lg_and_fam_comparison == T){
+      combined_plot <- grid.arrange(
+        arrangeGrob(delta_lgs_1_minus_0, delta_lgs_2_minus_1, delta_lgs_2_minus_0, ncol = 1),
+        arrangeGrob(delta_fams_1_minus_0, delta_fams_2_minus_1, delta_fams_2_minus_0, ncol = 1),
+        arrangeGrob(delta_entropies_1_minus_0, delta_entropies_2_minus_1, delta_entropies_2_minus_0, ncol = 1),
+        ncol = 3
+      )
+    }
+    else{
+      combined_plot <- grid.arrange(
+        arrangeGrob(delta_entropies_1_minus_0, delta_entropies_2_minus_1, delta_entropies_2_minus_0, ncol = 1),
+        ncol = 1
+      )
+    }
+  }else{
+    if(lg_and_fam_comparison == T){
+      combined_plot <- grid.arrange(
+        arrangeGrob(delta_lgs_1_minus_0, delta_fams_1_minus_0, delta_entropies_1_minus_0, ncol = 1),
+        ncol = 1
+      )
+    }
+    else{
+      combined_plot <- grid.arrange(
+        arrangeGrob(delta_entropies_1_minus_0, ncol = 1),
+        ncol = 1
+      )
+    }
+  }
+  
+  # save plot
+  ggsave(paste("../figures-for-paper/main/",name_for_plot,".png", collapse="", sep=""), plot = combined_plot, width = fig_width, height = fig_height, dpi = 400)
+}
 

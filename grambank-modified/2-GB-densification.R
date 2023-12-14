@@ -37,8 +37,6 @@ logical_for_pruning <- na_convert(logical_for_pruning)
 statistical_for_pruning <- na_convert(statistical_for_pruning)
 
 # specify parameters for densification 
-max_steps_logical <- nrow(logical_for_pruning)+ncol(logical_for_pruning)-2 # maximal logically possible number of iterations
-max_steps_statistical <- nrow(statistical_for_pruning)+ncol(statistical_for_pruning)-2 # maximal logically possible number of iterations
 variability_threshold <- 3 # each variable must have at least 3 languages in its second-largest state
 mean_type <- "log_odds"
 
@@ -51,7 +49,6 @@ coding_weight <- 0.995
 set.seed(8765)
 logfile_gblogical_logodds_taxtrue_09990995_seed8765 <-
   densify_steps(original_data = logical_for_pruning,
-                max_steps = max_steps_logical,
                 variability_threshold = variability_threshold,
                 mean_type = mean_type,
                 use_taxonomy = T,
@@ -60,10 +57,8 @@ logfile_gblogical_logodds_taxtrue_09990995_seed8765 <-
                 coding_weight = coding_weight)
 write.csv(logfile_gblogical_logodds_taxtrue_09990995_seed8765,"output/logicalGBM/logfile_gblogical_logodds_taxtrue_09990995_seed8765.csv")
 
-set.seed(8765)
 logfile_gbstatistical_logodds_taxtrue_09990995_seed8765 <-
   densify_steps(original_data = statistical_for_pruning,
-                max_steps = max_steps_statistical,
                 variability_threshold = variability_threshold,
                 mean_type = mean_type,
                 use_taxonomy = T,
@@ -108,11 +103,11 @@ write.csv(pruned_statistical,"output/statisticalGBM/statisticalGBM_pruned.csv")
 comp_logical <- compare_full_to_densified(full = logical_for_pruning,
                                           densified = pruned_logical,
                                           taxonomy_matrix = taxonomy_matrix,
-                                          directory = "output/logicalGBM/")
+                                          directory = "../figures-for-paper/supplementary/grambank_logical")
 
 comp_statistical <- compare_full_to_densified(full = statistical_for_pruning,
                                           densified = pruned_statistical,
                                           taxonomy_matrix = taxonomy_matrix,
-                                          directory = "output/statisticalGBM/")
+                                          directory = "../figures-for-paper/supplementary/grambank_statistical")
 
 

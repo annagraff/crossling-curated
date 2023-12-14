@@ -1,8 +1,11 @@
+# this script serves to validate the automated columns (columns 21 to 73) in the file GELATO_population_glottocode_mapping.csv
+# note that columns 1 to 20 are asscociated with GeLaTo [perpopMASTER_653pops2022.xlsx] (columns 1 to 8) or manually entered (columns 9 to 20)
+
 rm(list=ls())
+
 library(tidyverse)
 library(testthat)
 library(GetoptLong)
-library(googlesheets4)
 library(densify)
 library(readxl)
 
@@ -14,26 +17,24 @@ names(taxonomy)[1]<-"glottocode"
 
 glottolog_level <- read.csv("../input/glottolog_v.4.8/languages_and_dialects_geo.csv")
 
-# # gelato glottocodes is subset of perpopMASTER_653pops2022 from Chiara's SwitchDrive folder
-# perpopMASTER <- dataset <- read_excel("perpopMASTER_653pops2022.xlsx") %>% select(c("PopName","country","lat","lon","glottocodeBase","glottolog.node1"))
-# names(perpopMASTER)[6] <- "glottologFamily"
-# 
-gelato <- read_sheet("https://docs.google.com/spreadsheets/d/1sOz_n6x5vyEuYgnt9FE0cywk54CaG7yXFScr3oa2rB0/edit#gid=0",
-                     "mappingsFinal") %>% select(1:21)
+# however note that in gelato we still have a location column...
+gelato_mapping_decisions <- read.csv("GELATO_population_glottocode_mapping.csv")
+gelato_mapping_decisions <- na_convert(gelato_mapping_decisions)
 
-# retrieve proxies for later
-proxies <- gelato[,c(12:21)]
+### check all densities are correct
+gelato <- gelato_mapping_decisions %>% select(1:20)
+
+# retrieve proxies
+proxies <- gelato[,c(11:20)]
 proxies <- na_convert(proxies)
 
+# sanity checks
 # expect_true(all(perpopMASTER$PopName==gelato$PopName))
 # expect_true(all(perpopMASTER$glottocodeBase==gelato$glottocodeBase))
-# 
-# #for chiara
 # expect_true(all(perpopMASTER$glottologFamily==gelato$glottologFamily)) 
-# perpopMASTER[which(perpopMASTER$glottologFamily!=gelato$glottologFamily),]
 
-base_status <- apply(as.data.frame(gelato),1,function(x)if(x[8]%in%glottolog_level$glottocode==F){NA}else{filter(glottolog_level,glottocode==x[8])[1,4]})
-upstream_glottocode <- apply(as.data.frame(gelato),1,function(x)if(x[8]%in%taxonomy$glottocode==F){NA}else{filter(taxonomy,glottocode==x[8])[1,sum(!is.na(filter(taxonomy,glottocode==x[8])))-1]})
+base_status <- apply(as.data.frame(gelato),1,function(x)if(x[7]%in%glottolog_level$glottocode==F){NA}else{filter(glottolog_level,glottocode==x[7])[1,4]})
+upstream_glottocode <- apply(as.data.frame(gelato),1,function(x)if(x[7]%in%taxonomy$glottocode==F){NA}else{filter(taxonomy,glottocode==x[7])[1,sum(!is.na(filter(taxonomy,glottocode==x[7])))-1]})
 upstream_glottocode_status <- apply(as.data.frame(upstream_glottocode),1,function(x)if(x%in%glottolog_level$glottocode==F){NA}else{filter(glottolog_level,glottocode==x[1])[1,4]})
 
 gelato <- cbind(gelato,data.frame(status_glottolog = base_status,
@@ -182,7 +183,7 @@ gelato <- left_join(gelato,select(filter(taxonomy_for_densities,GelatoUpstream =
                                                                                        density_mm_statistical_small)), by=c("glottocodeUpstream"="glottocode"))
 
 
-names(gelato)[25:64]<-c("base_features_count_gb_logical_full","base_features_count_gb_logical_densified","base_features_count_gb_statistical_full","base_features_count_gb_statistical_full","base_features_count_mm_logical_full","base_features_count_mm_logical_large","base_features_count_mm_logical_small","base_features_count_mm_statistical_full","base_features_count_mm_statistical_large","base_features_count_mm_statistical_small",
+names(gelato)[24:63]<-c("base_features_count_gb_logical_full","base_features_count_gb_logical_densified","base_features_count_gb_statistical_full","base_features_count_gb_statistical_full","base_features_count_mm_logical_full","base_features_count_mm_logical_large","base_features_count_mm_logical_small","base_features_count_mm_statistical_full","base_features_count_mm_statistical_large","base_features_count_mm_statistical_small",
                        "base_density_gb_logical_full","base_density_gb_logical_densified","base_density_gb_statistical_full","base_density_gb_statistical_densified","base_density_mm_logical_full","base_density_mm_logical_large","base_density_mm_logical_small","base_density_mm_statistical_full","base_density_mm_statistical_large","base_density_mm_statistical_small",
                        "upstream_features_count_gb_logical_full","upstream_features_count_gb_logical_densified","upstream_features_count_gb_statistical_full","upstream_features_count_gb_statistical_densified","upstream_features_count_mm_logical_full","upstream_features_count_mm_logical_large","upstream_features_count_mm_logical_small","upstream_features_count_mm_statistical_full","upstream_features_count_mm_statistical_large","upstream_features_count_mm_statistical_small",
                        "upstream_density_gb_logical_full","upstream_density_gb_logical_densified","upstream_density_gb_statistical_full","upstream_density_gb_statistical_densified","upstream_density_mm_logical_full","upstream_density_mm_logical_large","upstream_density_mm_logical_small","upstream_density_mm_statistical_full","upstream_density_mm_statistical_large","upstream_density_mm_statistical_small")
@@ -205,13 +206,34 @@ gelato <- cbind(gelato,proxy_gb_logical_full_density,proxy_gb_logical_densified_
                 proxy_mm_statistical_full_density,proxy_mm_statistical_large_density,proxy_mm_statistical_small_density)
 
 
-gelato_automated_columns <- gelato[,22:ncol(gelato)]
+gelato_automated_glottologStatus <- gelato[,21:23]
+gelato_automated_numeric <- gelato[,24:ncol(gelato)]
+
+# now check everything is correct:
+expect_true(all(gelato_automated_glottologStatus==gelato_mapping_decisions[21:23], na.rm = T))
+expect_true(all(round(gelato_automated_numeric,digits=5)==round(gelato_mapping_decisions[24:ncol(gelato_mapping_decisions)],digits=5), na.rm = T))
+
+###### density plots
+densities <- left_join(taxonomy_for_densities, select(glottolog_level,"glottocode","macroarea","latitude","longitude")) %>% filter(!is.na(latitude))
+
+source("../functions.R")
+shifted <- project_data(densities, world_map_initial = world_map_initial)
 
 
-range_write("https://docs.google.com/spreadsheets/d/1sOz_n6x5vyEuYgnt9FE0cywk54CaG7yXFScr3oa2rB0/edit#gid=0", 
-            sheet = "mappingsFinal", 
-            data = gelato_automated_columns, range = "V1")
+ggplot() +
+  geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+  geom_sf(data = shifted$data, aes(colour = density_mm_statistical_large), size = 1) +
+  scale_color_viridis(option = "magma", direction = -1, na.value = "lightgrey") + 
+  ggtitle("Mega-Merge, statistical, densified (large)") +
+  labs(color = "Coverage") +
+  theme_minimal() +
+  theme(panel.grid.major = element_blank())                                                                                                                                 
 
-
-
-
+ggplot() +
+  geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
+  geom_sf(data = shifted$data, aes(colour = density_gb_statistical_full), size = 1) +
+  scale_color_viridis(option = "magma", direction = -1, na.value = "lightgrey") + 
+  ggtitle("GB, statistical, full") +
+  labs(color = "Coverage") +
+  theme_minimal() +
+  theme(panel.grid.major = element_blank())                                                                                                                                 

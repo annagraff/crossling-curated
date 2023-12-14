@@ -53,19 +53,6 @@ statistical_lexicon_for_pruning <- statistical_for_pruning[which(apply(statistic
 variability_threshold <- 3 # each variable must have at least 3 languages in its second-largest state, for all densifications
 mean_type <- "log_odds"
 
-# maximal logically possible number of iterations as max_steps for each set
-max_steps_logical_full <- nrow(logical_full_for_pruning)+ncol(logical_full_for_pruning)-2 
-max_steps_statistical_full <- nrow(statistical_full_for_pruning)+ncol(statistical_full_for_pruning)-2
-
-max_steps_logical_grammar <- nrow(logical_grammar_for_pruning)+ncol(logical_grammar_for_pruning)-2 
-max_steps_statistical_grammar <- nrow(statistical_grammar_for_pruning)+ncol(statistical_grammar_for_pruning)-2 
-
-max_steps_logical_phonology <- nrow(logical_phonology_for_pruning)+ncol(logical_phonology_for_pruning)-2 
-max_steps_statistical_phonology <- nrow(statistical_phonology_for_pruning)+ncol(statistical_phonology_for_pruning)-2 
-
-max_steps_logical_lexicon <- nrow(logical_lexicon_for_pruning)+ncol(logical_lexicon_for_pruning)-2 
-max_steps_statistical_lexicon <- nrow(statistical_lexicon_for_pruning)+ncol(statistical_lexicon_for_pruning)-2 
-
 ##### densify full curation
 # comment on weights: MM is very sparse in terms of coding density and in terms of taxonomic diversity
 # we do not specify that taxonomy should be more important in trimming and provide equal weights for taxonomy_steps
@@ -76,7 +63,6 @@ coding_weight_full <- 0.999
 set.seed(2222)
 logfile_full_mmlogical_logodds_taxtrue_09990999_seed2222 <-
   densify_steps(original_data = logical_full_for_pruning,
-                max_steps = max_steps_logical_full,
                 variability_threshold = variability_threshold,
                 mean_type = mean_type,
                 use_taxonomy = T,
@@ -88,7 +74,6 @@ write.csv(logfile_full_mmlogical_logodds_taxtrue_09990999_seed2222,"output/logic
 set.seed(2222)
 logfile_full_mmstatistical_logodds_taxtrue_09990999_seed2222 <-
   densify_steps(original_data = statistical_full_for_pruning,
-                max_steps = max_steps_statistical_full,
                 variability_threshold = variability_threshold,
                 mean_type = mean_type,
                 use_taxonomy = T,
@@ -168,13 +153,13 @@ comp_logical <- compare_full_to_densified(full=logical,
                                           densified=pruned_logical_large,
                                           densified2=pruned_logical_small,
                                           taxonomy_matrix=taxonomy_matrix,
-                                          directory="output/logicalMM/full/")
+                                          directory="../figures-for-paper/supplementary/mm_full_logical")
 
 comp_statistical <- compare_full_to_densified(full=statistical,
                                               densified=pruned_statistical_large,
                                               densified2=pruned_statistical_small,
                                               taxonomy_matrix=taxonomy_matrix,
-                                              directory="output/statisticalMM/full/")
+                                              directory="../figures-for-paper/supplementary/mm_full_statistical")
 
 ##### densify grammar curation
 # comment on weights: MM grammar is very sparse in terms of coding density (much like the full dataset) and also uneven in terms of taxonomic diversity (but less strongly so than the full dataset)
@@ -186,7 +171,6 @@ coding_weight_grammar <- 0.999
 set.seed(2222)
 logfile_grammar_mmlogical_logodds_taxtrue_09990999_seed2222 <-
   densify_steps(original_data = logical_grammar_for_pruning,
-                max_steps = max_steps_logical_grammar,
                 variability_threshold = variability_threshold,
                 mean_type = mean_type,
                 use_taxonomy = T,
@@ -198,7 +182,6 @@ write.csv(logfile_grammar_mmlogical_logodds_taxtrue_09990999_seed2222,"output/lo
 set.seed(2222)
 logfile_grammar_mmstatistical_logodds_taxtrue_09990999_seed2222 <-
   densify_steps(original_data = statistical_grammar_for_pruning,
-                max_steps = max_steps_statistical_grammar,
                 variability_threshold = variability_threshold,
                 mean_type = mean_type,
                 use_taxonomy = T,
@@ -280,13 +263,13 @@ comp_logical <- compare_full_to_densified(full=logical_grammar_for_pruning,
                                           densified=pruned_logical_grammar_large,
                                           densified2=pruned_logical_grammar_small,
                                           taxonomy_matrix=taxonomy_matrix,
-                                          directory="output/logicalMM/grammar/")
+                                          directory="../figures-for-paper/supplementary/mm_grammar_logical")
 
 comp_statistical <- compare_full_to_densified(full=statistical_grammar_for_pruning,
                                               densified=pruned_statistical_grammar_large,
                                               densified2=pruned_statistical_grammar_small,
                                               taxonomy_matrix=taxonomy_matrix,
-                                              directory="output/statisticalMM/grammar/")
+                                              directory="../figures-for-paper/supplementary/mm_full_statistical")
 
 ##### densify phonology curation
 # comment on weights: MM phonology is rather dense (not particularly sparse in terms of coding density), but rather uneven in terms of taxonomic diversity
@@ -298,7 +281,6 @@ coding_weight_phonology <- 0.9
 set.seed(4444)
 logfile_phonology_mmlogical_logodds_taxtrue_0909_seed4444 <-
   densify_steps(original_data = logical_phonology_for_pruning,
-                max_steps = max_steps_logical_phonology,
                 variability_threshold = variability_threshold,
                 mean_type = mean_type,
                 use_taxonomy = T,
@@ -310,7 +292,6 @@ write.csv(logfile_phonology_mmlogical_logodds_taxtrue_0909_seed4444,"output/logi
 set.seed(4444)
 logfile_phonology_mmstatistical_logodds_taxtrue_0909_seed4444 <-
   densify_steps(original_data = statistical_phonology_for_pruning,
-                max_steps = max_steps_statistical_phonology,
                 variability_threshold = variability_threshold,
                 mean_type = mean_type,
                 use_taxonomy = T,
@@ -361,12 +342,12 @@ write.csv(pruned_statistical_phonology,"output/statisticalMM/phonology/statistic
 comp_logical <- compare_full_to_densified(full=logical_phonology_for_pruning,
                                           densified=pruned_logical_phonology,
                                           taxonomy_matrix=taxonomy_matrix,
-                                          directory="output/logicalMM/phonology/")
+                                          directory="../figures-for-paper/supplementary/mm_phonology_logical")
 
 comp_statistical <- compare_full_to_densified(full=statistical_phonology_for_pruning,
                                               densified=pruned_statistical_phonology,
                                               taxonomy_matrix=taxonomy_matrix,
-                                              directory="output/statisticalMM/phonology/")
+                                              directory="../figures-for-paper/supplementary/mm_phonology_logical")
 
 
 ##### densify lexicon curation
@@ -379,7 +360,6 @@ coding_weight_lexicon <- 0.99
 set.seed(3333)
 logfile_lexicon_mmlogical_logodds_taxtrue_099099_seed3333 <-
   densify_steps(original_data = logical_lexicon_for_pruning,
-                max_steps = max_steps_logical_lexicon,
                 variability_threshold = variability_threshold,
                 mean_type = mean_type,
                 use_taxonomy = T,
@@ -391,7 +371,6 @@ write.csv(logfile_lexicon_mmlogical_logodds_taxtrue_099099_seed3333,"output/logi
 set.seed(3333)
 logfile_lexicon_mmstatistical_logodds_taxtrue_099099_seed3333 <-
   densify_steps(original_data = statistical_lexicon_for_pruning,
-                max_steps = max_steps_statistical_lexicon,
                 variability_threshold = variability_threshold,
                 mean_type = mean_type,
                 use_taxonomy = T,
@@ -443,11 +422,11 @@ write.csv(pruned_statistical_lexicon,"output/statisticalMM/lexicon/statisticalMM
 comp_logical <- compare_full_to_densified(full=logical_lexicon_for_pruning,
                                           densified=pruned_logical_lexicon,
                                           taxonomy_matrix=taxonomy_matrix,
-                                          directory="output/logicalMM/lexicon/")
+                                          directory="../figures-for-paper/supplementary/mm_lexicon_logical")
 
 comp_statistical <- compare_full_to_densified(full=statistical_lexicon_for_pruning,
                                               densified=pruned_statistical_lexicon,
                                               taxonomy_matrix=taxonomy_matrix,
-                                              directory="output/statisticalMM/lexicon/")
+                                              directory="../figures-for-paper/supplementary/mm_lexicon_logical")
 
 
