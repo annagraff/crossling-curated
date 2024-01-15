@@ -12,7 +12,7 @@ library(reshape2)
 library(data.table)
 
 # load functions
-source("../../functions.R")
+source("../functions.R")
 
 ########## load and prepare data ########## 
 # read in original grambank data
@@ -723,7 +723,7 @@ taxonomy_statistical <- left_join(taxonomy_statistical,macroareas)
 taxonomy_statistical <- left_join(taxonomy_statistical,taxonomy_for_csv)
 
 # parameters.csv
-parameters <- read.csv("input/variable-recode-patterns.csv") %>% select(1:17)
+parameters <- read.csv("input/variable-recode-patterns.csv")
 
 parameters_logical <- parameters %>% filter(design.logical==T)
 parameters_statistical <- parameters %>% filter(design.logical.statistical==T)
