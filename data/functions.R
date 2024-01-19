@@ -621,4 +621,171 @@ compare_full_to_densified <- function(full, densified, densified2 = NULL, taxono
   return(list(comparison,combined_plot))
 }
 
+project_data <-  function(
+    df,  # a data frame with Longitude, Latitude, and data
+    world_map_initial = world_map_initial, # a natural earth map or overlays of several maps
+    projection = 8859, # 8859 is the crs code for equal earth WGS84 with 150° as center meridian
+    graticules_gap = 20, # gap between single graticule lines in ° (1, 5, 10, 15, 20, 30 are possible) (default 20)
+    xmin = -180, # minimum longitude of desired extent (in ° between -180 and 180) (default -180)
+    xmax = 180, # maximum longitude of desired extent (in ° between -180 and 180) (default 180)
+    ymin = -60, # minimum latitude of desired extent (in ° between -90, 90) (default -60)
+    ymax = 85, # maximum latitude of desired extent (in ° between -90, 90) (default 85)
+    labels_lat = -175, # position of latitude labels on longitude axis (in ° long) (default -175)
+    labels_long = -52.5 # position of latitude labels on latitude axis (in ° lat) (default -52.5)
+) {
+  library(tidyverse)
+  library(dplyr)
+  library(sf)
+  library(rnaturalearth)
+  library(ggplot2)
+  
+  #### Settings
+  # target projection
+  df_projection <- 4326 # projection code of the data frame (e.g. 4326 for WGS84) (default 4326)
+  # meridian where world map is split up
+  split_meridian <- -30
+  # deactivating s2 spherical geometry to make following map crops possible
+  sf_use_s2(FALSE)
+  
+  # duplicate base_map for further processing
+  base_map <- world_map_initial
+  
+  # create "split line" to split polygons/linestrings that cross the splitting meridian
+  split_line <- st_linestring(x = cbind(split_meridian,c(-90,90)), dim = "XY")
+  split_line <- st_geometry(split_line) # makes it possible to assign crs
+  st_crs(split_line) <- st_crs(base_map) # assign crs from base map to line
+  
+  # intersect line with continent polygons/linestrings to identify the ones that cross splitting meridian
+  base_map$intersects <- suppressMessages(st_intersects(base_map, split_line, sparse = F))
+  base_map_intersects <- filter(base_map, intersects == T) # map with intersecting polygons
+  base_map_cleaned <- filter(base_map, intersects == F) # map without intersecting polygons
+  
+  # crop polygons/linestrings on both sides of splitting meridian separately
+  bbox_left <- c(xmin = -180, xmax = split_meridian-0.000001, ymin = -90, ymax = 90)
+  bbox_right <- c(xmin = split_meridian+0.000001, xmax = 180, ymin = -90, ymax = 90)
+  # 0.000001 ensures that edges of right and left side do not have the exact same coordinates
+  base_map_intersects_left <- suppressMessages(suppressWarnings(st_crop(base_map_intersects, bbox_left)))
+  base_map_intersects_right <- suppressMessages(suppressWarnings(st_crop(base_map_intersects, bbox_right)))
+  
+  # combine all three maps
+  base_map <- bind_rows(base_map_cleaned, base_map_intersects_left)
+  base_map <- bind_rows(base_map, base_map_intersects_right)
+  
+  # crop map to desired plotting extent
+  bbox_map <- c(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)
+  base_map <- suppressMessages(suppressWarnings(st_crop(base_map, bbox_map)))
+  
+  # reproject map
+  base_map <- st_transform(base_map, crs = projection)
+  
+  #### Graticules
+  # download graticules from naturalearthdata
+  if (!exists(paste0("graticules_", graticules_gap))){
+    assign(paste0("graticules_", graticules_gap),
+           ne_download(scale = 110,
+                       type = paste0("graticules_", graticules_gap),
+                       category = "physical"),
+           pos = 1)
+  }
+  
+  # load the graticules file from global environment
+  graticules <- get(paste0("graticules_", graticules_gap), envir = .GlobalEnv)
+  
+  # crop graticules to desired plotting extent
+  bbox_graticule <- c(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)
+  graticules <- suppressMessages(suppressWarnings(st_crop(st_as_sf(graticules), bbox_graticule)))
+  
+  # reproject graticules
+  graticules <- st_transform(graticules, crs = projection)
+  
+  #### Graticule Labels
+  # create data frames with grid labels
+  x_labs <- c("-25°", "-20°", "-15°", "-10°", "-5°", "0°", "5°", "10°", "15°", "20°",
+              "25°", "30°", "35°", "40°", "45°", "50°", "55°", "60°", "65°", "70°",
+              "75°", "80°", "85°", "90°", "95°", "100°", "105°", "110°", "115°", "120°",
+              "125°", "130°", "135°", "140°", "145°", "150°", "155°", "160°", "165°",
+              "170°", "175°", "180°", "-175°", "-170°", "-165°", "-160°", "-155°", "-150°",
+              "-145°", "-140°", "-135°", "-130°", "-125°", "-120°", "-115°", "-110°",
+              "-105°", "-100°", "-95°", "-90°", "-85°", "-80°", "-75°", "-70°", "-65°",
+              "-60°", "-55°", "-50°", "-45°", "-40°", "-35°")
+  y_labs <- c("-85°", "-80°", "-75°", "-70°", "-65°", "-60°", "-55°", "-50°", "-45°",
+              "-40°", "-35°", "-30°", "-25°", "-20°", "-15°", "-10°", "-5°", "0°",
+              "5°", "10°", "15°", "20°", "25°", "30°", "35°", "40°", "45°", "50°",
+              "55°", "60°", "65°", "70°", "75°", "80°", "85°")
+  x <- c(seq(-25, 180, by = 5), seq(-175, -35, by = 5))
+  long_labels <- data.frame(labs=x_labs, x, y=labels_long)
+  y <- c(seq(-85, 0, by = 5), seq(5, 85, by = 5))
+  lat_labels <- data.frame(labs=y_labs, x=labels_lat, y=y)
+  
+  # subset data frames according to graticules gap input variable
+  long_labels <- long_labels %>%
+    slice(which(x %% graticules_gap == 0))
+  lat_labels <- lat_labels %>%
+    slice(which(y %% graticules_gap == 0))
+  
+  # combine data frames into one
+  grid_labels <- bind_rows(long_labels, lat_labels)
+  
+  # create sf object
+  grid_labels <- st_as_sf(grid_labels, coords = c("x", "y"), crs = 4326)
+  
+  # crop graticule labels to desired plotting extent
+  bbox_grid <- c(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)
+  grid_labels <- suppressMessages(suppressWarnings(st_crop(st_as_sf(grid_labels), bbox_grid)))
+  
+  # reproject graticule lables
+  grid_labels <- st_transform(grid_labels, crs = projection)
+  
+  #### data
+  # change name of columns to "Longitude" and "Latitude"
+  if(any(names(df) %in% 'longitude')) {
+    df$Longitude <- df$longitude
+    df$Latitude <- df$latitude
+  }
+  
+  if(any(names(df) %in% 'lon')) {
+    df$Longitude <- df$lon
+    df$Latitude <- df$lat
+  }
+  
+  if(any(names(df) %in% 'long')) {
+    df$Longitude <- df$long
+    df$Latitude <- df$lat
+  }
+  
+  # create an sf object
+  df = st_as_sf(df, coords = c("Longitude", "Latitude"), crs = df_projection)
+  
+  # crop data frame to desired plotting extent
+  bbox_data <- c(xmin = xmin, xmax = xmax, ymin = ymin, ymax = ymax)
+  df <- suppressMessages(suppressWarnings(st_crop(df, bbox_data)))
+  
+  # reproject data frame to desired projection
+  df <- st_transform(df, crs = projection)
+  
+  #### ggplot as base plot with base map
+  base_plot <- ggplot() +
+    geom_sf(data = base_map, colour = "darkgrey", fill = "transparent", size = .25) +
+    scale_size(range = c(10, 10)) +
+    theme(legend.position = "bottom",
+          legend.direction = "horizontal",
+          legend.text = element_text(size = 16),
+          legend.title = element_text(size = 16),
+          legend.box.background = element_rect(fill = "white", color = "white"),
+          panel.grid = element_blank(),
+          panel.background = element_blank(),
+          axis.ticks = element_blank(),
+          axis.text = element_blank(),
+          axis.title = element_blank()
+    ) +
+    guides(color = guide_legend(override.aes = list(size = 6)))
+  
+  #### objects returned by function
+  return(list(base_map = base_map,
+              graticules = graticules,
+              grid_labels = grid_labels,
+              data = df,
+              base_plot = base_plot))
+}
+
 
