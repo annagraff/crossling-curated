@@ -6,6 +6,7 @@ library(densify)
 library(testthat)
 library(lsr)
 library(gridExtra)
+library(viridis)
 
 # this function generates expectation_assessment for each expectation
 for_viz <- function(ID, modifications, diversity_samples,recoded_data,taxonomy,proportion_languages_must_be_in_applicable_state, title, textpos, conditional, marginal, xlab){
@@ -96,6 +97,7 @@ for_viz <- function(ID, modifications, diversity_samples,recoded_data,taxonomy,p
   
   p <- ggplot(dd, aes(x = Proportion, fill = Probability))+
     geom_density(alpha = 0.8, na.rm = TRUE,  aes(x=Proportion,fill=Probability))+
+    scale_fill_manual( values = c("#FFDB6D","#4E84C4"))+
     geom_vline(xintercept = mean(expectation_assessment$result1_XOR_AND_THEN,na.rm=T)+sd(expectation_assessment$result1_XOR_AND_THEN,na.rm=T), linetype="dotted") +
     geom_vline(xintercept = 0.2, linetype="dashed") +
     annotate("text", x=0.2, y=textpos, label="P = 0.2", 
@@ -118,7 +120,7 @@ for_viz <- function(ID, modifications, diversity_samples,recoded_data,taxonomy,p
 
 
 modifications <- read.csv("../data/TypLinkInd/output/statisticalTLI/cldf/modifications.csv")
-diversity_samples <- read.csv("../data/TypLinkInd/output/1000_diversity_samples_seed_2023.csv", row.names = 1)
+diversity_samples <- read.csv("../data/TypLinkInd/output/1000_diversity_samples_seed2023.csv", row.names = 1)
 recoded_data <- read.csv("../data/TypLinkInd/output/logicalTLI/full/logicalTLI_full.csv", row.names = "X")
 names(recoded_data) <- gsub("\\.","+",names(recoded_data))
 taxonomy <- as_flat_taxonomy_matrix(glottolog_languoids)
@@ -169,4 +171,4 @@ plot(smor10)
 # arrange the plots side by side, print and save
 combined_plot_full <- grid.arrange(swoo23b,swoo23a,smor10, ncol = 1)
 
-ggsave("Fig4.png", plot = combined_plot_full, width = 14, height = 8, dpi = 700)
+ggsave("Fig5.png", plot = combined_plot_full, width = 14, height = 8, dpi = 700)
