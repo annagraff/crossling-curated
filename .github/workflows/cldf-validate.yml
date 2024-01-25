@@ -1,10 +1,6 @@
 name: CLDF-validation
 
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+on: push
 
 jobs:
   build:
@@ -26,7 +22,7 @@ jobs:
         pip install pytest-cldf
     - name: Test with pytest
       run: |
-        pytest --cldf-metadata=mega-merge/output/logicalMM/cldf/StructureDataset-MM-logical-metadata.json test.py
-        pytest --cldf-metadata=mega-merge/output/statisticalMM/cldf/StructureDataset-MM-statistical-metadata.json test.py
-        pytest --cldf-metadata=grambank-modified/output/logicalGBM/cldf/StructureDataset-GBM-logical-metadata.json test.py
-        pytest --cldf-metadata=grambank-modified/output/statisticalGBM/cldf/StructureDataset-GBM-statistical-metadata.json test.py
+        pytest --cldf-metadata=data/TypLinkInd/output/logicalTLI/cldf/StructureDataset-metadata.json test.py
+        pytest --cldf-metadata=data/TypLinkInd/output/statisticalTLI/cldf/StructureDataset-metadata.json test.py
+        pytest --cldf-metadata=data/GBInd/output/logicalGBI/cldf/StructureDataset-metadata.json test.py
+        pytest --cldf-metadata=data/GBInd/output/statisticalGBI/cldf/StructureDataset-metadata.json  test.py
