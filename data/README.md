@@ -1,0 +1,1 @@
+The R-Script "functions.R" provides custom-written functions necessary to run scripts within this repository.
