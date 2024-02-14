@@ -335,4 +335,4 @@ gbi_comparison_plot <- grid_point_comparison_horizontal(baseline_gp_frame = gb_o
                                                        comparison_gp_frame = gbi_logical_gps[[1]], 
                                                        comparison_gp_frame_2 = gbi_statistical_gps[[1]], 
                                                        world_map = world_map_initial)
-ggsave(file="Fig9.png",gbi_comparison_plot[[1]], dpi = 500, width = 7, height = 10, units = "in")
+ggsave(file="Fig9.png",gbi_comparison_plot[[1]], dpi = 500, width = 10, height = 10, units = "in")
