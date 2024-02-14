@@ -357,8 +357,8 @@ evaluate_XOR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversit
         hyp.NOT.applies.2 <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$v1.unequals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", "))]
         
         # track the proportion of cases, in which the expectation is violated (d1 and d2)
-        d1 <- sum(hyp.NOT.applies.1)/(sum(hyp.applies)+sum(hyp.NOT.applies.1)) # proportion of cases, in which gut expectation is violated with respect to variable 1
-        d2 <- sum(hyp.NOT.applies.2)/(sum(hyp.applies)+sum(hyp.NOT.applies.2)) # proportion of cases, in which gut expectation is violated with respect to variable 1
+        d1 <- sum(hyp.NOT.applies.1)/(sum(hyp.applies)+sum(hyp.NOT.applies.1)) # proportion of cases, in which expectation is violated with respect to variable 1
+        d2 <- sum(hyp.NOT.applies.2)/(sum(hyp.applies)+sum(hyp.NOT.applies.2)) # proportion of cases, in which expectation is violated with respect to variable 1
         expectation_assessment[ds,"result1_XOR_AND_THEN"]<-d1
         expectation_assessment[ds,"result2_XOR_AND"]<-d2
         
@@ -393,7 +393,7 @@ evaluate_XOR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversit
         hyp.NOT.applies <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$v2.unequals.for.test)),", "))]
         
         # track the proportion of cases, in which the expectation is violated (d1)
-        d1 <- sum(hyp.NOT.applies)/(sum(hyp.applies)+sum(hyp.NOT.applies)) # proportion of cases, in which gut expectation is violated with respect to variable 1
+        d1 <- sum(hyp.NOT.applies)/(sum(hyp.applies)+sum(hyp.NOT.applies)) # proportion of cases, in which expectation is violated with respect to variable 1
         expectation_assessment[ds,"result1_XOR_AND_THEN"]<-d1
         
         # the proportion must be compared to the baseline expectation: this is the proportion of languages in the "unequals" state of variable 2 overall (independently of variable 1 being coded or not, and which state it would be in)

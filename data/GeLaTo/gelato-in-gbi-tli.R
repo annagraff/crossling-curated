@@ -36,21 +36,21 @@ gelato <- cbind(gelato,data.frame(status.glottolog = base_status,
                                   glottocodeUpstream = upstream_glottocode,
                                   glottocodeUpstream.status = upstream_glottocode_status))
 
-# read in GB data: logical and statistical, full and densified
+# read in GBI data: logical and statistical, full and densified
 gbilogfull <- read.csv("../GBInd/output/logicalGBI/logicalGBI.csv", row.names = "glottocode") %>% select(-X)
-gbilogdens <- read.csv("../GBInd/output/logicalGBI/logicalGBI_pruned.csv", row.names = "X")
+gbilogdens <- read.csv("../GBInd/output/logicalGBI/logicalGBI_pruned.csv", row.names = "glottocode") %>% select(-X)
 
 gbistafull <- read.csv("../GBInd/output/statisticalGBI/statisticalGBI.csv", row.names = "glottocode") %>% select(-X)
-gbistadens <- read.csv("../GBInd/output/statisticalGBI/statisticalGBI_pruned.csv", row.names = "X")
+gbistadens <- read.csv("../GBInd/output/statisticalGBI/statisticalGBI_pruned.csv", row.names = "glottocode") %>% select(-X)
 
-# read in MM data: logical and statistical, full, large densified and small densified 
+# read in TLI data: logical and statistical, full, large densified and small densified 
 tlilogfull <- read.csv("../TypLinkInd/output/logicalTLI/full/logicalTLI_full.csv", row.names = "glottocode") %>% select(-X)
-tlilogl <- read.csv("../TypLinkInd/output/logicalTLI/full/logicalTLI_full_pruned_large.csv", row.names = "X")
-tlilogs <- read.csv("../TypLinkInd/output/logicalTLI/full/logicalTLI_full_pruned_small.csv", row.names = "X")
+tlilogl <- read.csv("../TypLinkInd/output/logicalTLI/full/logicalTLI_full_pruned_large.csv", row.names = "glottocode") %>% select(-X)
+tlilogs <- read.csv("../TypLinkInd/output/logicalTLI/full/logicalTLI_full_pruned_small.csv", row.names = "glottocode") %>% select(-X)
 
 tlistafull <- read.csv("../TypLinkInd/output/statisticalTLI/full/statisticalTLI_full.csv", row.names = "glottocode") %>% select(-X)
-tlistal <- read.csv("../TypLinkInd/output/statisticalTLI/full/statisticalTLI_full_pruned_large.csv", row.names = "X")
-tlistas <- read.csv("../TypLinkInd/output/statisticalTLI/full/statisticalTLI_full_pruned_small.csv", row.names = "X")
+tlistal <- read.csv("../TypLinkInd/output/statisticalTLI/full/statisticalTLI_full_pruned_large.csv", row.names = "glottocode") %>% select(-X)
+tlistas <- read.csv("../TypLinkInd/output/statisticalTLI/full/statisticalTLI_full_pruned_small.csv", row.names = "glottocode") %>% select(-X)
 
 # turn all ? or missing data to NA
 gbilogfull <- na_convert(gbilogfull)
@@ -113,7 +113,7 @@ lgs_in_any_GB <- data.frame(glottocode = glottocodesInAnyGBI,
                             density.gbi.statistical.full= gbistafull.density,
                             density.gbi.statistical.densified = gbistadens.density)
 
-lgs_in_any_MM <- data.frame(glottocode = glottocodesInAnyTLI,
+lgs_in_any_TLI <- data.frame(glottocode = glottocodesInAnyTLI,
                             features.count.tli.logical.full = tlilogfull.count,
                             features.count.tli.logical.large = tlilogl.count,
                             features.count.tli.logical.small = tlilogs.count,
@@ -128,7 +128,7 @@ lgs_in_any_MM <- data.frame(glottocode = glottocodesInAnyTLI,
                             density.tli.statistical.small = tlistas.density)
                             
 taxonomy_for_densities <- left_join(taxonomy_for_densities,lgs_in_any_GB)
-taxonomy_for_densities <- left_join(taxonomy_for_densities,lgs_in_any_MM)
+taxonomy_for_densities <- left_join(taxonomy_for_densities,lgs_in_any_TLI)
 
 ## helper columns: counts and densities for all datasets for glottocodeBase
 gelato <- left_join(gelato,select(filter(taxonomy_for_densities,GelatoBase == T),c(glottocode,
@@ -178,7 +178,7 @@ gelato <- left_join(gelato,select(filter(taxonomy_for_densities,GelatoUpstream =
                                                                                        density.tli.statistical.small)), by=c("glottocodeUpstream"="glottocode"))
 
 
-names(gelato)[24:63]<-c("base.features.count.gbi.logical.full","base.features.count.gbi.logical.densified","base.features.count.gbi.statistical.full","base.features.count.gbi.statistical.full","base.features.count.tli.logical.full","base.features.count.tli.logical.large","base.features.count.tli.logical.small","base.features.count.tli.statistical.full","base.features.count.tli.statistical.large","base.features.count.tli.statistical.small",
+names(gelato)[24:63]<-c("base.features.count.gbi.logical.full","base.features.count.gbi.logical.densified","base.features.count.gbi.statistical.full","base.features.count.gbi.statistical.densified","base.features.count.tli.logical.full","base.features.count.tli.logical.large","base.features.count.tli.logical.small","base.features.count.tli.statistical.full","base.features.count.tli.statistical.large","base.features.count.tli.statistical.small",
                        "base.density.gbi.logical.full","base.density.gbi.logical.densified","base.density.gbi.statistical.full","base.density.gbi.statistical.densified","base.density.tli.logical.full","base.density.tli.logical.large","base.density.tli.logical.small","base.density.tli.statistical.full","base.density.tli.statistical.large","base.density.tli.statistical.small",
                        "upstream.features.count.gbi.logical.full","upstream.features.count.gbi.logical.densified","upstream.features.count.gbi.statistical.full","upstream.features.count.gbi.statistical.densified","upstream.features.count.tli.logical.full","upstream.features.count.tli.logical.large","upstream.features.count.tli.logical.small","upstream.features.count.tli.statistical.full","upstream.features.count.tli.statistical.large","upstream.features.count.tli.statistical.small",
                        "upstream.density.gbi.logical.full","upstream.density.gbi.logical.densified","upstream.density.gbi.statistical.full","upstream.density.gbi.statistical.densified","upstream.density.tli.logical.full","upstream.density.tli.logical.large","upstream.density.tli.logical.small","upstream.density.tli.statistical.full","upstream.density.tli.statistical.large","upstream.density.tli.statistical.small")
@@ -207,7 +207,3 @@ gelato_automated_numeric <- gelato[,24:ncol(gelato)]
 # now check everything is correct:
 expect_true(all(gelato_automated_glottologStatus==gelato_mapping_decisions[21:23], na.rm = T))
 expect_true(all(round(gelato_automated_numeric,digits=5)==round(gelato_mapping_decisions[24:ncol(gelato_mapping_decisions)],digits=5), na.rm = T))
-
-
-
-
