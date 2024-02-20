@@ -47,18 +47,16 @@ sum(!is.na(gbi_statistical))/(nrow(gbi_statistical)*ncol(gbi_statistical)) # cod
 # phonology
 # read in logical TLI data
 logical <- read.csv("../data/TypLinkInd/output/logicalTLI/full/logicalTLI_full.csv",row.names = "glottocode") %>% select(-X)
-names(logical) <- str_replace_all(names(logical),"\\.","\\+")
 logical <- na_convert(logical)
 logical_parameters <- read.csv("../data/TypLinkInd/output/logicalTLI/cldf/parameters.csv")
-phonology_logical <- logical[which(apply(logical[which(names(logical)%in%filter(logical_parameters,domain == "Phonology")$new.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(logical)%in%filter(logical_parameters,domain == "Phonology")$new.name))]
+phonology_logical <- logical[which(apply(logical[which(names(logical)%in%filter(logical_parameters,domain == "Phonology")$short.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(logical)%in%filter(logical_parameters,domain == "Phonology")$short.name))]
 phonology_logical <- factorise(phonology_logical)
 sum(!is.na(phonology_logical))/(nrow(phonology_logical)*ncol(phonology_logical)) # coding density: 56% --> ok!
 
 statistical <- read.csv("../data/TypLinkInd/output/statisticalTLI/full/statisticalTLI_full.csv",row.names = "glottocode") %>% select(-X)
-names(statistical) <- str_replace_all(names(statistical),"\\.","\\+")
 statistical <- na_convert(statistical)
 statistical_parameters <- read.csv("../data/TypLinkInd/output/statisticalTLI/cldf/parameters.csv")
-phonology_statistical <- statistical[which(apply(statistical[which(names(statistical)%in%filter(statistical_parameters,domain == "Phonology")$new.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(statistical)%in%filter(statistical_parameters,domain == "Phonology")$new.name))]
+phonology_statistical <- statistical[which(apply(statistical[which(names(statistical)%in%filter(statistical_parameters,domain == "Phonology")$short.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(statistical)%in%filter(statistical_parameters,domain == "Phonology")$short.name))]
 phonology_statistical <- factorise(phonology_statistical)
 sum(!is.na(phonology_statistical))/(nrow(phonology_statistical)*ncol(phonology_statistical)) # coding density: 55% --> ok!
 

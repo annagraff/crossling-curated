@@ -33,7 +33,7 @@
                         "datatype": "string",
                         "propertyUrl": "http://cldf.clld.org/v1.0/terms.rdf#parameterReference",
                         "required": true,
-                        "name": "new.name"
+                        "name": "short.name"
                     },
                     {
                         "dc:extent": "singlevalued",
@@ -67,12 +67,12 @@
                     },
                     {
                         "columnReference": [
-                            "new.name"
+                            "short.name"
                         ],
                         "reference": {
                             "resource": "parameters.csv",
                             "columnReference": [
-                                "new.name"
+                                "short.name"
                             ]
                         }
                     },
@@ -407,9 +407,16 @@
                         "datatype": {
                             "base": "string"
                         },
-                        "propertyUrl": "http://cldf.clld.org/v1.0/terms.rdf#id",
                         "required": true,
                         "name": "new.name"
+                    },
+					{
+                        "datatype": {
+                            "base": "string"
+                        },
+                        "propertyUrl": "http://cldf.clld.org/v1.0/terms.rdf#id",
+                        "required": true,
+                        "name": "short.name"
                     },
                     {
                         "datatype": "string",
@@ -631,7 +638,7 @@
                     }
                 ],
                 "primaryKey": [
-                    "new.name"
+                    "short.name"
                 ]
             },
             "url": "parameters.csv"
@@ -655,7 +662,7 @@
                         "datatype": "string",
                         "propertyUrl": "http://cldf.clld.org/v1.0/terms.rdf#parameterReference",
                         "required": true,
-                        "name": "new.name"
+                        "name": "short.name"
                     },
                     {
                         "datatype": "string",
@@ -667,12 +674,12 @@
                 "foreignKeys": [
                     {
                         "columnReference": [
-                            "new.name"
+                            "short.name"
                         ],
                         "reference": {
                             "resource": "parameters.csv",
                             "columnReference": [
-                                "new.name"
+                                "short.name"
                             ]
                         }
                     }

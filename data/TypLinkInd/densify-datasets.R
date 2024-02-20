@@ -12,11 +12,9 @@ source("../functions.R")
 
 # read in logical TLI data
 logical <- read.csv("output/logicalTLI/full/logicalTLI_full.csv") %>% select(-X)
-names(logical) <- str_replace_all(names(logical),"\\.","\\+")
 
 # read in statistical TLI data
 statistical <- read.csv("output/statisticalTLI/full/statisticalTLI_full.csv") %>% select(-X)
-names(statistical) <- str_replace_all(names(statistical),"\\.","\\+")
 
 # generate taxonomy matrix
 taxonomy_matrix <- as_flat_taxonomy_matrix(glottolog_languoids)
@@ -28,15 +26,15 @@ statistical_for_pruning <- na_convert(statistical)
 # group both logical and statistical data in 4 sets: (1) full (morphosyntax+phonology+lexicon), (2) morphosyntax only, (3) phonology only, (4) lexicon only
 logical_parameters <- read.csv("output/logicalTLI/cldf/parameters.csv")
 logical_full_for_pruning <- logical_for_pruning
-logical_morphosyntax_for_pruning <- logical_for_pruning[which(apply(logical_for_pruning[which(names(logical_for_pruning)%in%filter(logical_parameters,domain == "Morphosyntax")$new.name)],1,function(x)length(na.omit(x)))>0), c(1,which(names(logical_for_pruning)%in%filter(logical_parameters,domain == "Morphosyntax")$new.name))]
-logical_phonology_for_pruning <- logical_for_pruning[which(apply(logical_for_pruning[which(names(logical_for_pruning)%in%filter(logical_parameters,domain == "Phonology")$new.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(logical_for_pruning)%in%filter(logical_parameters,domain == "Phonology")$new.name))]
-logical_lexicon_for_pruning <- logical_for_pruning[which(apply(logical_for_pruning[which(names(logical_for_pruning)%in%filter(logical_parameters,domain == "Lexicon")$new.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(logical_for_pruning)%in%filter(logical_parameters,domain == "Lexicon")$new.name))]
+logical_morphosyntax_for_pruning <- logical_for_pruning[which(apply(logical_for_pruning[which(names(logical_for_pruning)%in%filter(logical_parameters,domain == "Morphosyntax")$short.name)],1,function(x)length(na.omit(x)))>0), c(1,which(names(logical_for_pruning)%in%filter(logical_parameters,domain == "Morphosyntax")$short.name))]
+logical_phonology_for_pruning <- logical_for_pruning[which(apply(logical_for_pruning[which(names(logical_for_pruning)%in%filter(logical_parameters,domain == "Phonology")$short.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(logical_for_pruning)%in%filter(logical_parameters,domain == "Phonology")$short.name))]
+logical_lexicon_for_pruning <- logical_for_pruning[which(apply(logical_for_pruning[which(names(logical_for_pruning)%in%filter(logical_parameters,domain == "Lexicon")$short.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(logical_for_pruning)%in%filter(logical_parameters,domain == "Lexicon")$short.name))]
 
 statistical_parameters <- read.csv("output/statisticalTLI/cldf/parameters.csv")
 statistical_full_for_pruning <- statistical_for_pruning
-statistical_morphosyntax_for_pruning <- statistical_for_pruning[which(apply(statistical_for_pruning[which(names(statistical_for_pruning)%in%filter(statistical_parameters,domain == "Morphosyntax")$new.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(statistical_for_pruning)%in%filter(statistical_parameters,domain == "Morphosyntax")$new.name))]
-statistical_phonology_for_pruning <- statistical_for_pruning[which(apply(statistical_for_pruning[which(names(statistical_for_pruning)%in%filter(statistical_parameters,domain == "Phonology")$new.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(statistical_for_pruning)%in%filter(statistical_parameters,domain == "Phonology")$new.name))]
-statistical_lexicon_for_pruning <- statistical_for_pruning[which(apply(statistical_for_pruning[which(names(statistical_for_pruning)%in%filter(statistical_parameters,domain == "Lexicon")$new.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(statistical_for_pruning)%in%filter(statistical_parameters,domain == "Lexicon")$new.name))]
+statistical_morphosyntax_for_pruning <- statistical_for_pruning[which(apply(statistical_for_pruning[which(names(statistical_for_pruning)%in%filter(statistical_parameters,domain == "Morphosyntax")$short.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(statistical_for_pruning)%in%filter(statistical_parameters,domain == "Morphosyntax")$short.name))]
+statistical_phonology_for_pruning <- statistical_for_pruning[which(apply(statistical_for_pruning[which(names(statistical_for_pruning)%in%filter(statistical_parameters,domain == "Phonology")$short.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(statistical_for_pruning)%in%filter(statistical_parameters,domain == "Phonology")$short.name))]
+statistical_lexicon_for_pruning <- statistical_for_pruning[which(apply(statistical_for_pruning[which(names(statistical_for_pruning)%in%filter(statistical_parameters,domain == "Lexicon")$short.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(statistical_for_pruning)%in%filter(statistical_parameters,domain == "Lexicon")$short.name))]
 
 # specify parameters for densification
 min_variability <- 3 # each variable must have at least 3 languages in its second-largest state

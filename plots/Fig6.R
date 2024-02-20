@@ -120,7 +120,7 @@ for_viz <- function(ID, modifications, diversity_samples,recoded_data,taxonomy,p
 
 modifications <- read.csv("../data/TypLinkInd/output/statisticalTLI/cldf/modifications.csv")
 diversity_samples <- read.csv("../data/TypLinkInd/output/1000_diversity_samples_seed2023.csv", row.names = 1)
-recoded_data <- read.csv("../data/TypLinkInd/output/logicalTLI/full/logicalTLI_full.csv", row.names = "X")
+recoded_data <- read.csv("../data/TypLinkInd/output/statisticalTLI/data_for_stats.csv", row.names = "X")
 names(recoded_data) <- gsub("\\.","+",names(recoded_data))
 taxonomy <- as_flat_taxonomy_matrix(glottolog_languoids)
 proportion_languages_must_be_in_applicable_state <- 1/3

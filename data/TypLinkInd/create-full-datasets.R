@@ -1160,7 +1160,11 @@ for (rd in 1:nrow(ntrd)){
 expect_true(all(ntrd$modification.ID%in%unlist(strsplit(recode_patterns$suspected.but.untestable.dependencies,";"))))
 expect_true(all(na.omit(unique(unlist(strsplit(recode_patterns$suspected.but.untestable.dependencies,";"))))%in%ntrd$modification.ID))
 
-########## save data as language-feature matrices ########## 
+########## save data as language-feature matrices ##########
+# for language-feature matrices, rename variables to short name
+names(logical_data)[2:ncol(logical_data)] <- as.character(sapply(names(logical_data)[2:ncol(logical_data)],function(x)filter(recode_patterns,new.name==x)$short.name))
+names(statistical_data)[2:ncol(statistical_data)] <- as.character(sapply(names(statistical_data)[2:ncol(statistical_data)],function(x)filter(recode_patterns,new.name==x)$short.name))
+
 # save logical and statistical datasets as language-feature matrices (.csv)
 write.csv(logical_data,"output/logicalTLI/full/logicalTLI_full.csv")
 write.csv(statistical_data,"output/statisticalTLI/full/statisticalTLI_full.csv")
@@ -1180,30 +1184,30 @@ taxonomy_statistical <- left_join(taxonomy_statistical,macroareas)
 taxonomy_statistical <- left_join(taxonomy_statistical,taxonomy_for_csv)
 
 # parameters.csv
-parameters <- read.csv("input/variable-recode-patterns.csv") %>% select(1:23)
+parameters <- read.csv("input/variable-recode-patterns.csv") %>% select(1:24)
 
 parameters_logical <- parameters %>% filter(design.logical==T)
 parameters_statistical <- parameters %>% filter(design.logical.statistical==T)
 
 # values.csv
-logical_long <- melt(setDT(logical_data), id.vars = "glottocode", variable.name = "new.name")
+logical_long <- melt(setDT(logical_data), id.vars = "glottocode", variable.name = "short.name")
 logical_long$value_ID <- apply(logical_long,1,function(x) paste(x[2],x[1],sep="-"))
 logical_long$code_ID <- apply(logical_long,1,function(x) paste(x[2],x[3],sep="-"))
-logical_long <- logical_long %>% select(c("value_ID","glottocode","new.name","value","code_ID"))
+logical_long <- logical_long %>% select(c("value_ID","glottocode","short.name","value","code_ID"))
 logical_long$glottocode <- as.character(logical_long$glottocode)
-logical_long$new.name <- as.character(logical_long$new.name)
+logical_long$short.name <- as.character(logical_long$short.name)
 
-statistical_long <- melt(setDT(statistical_data), id.vars = "glottocode", variable.name = "new.name")
+statistical_long <- melt(setDT(statistical_data), id.vars = "glottocode", variable.name = "short.name")
 statistical_long$value_ID <- apply(statistical_long,1,function(x) paste(x[2],x[1],sep="-"))
 statistical_long$code_ID <- apply(statistical_long,1,function(x) paste(x[2],x[3],sep="-"))
 statistical_long$glottocode <- as.character(statistical_long$glottocode)
-statistical_long$new.name <- as.character(statistical_long$new.name)
-statistical_long <- statistical_long %>% select(c("value_ID","glottocode","new.name","value","code_ID"))
+statistical_long$short.name <- as.character(statistical_long$short.name)
+statistical_long <- statistical_long %>% select(c("value_ID","glottocode","short.name","value","code_ID"))
 
 # codes.csv
-logical_codes <- logical_long %>% select(c("code_ID","new.name","value")) %>% unique()
+logical_codes <- logical_long %>% select(c("code_ID","short.name","value")) %>% unique()
 
-statistical_codes <- statistical_long %>% select(c("code_ID","new.name","value")) %>% unique()
+statistical_codes <- statistical_long %>% select(c("code_ID","short.name","value")) %>% unique()
 
 # modifications.csv
 modifications <- read.csv("input/decisions-log.csv")
@@ -1214,10 +1218,10 @@ expect_true(all(unique(statistical_long$glottocode) %in% taxonomy_statistical$gl
 expect_true(all(taxonomy_logical$glottocode %in% unique(logical_long$glottocode)))
 expect_true(all(taxonomy_statistical$glottocode %in% unique(statistical_long$glottocode)))
 
-expect_true(all(unique(logical_long$new.name) %in% parameters$new.name))
-expect_true(all(unique(statistical_long$new.name) %in% parameters$new.name))
-expect_true(all(filter(parameters,design.logical == "TRUE")$new.name %in% unique(logical_long$new.name)))
-expect_true(all(filter(parameters,design.logical.statistical == "TRUE")$new.name %in% unique(statistical_long$new.name)))
+expect_true(all(unique(logical_long$short.name) %in% parameters$short.name))
+expect_true(all(unique(statistical_long$short.name) %in% parameters$short.name))
+expect_true(all(filter(parameters,design.logical == "TRUE")$short.name %in% unique(logical_long$short.name)))
+expect_true(all(filter(parameters,design.logical.statistical == "TRUE")$short.name %in% unique(statistical_long$short.name)))
 
 expect_true(all(unique(logical_long$code_ID) %in% logical_codes$code_ID))
 expect_true(all(unique(statistical_long$code_ID) %in% statistical_codes$code_ID))
@@ -1234,8 +1238,8 @@ write.csv(taxonomy_logical,"output/logicalTLI/cldf/languages.csv",fileEncoding="
 write.csv(taxonomy_statistical,"output/statisticalTLI/cldf/languages.csv",fileEncoding="UTF-8",row.names = F)
 write.csv(parameters_logical,"output/logicalTLI/cldf/parameters.csv",fileEncoding="UTF-8",row.names = F)
 write.csv(parameters_statistical,"output/statisticalTLI/cldf/parameters.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(logical_long,file=gzfile("output/logicalTLI/cldf/values.csv.gz"),fileEncoding="UTF-8",row.names = F)
-write.csv(statistical_long,file=gzfile("output/statisticalTLI/cldf/values.csv.gz"),fileEncoding="UTF-8",row.names = F)
+write.csv(logical_long,file="output/logicalTLI/cldf/values.csv",row.names = F)
+write.csv(statistical_long,file="output/statisticalTLI/cldf/values.csv",row.names = F)
 write.csv(logical_codes,"output/logicalTLI/cldf/codes.csv",fileEncoding="UTF-8",row.names = F)
 write.csv(statistical_codes,"output/statisticalTLI/cldf/codes.csv",fileEncoding="UTF-8",row.names = F)
 write.csv(modifications,"output/logicalTLI/cldf/modifications.csv",fileEncoding="UTF-8",row.names = F)
