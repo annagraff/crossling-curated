@@ -18,13 +18,10 @@ expectations <- read.csv("input/decisions-log.csv") %>% filter(modification.type
 
 # load logical grambank data, glottolog taxonomy and glottolog macroarea data
 logical_data <- read.csv("output/logicalGBI/logicalGBI.csv") %>% select(-X)
-taxonomy <- as_flat_taxonomy_matrix(glottolog_languoids)
-macroareas <- read.csv("../../raw/glottolog_v.4.8/languages_and_dialects_geo.csv")
-names(macroareas)[1]<-"id"
-taxonomy <- merge(taxonomy,select(macroareas, c("id","macroarea")),by="id")
+taxonomy <- read.csv("output/logicalGBI/cldf/languages.csv")
 
 # subset taxonomy to languages in logical data with a macroarea-label
-lgs <- filter(taxonomy,id%in%logical_data$glottocode)
+lgs <- filter(taxonomy,glottocode%in%logical_data$glottocode)
 
 # load data for stats
 recoded_data <- read.csv("output/statisticalGBI/data_for_stats.csv") %>% select(-X)
@@ -37,24 +34,24 @@ regions <- data.frame(regions=c("Africa","Eurasia","Papunesia","Australia","Sout
 lg_samples_500<-matrix(NA, ncol=500, nrow=120)
 
 # iteratively generate 500 samples
-set.seed(2023) # this is a random operation; we pick seed 2023 for reproducibility
+set.seed(42) # this is a random operation; we pick seed 500 for reproducibility
 for (smpl in 1:500){
   cat("Generating sample ", smpl, "\n", sep="")
   diversity_samples_lgs <- slice(data.frame(lg=NA),0) # store the languages here
   diversity_samples_fams <- slice(data.frame(family=NA),0) # store the corresponding families here
   for (rg in 1:nrow(regions)){ # for each macroarea
-    reg_fam <- unique(filter(lgs,macroarea==regions[rg,])$level1) # these are the families in this macroarea
+    reg_fam <- unique(filter(lgs,glottolog.macroarea==regions[rg,])$level1) # these are the families in this macroarea
     fam_add <- data.frame(family=reg_fam[sample(length(reg_fam),size=20,replace=F)]) # sample 20 different random families in the macroarea
     diversity_samples_fams<-rbind(diversity_samples_fams,fam_add) # log the 20 families for this sample
     diversity_samples_lgs<-rbind(diversity_samples_lgs, # sample and save one random language per family
                                  data.frame(lg=(apply(fam_add,1,function(x)
-                                   filter(lgs,level1==x[1]&macroarea==regions[rg,])[sample(nrow(filter(lgs,level1==x[1]&macroarea==regions[rg,])),size=1,replace=F),]$id))))
+                                   filter(lgs,level1==x[1]&glottolog.macroarea==regions[rg,])[sample(nrow(filter(lgs,level1==x[1]&glottolog.macroarea==regions[rg,])),size=1,replace=F),]$glottocode))))
   }
   lg_samples_500[,smpl]<-diversity_samples_lgs[,"lg"] # at the end of each iteration, store the full language sample
 }
 
 # save this diversity sample
-write.csv(lg_samples_500,"output/500_diversity_samples_seed2023.csv")
+write.csv(lg_samples_500,"output/500_diversity_samples.csv")
 
 ### rerun all tests to reproduce stored results using the input data, expectations, taxonomy and language samples
 # specify test condition, fix threshold

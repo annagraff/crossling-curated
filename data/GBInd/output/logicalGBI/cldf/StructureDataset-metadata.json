@@ -135,13 +135,13 @@
                         "name": "level"
                     },
                     {
-                        "dc:description": "Which macroarea does this glottocode belong to, if applicable",
+                        "dc:description": "Which macroarea (sensu Glottolog) can this glottocode be assigned to, if applicable",
                         "datatype": "string",
                         "required": false,
                         "null": [
                             "NA"
                         ],
-                        "name": "macroarea"
+                        "name": "glottolog.macroarea"
                     },
                     {
                         "datatype": {
@@ -168,6 +168,33 @@
                         "propertyUrl": "http://cldf.clld.org/v1.0/terms.rdf#longitude",
                         "required": false,
                         "name": "longitude"
+                    },
+                    {
+                        "dc:description": "Which continent (sensu AUTOTYP) can this glottocode be assigned to, if applicable",
+                        "datatype": "string",
+                        "required": false,
+                        "null": [
+                            "NA"
+                        ],
+                        "name": "autotyp.continent"
+                    },
+                    {
+                        "dc:description": "Which area (sensu AUTOTYP) can this glottocode be assigned to, if applicable",
+                        "datatype": "string",
+                        "required": false,
+                        "null": [
+                            "NA"
+                        ],
+                        "name": "autotyp.area"
+                    },
+                    {
+                        "dc:description": "Comment relating to macroarea, coordinates, continent or area",
+                        "datatype": "string",
+                        "required": false,
+                        "null": [
+                            "NA"
+                        ],
+                        "name": "comment"
                     },
                     {
                         "dc:description": "Glottocode of the 1st-level (top-level = language family) clade the variety belongs to",
