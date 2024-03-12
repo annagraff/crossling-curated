@@ -1171,17 +1171,15 @@ write.csv(statistical_data,"output/statisticalTLI/full/statisticalTLI_full.csv")
 
 ########## make, check and save cldf  ########## 
 # languages.csv
-taxonomy_for_csv <- as_flat_taxonomy_matrix(glottolog_languoids)
-names(taxonomy_for_csv)[1] <- "glottocode"
-macroareas <- read.csv("../../raw/glottolog_v.4.8/languages_and_dialects_geo.csv")
+lang_metadata <- read.csv("../lang-metadata.csv")
 
 taxonomy_logical <- data.frame(glottocode = logical_data$glottocode)
-taxonomy_logical <- left_join(taxonomy_logical,macroareas)
-taxonomy_logical <- left_join(taxonomy_logical,taxonomy_for_csv)
+taxonomy_logical <- left_join(taxonomy_logical,lang_metadata)
+taxonomy_logical[taxonomy_logical==""] <- NA
 
 taxonomy_statistical <- data.frame(glottocode = statistical_data$glottocode)
-taxonomy_statistical <- left_join(taxonomy_statistical,macroareas)
-taxonomy_statistical <- left_join(taxonomy_statistical,taxonomy_for_csv)
+taxonomy_statistical <- left_join(taxonomy_statistical,lang_metadata)
+taxonomy_statistical[taxonomy_statistical==""] <- NA
 
 # parameters.csv
 parameters <- read.csv("input/variable-recode-patterns.csv") %>% select(1:24)
