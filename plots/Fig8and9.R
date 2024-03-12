@@ -14,9 +14,10 @@ source("../data/functions.R")
 taxonomy_matrix <- as_flat_taxonomy_matrix(glottolog_languoids)
 
 # link coordinates to lgs
-macroareas <- read.csv("../raw/glottolog_v.4.8/languages_and_dialects_geo.csv")
+macroareas <- read.csv("../data/lang-metadata.csv")
 names(macroareas)[1] <- "id"
-taxonomy_matrix_for_plot <- merge(taxonomy_matrix,select(macroareas, c("id","latitude","longitude","macroarea")),by="id") %>% filter(!is.na(latitude))
+macroareas <- na_convert(macroareas)
+taxonomy_matrix_for_plot <- merge(taxonomy_matrix,select(macroareas, c("id","latitude","longitude","glottolog.macroarea")),by="id") %>% filter(!is.na(latitude))
 names(taxonomy_matrix_for_plot)[29:30] <- c("lat","lon") # change names to lat and lon for downstream functions
 
 # download Natural Earth data for sf, including islands
@@ -326,11 +327,11 @@ entropies <- plot_grid(gbi_statistical_gps[[3]],gbi_statistical_gps[[4]],
                        lexicon_statistical_gps[[3]],lexicon_statistical_gps[[4]], 
                        align = "h", axis = "l", ncol = 2, rel_widths = c(1,1))
 
-ggsave(file="Fig8.png",entropies, dpi = 500, width = 10, height = 7, units = "in")
+ggsave(file="Fig8.png", entropies, dpi = 500, width = 10, height = 7, units = "in")
 
 # compare across curations, using Grambank
 gbi_comparison_plot <- grid_point_comparison_horizontal(baseline_gp_frame = gb_original_gps[[1]], 
                                                        comparison_gp_frame = gbi_logical_gps[[1]], 
                                                        comparison_gp_frame_2 = gbi_statistical_gps[[1]], 
                                                        world_map = world_map_initial)
-ggsave(file="Fig9.png",gbi_comparison_plot[[1]], dpi = 500, width = 10, height = 10, units = "in")
+ggsave(file="Fig9.png", gbi_comparison_plot[[1]], dpi = 500, width = 10, height = 10, units = "in")
