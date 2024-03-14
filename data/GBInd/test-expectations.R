@@ -51,7 +51,7 @@ for (smpl in 1:500){
 }
 
 # save this diversity sample
-write.csv(lg_samples_500,"output/500_diversity_samples25.csv")
+write.csv(lg_samples_500,"output/500_diversity_samples.csv")
 
 ### rerun all tests to reproduce stored results using the input data, expectations, taxonomy and language samples
 # specify test condition, fix threshold
