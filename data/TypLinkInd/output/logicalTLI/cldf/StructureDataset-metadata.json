@@ -10,7 +10,7 @@
     "tables": [
         {
             "dc:conformsTo": "http://cldf.clld.org/v1.0/terms.rdf#ValueTable",
-            "dc:extent": 1488136,
+            "dc:extent": 1486391,
             "tableSchema": {
                 "columns": [
                     {
@@ -96,7 +96,7 @@
         },
         {
             "dc:conformsTo": "http://cldf.clld.org/v1.0/terms.rdf#LanguageTable",
-            "dc:extent": 4264,
+            "dc:extent": 4259,
             "tableSchema": {
                 "columns": [
                     {

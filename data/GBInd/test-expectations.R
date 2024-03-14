@@ -34,7 +34,7 @@ regions <- data.frame(regions=c("Africa","Eurasia","Papunesia","Australia","Sout
 lg_samples_500<-matrix(NA, ncol=500, nrow=120)
 
 # iteratively generate 500 samples
-set.seed(42) # this is a random operation; we pick seed 500 for reproducibility
+set.seed(25) # this is a random operation; we pick seed 25 for reproducibility
 for (smpl in 1:500){
   cat("Generating sample ", smpl, "\n", sep="")
   diversity_samples_lgs <- slice(data.frame(lg=NA),0) # store the languages here
@@ -51,7 +51,7 @@ for (smpl in 1:500){
 }
 
 # save this diversity sample
-write.csv(lg_samples_500,"output/500_diversity_samples.csv")
+write.csv(lg_samples_500,"output/500_diversity_samples25.csv")
 
 ### rerun all tests to reproduce stored results using the input data, expectations, taxonomy and language samples
 # specify test condition, fix threshold

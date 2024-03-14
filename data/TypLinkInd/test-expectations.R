@@ -45,7 +45,7 @@ regions <- data.frame(regions=c("Africa","Eurasia","Papunesia","Australia","Sout
 lg_samples_1000 <- matrix(NA, ncol=1000, nrow=120)
 
 # iteratively generate 1000 samples
-set.seed(44) # this is a random operation; we pick seed 44 for reproducibility
+set.seed(52) # this is a random operation; we pick seed 52 for reproducibility
 for (smpl in 1:1000){
   cat("Generating sample ", smpl, "\n", sep="")
   diversity_samples_lgs <- slice(data.frame(lg=NA),0) # store the languages here
@@ -96,3 +96,4 @@ summaries1 <-  data.frame(y=apply(results,1,function(x)if(is.na(x[21])){"no"}els
 summaries2 <- data.frame(x=apply(summaries1,1,function(x)if(x[2]==x[3]&x[3]==x[4]&x[4]==x[5]&x[5]=="yes"){"yes"}else{"no"}))
 
 expect_true(all(cbind(summaries2,summaries1) == expectations[,8:13]))
+

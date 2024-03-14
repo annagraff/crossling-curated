@@ -1,4 +1,4 @@
-# code for Figs 10 and 11
+# code for Figs 10, 11 and 12
 rm(list=ls())
 
 library(densify)
@@ -54,10 +54,6 @@ morphosyntax_logical_large <- read.csv("../data/TypLinkInd/output/logicalTLI/mor
 morphosyntax_logical_large <- na_convert(morphosyntax_logical_large)
 morphosyntax_logical_large <- factorise(morphosyntax_logical_large)
 
-morphosyntax_logical_small <- read.csv("../data/TypLinkInd/output/logicalTLI/morphosyntax/logicalTLI_morphosyntax_pruned_small.csv",row.names = "glottocode") %>% select(-X)
-morphosyntax_logical_small <- na_convert(morphosyntax_logical_small)
-morphosyntax_logical_small <- factorise(morphosyntax_logical_small)
-
 # phonology
 phonology_logical_pruned <- read.csv("../data/TypLinkInd/output/logicalTLI/phonology/logicalTLI_phonology_pruned.csv",row.names = "glottocode") %>% select(-X)
 phonology_logical_pruned <- na_convert(phonology_logical_pruned)
@@ -84,6 +80,9 @@ generate_per_family_prop_table <- function(data,taxonomy_matrix){
       names(props_table)[ncol(props_table)]<-paste(names(data)[vbl],levs[lvl],sep="_")
     }
   }
+  ## remove "families", which actually aren't genealogical units: Artificial Language, Bookkeeping, Mixed Language, Pidgin, Sign Language, Speech Register, Unattested, Unclassifiable
+  props_table <- props_table %>% filter(family %in% c("arti1236","book1242","mixe1287","pidg1258","sign1238","spee1234","unat1236","uncl1493") == FALSE)
+  
   rownames(props_table)<-props_table$family
   props_table <- select(props_table,-family)
   return(props_table)
@@ -265,7 +264,6 @@ proportions_gbi_logical_densified <- generate_per_family_prop_table(data = gbi_l
 proportions_tli_logical_large <- generate_per_family_prop_table(data = tli_logical_large, taxonomy_matrix = taxonomy_matrix)
 proportions_tli_logical_small <- generate_per_family_prop_table(data = tli_logical_small, taxonomy_matrix = taxonomy_matrix)
 proportions_morphosyntax_logical_large <- generate_per_family_prop_table(data = morphosyntax_logical_large, taxonomy_matrix = taxonomy_matrix)
-proportions_morphosyntax_logical_small <- generate_per_family_prop_table(data = morphosyntax_logical_small, taxonomy_matrix = taxonomy_matrix)
 proportions_phonology_logical_pruned <- generate_per_family_prop_table(data = phonology_logical_pruned, taxonomy_matrix = taxonomy_matrix)
 proportions_lexicon_logical_pruned <- generate_per_family_prop_table(data = lexicon_logical_pruned, taxonomy_matrix = taxonomy_matrix)
 
@@ -279,7 +277,6 @@ proportions_gbi_logical_densified[proportions_gbi_logical_densified=="NaN"]<-NA
 proportions_tli_logical_large[proportions_tli_logical_large=="NaN"]<-NA
 proportions_tli_logical_small[proportions_tli_logical_small=="NaN"]<-NA
 proportions_morphosyntax_logical_large[proportions_morphosyntax_logical_large=="NaN"]<-NA
-proportions_morphosyntax_logical_small[proportions_morphosyntax_logical_small=="NaN"]<-NA
 proportions_phonology_logical_pruned[proportions_phonology_logical_pruned=="NaN"]<-NA
 proportions_lexicon_logical_pruned[proportions_lexicon_logical_pruned=="NaN"]<-NA
 
@@ -288,7 +285,6 @@ per_family_props_PCA_gbi_logical_densified <- pca(proportions_gbi_logical_densif
 per_family_props_PCA_tli_logical_large <- pca(proportions_tli_logical_large, method='rnipals', nPcs=10)
 per_family_props_PCA_tli_logical_small <- pca(proportions_tli_logical_small, method='rnipals', nPcs=10)
 per_family_props_PCA_morphosyntax_logical_large <- pca(proportions_morphosyntax_logical_large, method='rnipals', nPcs=10)
-per_family_props_PCA_morphosyntax_logical_small <- pca(proportions_morphosyntax_logical_small, method='rnipals', nPcs=10)
 per_family_props_PCA_phonology_logical_pruned <- pca(proportions_phonology_logical_pruned, method='rnipals', nPcs=10)
 per_family_props_PCA_lexicon_logical_pruned <- pca(proportions_lexicon_logical_pruned, method='rnipals', nPcs=10)
 
@@ -298,7 +294,6 @@ explained_variance(per_family_props_PCA_gbi_logical_densified)[,1:10]
 explained_variance(per_family_props_PCA_tli_logical_large)[,1:10]
 explained_variance(per_family_props_PCA_tli_logical_small)[,1:10]
 explained_variance(per_family_props_PCA_morphosyntax_logical_large)[,1:10]
-explained_variance(per_family_props_PCA_morphosyntax_logical_small)[,1:10]
 explained_variance(per_family_props_PCA_phonology_logical_pruned)[,1:10]
 explained_variance(per_family_props_PCA_lexicon_logical_pruned)[,1:10]
 

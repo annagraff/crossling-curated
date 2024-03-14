@@ -11,7 +11,6 @@ library(densify)
 library(reshape2)
 library(data.table)
 
-
 # load functions
 source("../functions.R")
 
@@ -22,7 +21,7 @@ original_variable_matrix <- as.data.frame(read_csv("output/compiled_external_inp
 
 taxonomy <- as_flat_taxonomy_matrix(glottolog_languoids)
 
-# some glottocodes from WALS not found in glottolog v. 4.8. because they have been assigned new glottocodes - replace them here (manual assignment via ISO 639-3 code)
+# some glottocodes are not found in glottolog v. 5.0. because they have been assigned new glottocodes - replace them here (manual assignment via ISO 639-3 code)
 original_variable_matrix$glottocode[which(original_variable_matrix$glottocode %in% taxonomy$id == F)]
 
 original_variable_matrix <- update_glottocode_and_data(data=original_variable_matrix, old="woro1255", new="worr1237") # Worora from WALS
@@ -30,8 +29,24 @@ original_variable_matrix <- update_glottocode_and_data(data=original_variable_ma
 original_variable_matrix <- update_glottocode_and_data(data=original_variable_matrix, old="sanm1259", new="sanm1295") # Mixtec (Molinos) from WALS
 original_variable_matrix <- update_glottocode_and_data(data=original_variable_matrix, old="cypr1245", new="mode1248") # Greek (Cypriot) from WALS
 original_variable_matrix <- update_glottocode_and_data(data=original_variable_matrix, old="yidd1255", new="east2295") # Yiddish from WALS
+original_variable_matrix <- update_glottocode_and_data(data=original_variable_matrix, old="lenc1244", new="lenc1239") # Lenca-Salvador (Bookkeeping) from Lexibank
 
 expect_true(all(original_variable_matrix$glottocode %in% taxonomy$id))
+
+# some glottocodes are of the kind "bookkeeping" and have been retired / merged with other glottocodes. we update these glottocodes manually
+taxonomy %>% filter(id %in% original_variable_matrix$glottocode) %>% filter(level1=="book1242") %>% select(id)
+original_variable_matrix <- update_glottocode_and_data(data=original_variable_matrix, old="band1337", new="darl1243") # Bandjigali from PHOIBLE
+original_variable_matrix <- update_glottocode_and_data(data=original_variable_matrix, old="bubi1249", new="bube1242") # Bubia from PHOIBLE
+original_variable_matrix <- update_glottocode_and_data(data=original_variable_matrix, old="chua1256", new="firs1234") # Chuanqiandian Cluster Miao from PHOIBLE
+original_variable_matrix <- update_glottocode_and_data(data=original_variable_matrix, old="kukn1238", new="dhod1238") # Kukna from WALS 
+original_variable_matrix <- update_glottocode_and_data(data=original_variable_matrix, old="naxi1246", new="yong1270") # Naxi (Yongning) from Lexibank --> Narua is best match (Yongning)
+original_variable_matrix <- update_glottocode_and_data(data=original_variable_matrix, old="nucl1668", new="kana1291") # Katukina from PHOIBLE
+original_variable_matrix <- update_glottocode_and_data(data=original_variable_matrix, old="samr1245", new="cent2314") # Samre from PHOIBLE --> reassigned glottocode via reference
+original_variable_matrix <- update_glottocode_and_data(data=original_variable_matrix, old="sana1281", new="sana1298") # Sanapana from Lexibank
+original_variable_matrix <- update_glottocode_and_data(data=original_variable_matrix, old="sout3125", new="sout2920") # Betsimisaraka from Lexibank
+original_variable_matrix <- update_glottocode_and_data(data=original_variable_matrix, old="wela1234", new="ngal1291") # Rawngtu from Lexibank
+
+expect_false(any(select(filter(taxonomy, id %in% original_variable_matrix$glottocode), level1) == "book1242"))
 
 # read in the file specifying the maintained variables, the and the recoded variables with their recoding patterns
 recode_patterns <- read.csv("input/variable-recode-patterns.csv")
