@@ -325,7 +325,7 @@ rgb_cube <- cloud(z~x*y, m,
 
 #trellis.device(png, filename = "rgb_cube.png", type="cairo", units="in", width=5, height=5,  pointsize=10, res=300)
 print(rgb_cube)
-# dev.off()
+#dev.off()
 
 # map languages to colours
 rgb_mapping_gbi_logical_full_kalyan <- RGB_mapping(per_family_props_PCA_gbi_logical_full,taxonomy_matrix_for_plot, pc1flip = T, pc2flip = F, pc3flip = F) %>% filter(id%in%rownames(gbi_logical_full)) %>% na.omit()
