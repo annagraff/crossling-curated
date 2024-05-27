@@ -3,7 +3,7 @@ Two global datasets of structural linguistic features, curated for independence 
 
 Cite as:
 
-Graff, Anna; Chousou-Polydouri, Natalia; Inman, David; Skirgård, Hedvig; Lischka, Marc; Barbieri, Chiara and Bickel, Balthasar (2023): Curating global datasets of structural linguistic features for independence. https://github.com/annagraff/crossling-curated.
+Graff, Anna; Chousou-Polydouri, Natalia; Inman, David; Skirgård, Hedvig; Lischka, Marc; Zakharko, Taras; Barbieri, Chiara and Bickel, Balthasar (2023): Curating global datasets of structural linguistic features for independence. https://github.com/annagraff/crossling-curated.
 
 External input data can be accessed in the "raw" folder.
 
