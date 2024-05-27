@@ -425,7 +425,7 @@
             "tableSchema": {
                 "columns": [
                     {
-                        "dc:description": "Original variable name(s), separated by '&' if applicable",
+                        "dc:description": "Original feature name(s), separated by '&' if applicable",
                         "separator": "&",
                         "name": "original.names",
                         "required": true
@@ -445,16 +445,16 @@
                         "name": "description"
                     },
                     {
-                        "dc:description": "Is this an original variable?",
+                        "dc:description": "Is this an original feature?",
                         "datatype": {
                             "base": "boolean",
                             "format": "TRUE|FALSE"
                         },
                         "required": true,
-                        "name": "original.variables"
+                        "name": "original.features"
                     },
                     {
-                        "dc:description": "Is this a variable for the design+logically curated Mega-Merge dataset?",
+                        "dc:description": "Is this a feature for the design+logically curated Mega-Merge dataset?",
                         "datatype": {
                             "base": "boolean",
                             "format": "TRUE|FALSE"
@@ -463,7 +463,7 @@
                         "name": "design.logical"
                     },
                     {
-                        "dc:description": "Is this a variable for the design+logically+statistically curated Mega-Merge dataset?",
+                        "dc:description": "Is this a feature for the design+logically+statistically curated Mega-Merge dataset?",
                         "datatype": {
                             "base": "boolean",
                             "format": "TRUE|FALSE"
@@ -472,7 +472,7 @@
                         "name": "design.logical.statistical"
                     },
                     {
-                        "dc:description": "Associated modification ID(s) resulting in creation, modification or deletion of this variable if applicable, separated by ';' if applicable",
+                        "dc:description": "Associated modification ID(s) resulting in creation, modification or deletion of this feature if applicable, separated by ';' if applicable",
                         "separator": ";",
                         "required": false,
                         "null": [
@@ -481,7 +481,7 @@
                         "name": "modification.IDs"
                     },
                     {
-                        "dc:description": "Associated modification ID(s) that did not result on action on this variable if applicable, separated by ';' if applicable",
+                        "dc:description": "Associated modification ID(s) that did not result on action on this feature if applicable, separated by ';' if applicable",
                         "separator": ";",
                         "required": false,
                         "null": [
@@ -499,7 +499,7 @@
                         "name": "known.remaining.dependencies.after.statistical.treatment"
                     },
                     {
-                        "dc:description": "Networks of dependencies encompassing more than two variables, separated by ';' if applicable",
+                        "dc:description": "Networks of dependencies encompassing more than two features, separated by ';' if applicable",
                         "separator": ";",
                         "required": false,
                         "null": [
@@ -513,20 +513,20 @@
                         "name": "recode.operation.type"
                     },
                     {
-                        "dc:description": "Is this variable conditioned on any aspect in language being present/absent (e.g. another variable) - human readable",
+                        "dc:description": "Is this feature conditioned on any aspect in language being present/absent (e.g. another feature) - human readable",
                         "required": true,
                         "name": "condition.human.readable"
                     },
                     {
-                        "dc:description": "Specification of condition, if variable is conditioned",
+                        "dc:description": "Specification of condition, if feature is conditioned",
                         "required": false,
                         "null": [
                             ""
                         ],
-                        "name": "condition.if.variable.conditioned"
+                        "name": "condition.if.feature.conditioned"
                     },
                     {
-                        "dc:description": "Code for creating meta-variable or for executing special recode of a merged variable, written in R. The code is preceded by an index (number plus space), which is parsed using the columns new.levels and recode.pattern to generate the new variable coding from the original variables.",
+                        "dc:description": "Code for creating meta-feature or for executing special recode of a merged feature, written in R. The code is preceded by an index (number plus space), which is parsed using the columns new.levels and recode.pattern to generate the new feature coding from the original features.",
                         "separator": ";",
                         "required": false,
                         "null": [
@@ -535,7 +535,7 @@
                         "name": "recode.operation.Rcode"
                     },
                     {
-                        "dc:description": "Variable levels in the original variable, preceded by an index (number plus space), which is parsed using the columns new.levels and recode.pattern to generate the new variable coding from the original variable(s).",
+                        "dc:description": "Variable levels in the original feature, preceded by an index (number plus space), which is parsed using the columns new.levels and recode.pattern to generate the new feature coding from the original feature(s).",
                         "separator": ";",
                         "required": false,
                         "null": [
@@ -544,7 +544,7 @@
                         "name": "original.levels"
                     },
                     {
-                        "dc:description": "Variable levels for the new variable – their order is relevant for parsing using the columns recode.operation.Rcode or original.levels and recode.pattern to generate the new variable coding from the original variable(s).",
+                        "dc:description": "Variable levels for the new feature – their order is relevant for parsing using the columns recode.operation.Rcode or original.levels and recode.pattern to generate the new feature coding from the original feature(s).",
                         "separator": ";",
                         "required": false,
                         "null": [
@@ -553,7 +553,7 @@
                         "name": "new.levels"
                     },
                     {
-                        "dc:description": "Pattern for recoding original variable(s) to new variable: The indices [separated by '/' if applicable] refer to the ordered cases specified in column recode.operation.Rcode or to the ordered levels in column original.levels. They are converted to the state in new.levels that matches their position with respect to the separator(s) '-' in this column.",
+                        "dc:description": "Pattern for recoding original feature(s) to new feature: The indices [separated by '/' if applicable] refer to the ordered cases specified in column recode.operation.Rcode or to the ordered levels in column original.levels. They are converted to the state in new.levels that matches their position with respect to the separator(s) '-' in this column.",
                         "separator": "-",
                         "required": false,
                         "null": [
@@ -617,7 +617,7 @@
                         "name": "code_ID"
                     },
                     {
-                        "dc:description": "The parameter or variable the code belongs to.",
+                        "dc:description": "The parameter or feature the code belongs to.",
                         "dc:extent": "singlevalued",
                         "datatype": "string",
                         "propertyUrl": "http://cldf.clld.org/v1.0/terms.rdf#parameterReference",
@@ -714,7 +714,7 @@
                         "name": "statistical.action.or.logging.necessary"
                     },
 					{
-                        "dc:description": "Flag whether or not statistically motivated action is required: 'yes' if 'yes' to variables relative.overlap.vsmall.in.vlarge.sufficient, sufficient.samples.applicable.for.test, passes.bell.test and passes.cohens.d, if applicable (statistical modification.type only)",
+                        "dc:description": "Flag whether or not statistically motivated action is required: 'yes' if 'yes' to features relative.overlap.fsmall.in.flarge.sufficient, sufficient.samples.applicable.for.test, passes.bell.test and passes.cohens.d, if applicable (statistical modification.type only)",
                         "datatype": {
                             "base": "string",
                             "format": "yes|no"
@@ -738,7 +738,7 @@
                         "name": "logging.in.known.remaining.dependencies"
                     },
                     {
-                        "dc:description": "Flag whether or not the relative overlap in languages between the smaller and the larger variable is sufficient to trust any computed proportions from tests: 'yes' if column relative.overlap.vsmall.in.vlarge > 0.3, if applicable (statistical modification.type only)",
+                        "dc:description": "Flag whether or not the relative overlap in languages between the smaller and the larger feature is sufficient to trust any computed proportions from tests: 'yes' if column relative.overlap.fsmall.in.flarge > 0.3, if applicable (statistical modification.type only)",
                         "datatype": {
                             "base": "string",
                             "format": "yes|no"
@@ -747,7 +747,7 @@
                         "null": [
                             ""
                         ],
-                        "name": "relative.overlap.vsmall.in.vlarge.sufficient"
+                        "name": "relative.overlap.fsmall.in.flarge.sufficient"
                     },
                     {
                         "dc:description": "Flag whether sufficient samples (>= 20) can be evaluated, if applicable (statistical modification.type only)",
@@ -797,7 +797,7 @@
                             "NA"
                         ],
                         "separator": ", ",
-                        "name": "relevant.variables"
+                        "name": "relevant.features"
                     },
                     {
                         "dc:description": "Variables added through modification.ID, if applicable",
@@ -807,10 +807,10 @@
                         "null": [
                             "NA"
                         ],
-                        "name": "resulting.added.variables"
+                        "name": "resulting.added.features"
                     },
                     {
-                        "dc:description": "Are the variable(s) added through the modification.ID kept in the design/logical curation, if applicable",
+                        "dc:description": "Are the feature(s) added through the modification.ID kept in the design/logical curation, if applicable",
                         "datatype": {
                             "base": "string",
                             "format": "yes|no"
@@ -819,7 +819,7 @@
                         "null": [
                             "NA"
                         ],
-                        "name": "is.added.variable.kept"
+                        "name": "is.added.feature.kept"
                     },
                     {
                         "dc:description": "Variables removed through modification.ID, if applicable",
@@ -829,7 +829,7 @@
                         "null": [
                             "NA"
                         ],
-                        "name": "resulting.removed.variables"
+                        "name": "resulting.removed.features"
                     },
                     {
                         "dc:description": "Variable 1 participating in test, if applicable (statistical modification.type only)",
@@ -838,7 +838,7 @@
                         "null": [
                             ""
                         ],
-                        "name": "variable.1.for.test"
+                        "name": "feature.1.for.test"
                     },
                     {
                         "dc:description": "Variable 2 participating in test, if applicable (statistical modification.type only)",
@@ -847,7 +847,7 @@
                         "null": [
                             ""
                         ],
-                        "name": "variable.2.for.test"
+                        "name": "feature.2.for.test"
                     },
                     {
                         "dc:description": "Type of test (XOR, AND or THEN), if applicable (statistical modification.type only)",
@@ -859,92 +859,92 @@
                         "name": "test"
                     },
                     {
-                        "dc:description": "State of variable 1 which is subject to a statistical association test, if applicable (statistical modification.type only)",
+                        "dc:description": "State of feature 1 which is subject to a statistical association test, if applicable (statistical modification.type only)",
                         "datatype": "string",
                         "required": false,
                         "null": [
                             ""
                         ],
                         "separator": ", ",
-                        "name": "v1.equals.for.test"
+                        "name": "f1.equals.for.test"
                     },
                     {
-                        "dc:description": "Anti-state of variable 1 which is subject to a statistical association test, if applicable (statistical modification.type only)",
+                        "dc:description": "Anti-state of feature 1 which is subject to a statistical association test, if applicable (statistical modification.type only)",
                         "datatype": "string",
                         "required": false,
                         "null": [
                             ""
                         ],
                         "separator": ", ",
-                        "name": "v1.unequals.for.test"
+                        "name": "f1.unequals.for.test"
                     },
                     {
-                        "dc:description": "State of variable 2 which is subject to a statistical association test, if applicable (statistical modification.type only)",
+                        "dc:description": "State of feature 2 which is subject to a statistical association test, if applicable (statistical modification.type only)",
                         "datatype": "string",
                         "required": false,
                         "null": [
                             ""
                         ],
                         "separator": ", ",
-                        "name": "v2.equals.for.test"
+                        "name": "f2.equals.for.test"
                     },
                     {
-                        "dc:description": "Anti-state of variable 2 which is subject to a statistical association test, if applicable (statistical modification.type only)",
+                        "dc:description": "Anti-state of feature 2 which is subject to a statistical association test, if applicable (statistical modification.type only)",
                         "datatype": "string",
                         "required": false,
                         "null": [
                             ""
                         ],
                         "separator": ", ",
-                        "name": "v2.unequals.for.test"
+                        "name": "f2.unequals.for.test"
                     },
                     {
-                        "dc:description": "Number of languages coded (not '?' or NA) for variable 1, if applicable (statistical modification.type only)",
+                        "dc:description": "Number of languages coded (not '?' or NA) for feature 1, if applicable (statistical modification.type only)",
                         "datatype": "number",
                         "required": false,
                         "null": [
                             "NA"
                         ],
-                        "name": "nr.lgs.v1"
+                        "name": "nr.lgs.f1"
                     },
                     {
-                        "dc:description": "Number of languages coded (not '?' or NA) for variable 2, if applicable (statistical modification.type only)",
+                        "dc:description": "Number of languages coded (not '?' or NA) for feature 2, if applicable (statistical modification.type only)",
                         "datatype": "number",
                         "required": false,
                         "null": [
                             "NA"
                         ],
-                        "name": "nr.lgs.v2"
+                        "name": "nr.lgs.f2"
                     },
                     {
-                        "dc:description": "Number of languages coded (not '?' or NA) in both variables, if applicable (statistical modification.type only)",
+                        "dc:description": "Number of languages coded (not '?' or NA) in both features, if applicable (statistical modification.type only)",
                         "datatype": "number",
                         "required": false,
                         "null": [
                             "NA"
                         ],
-                        "name": "absolute.overlap.v1.v2"
+                        "name": "absolute.overlap.f1.f2"
                     },
                     {
-                        "dc:description": "Proportion of languages coded (not '?' or NA) in the smaller variable, which is also coded in the larger variable, if applicable (statistical modification.type only)",
+                        "dc:description": "Proportion of languages coded (not '?' or NA) in the smaller feature, which is also coded in the larger feature, if applicable (statistical modification.type only)",
                         "datatype": "number",
                         "required": false,
                         "null": [
                             "NA"
                         ],
-                        "name": "relative.overlap.vsmall.in.vlarge"
+                        "name": "relative.overlap.fsmall.in.flarge"
                     },
                     {
-                        "dc:description": "Proportion of languages coded (not '?' or NA) in the larger variable, which is also coded in the smaller variable, if applicable (statistical modification.type only)",
+                        "dc:description": "Proportion of languages coded (not '?' or NA) in the larger feature, which is also coded in the smaller feature, if applicable (statistical modification.type only)",
                         "datatype": "number",
                         "required": false,
                         "null": [
                             "NA"
                         ],
-                        "name": "relative.overlap.vlarge.in.vsmall"
+                        "name": "relative.overlap.flarge.in.fsmall"
                     },
                     {
-                        "dc:description": "Number of samples discarded for the test, because under 1/3 of the languages in the applicable state of v1 are not also coded for v2",
+                        "dc:description": "Number of samples discarded for the test, because under 1/3 of the languages in the applicable state of f1 are not also coded for f2",
                         "datatype": "number",
                         "required": false,
                         "null": [

@@ -1,5 +1,4 @@
 #### This script densifies the GBInd logical and statistical datasets
-
 rm(list=ls())
 
 # load packages
@@ -26,7 +25,7 @@ statistical_for_pruning <- na_convert(statistical)
 
 # specify parameters for densification 
 min_variability <- 3 # each variable must have at least 3 languages in its second-largest state
-scoring <- "log_odds"
+density_mean <- "log_odds"
 
 # comment on weights: GB is quite dense, and part of the "NA"s on the column/variable side in both curations is explicitly wanted
 # densification should thus be biased towards the taxonomic diversity criterion, expressed in a higher weight
@@ -36,27 +35,27 @@ set.seed(1111)
 logical_log <-
   densify(data = logical_for_pruning,
                 min_variability = min_variability,
-                scoring = scoring,
+                density_mean = density_mean,
                 taxonomy = glottolog_languoids,
                 taxon_id = "glottocode",
-                scoring_weights = list(coding = 0.999, taxonomy = 1))
+                density_mean_weights = list(coding = 0.999, taxonomy = 1))
 
 statistical_log <-
   densify(data = statistical_for_pruning,
           min_variability = min_variability,
-          scoring = scoring,
+          density_mean = density_mean,
           taxonomy = glottolog_languoids,
           taxon_id = "glottocode",
-          scoring_weights = list(coding = 0.999, taxonomy = 1))
+          density_mean_weights = list(coding = 0.999, taxonomy = 1))
 
 # prune to optima
 # we include minimum row coding density, since NAs on language end should largely be random
 # we include taxonomic index since densification here explicitly seeks to increase taxonomic diversity
 logical_pruned <- prune(logical_log, 
-                         score = n_data_points*coding_density*row_coding_density_min*taxonomic_index^3)
+                         scoring_function = n_data_points*coding_density*row_coding_density_min*taxonomic_index^3)
 
 statistical_pruned <- prune(statistical_log, 
-                        score = n_data_points*coding_density*row_coding_density_min*taxonomic_index^3)
+                            scoring_function = n_data_points*coding_density*row_coding_density_min*taxonomic_index^3)
 
 # retrieve corresponding data from input (to re-establish differences between ? and NA)
 logical_pruned <- logical[which(logical$glottocode%in%logical_pruned$glottocode), which(names(logical)%in%names(logical_pruned))]

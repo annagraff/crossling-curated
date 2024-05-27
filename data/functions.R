@@ -41,7 +41,7 @@ update_glottocode_and_data <- function(data, old, new){
   return(data)
 }
 
-# this function serves to recode states from one or several original variables into other states, as specified in modifications.csv
+# this function serves to recode states from one or several original features into other states, as specified in modifications.csv
 implement_recode <- function(original_data, expected_levels, recoding_groups, recoded_levels, nvar, recode_mode){
   
   # make a table of original values
@@ -98,7 +98,7 @@ implement_recode <- function(original_data, expected_levels, recoding_groups, re
   }
   
   if (recode_mode == "logical_arguments"){
-    # recode the data according to prioritised variable
+    # recode the data according to prioritised feature
     for (i in 1:nrow(level_table)){
       original_data[original_data$glottocode%in%filter(original_data,eval(parse(text=level_table$level[i])))$glottocode,"merged"]<-level_table$new_level[i]
     }
@@ -132,72 +132,72 @@ extract_condition_and_equator <- function(condition_statement){
   return(list(condition,equator))
 }
 
-# this function serves to condition a variable on another -- note that the currently implemented function works for up to 5 desired states in the %in% case
-implement_conditioning <- function(variable_to_be_conditioned, condition, equator){
+# this function serves to condition a feature on another -- note that the currently implemented function works for up to 5 desired states in the %in% case
+implement_conditioning <- function(feature_to_be_conditioned, condition, equator){
   
-  # select conditioned upon variable
-  conditioned_upon_variable <- recoded_data[,c(1,which(names(recoded_data)%in%condition[1]))]
+  # select conditioned upon feature
+  conditioned_upon_feature <- recoded_data[,c(1,which(names(recoded_data)%in%condition[1]))]
   
   # select glottocodes for which condition applies and turn data into "?" where applicable
   if (equator == " == "){ 
-    # if the condition in question is positive (" == "), we want to keep languages that have the desired state of conditioned_upon_variable OR which are "?" to both conditioned_upon_variable and variable_to_be_conditioned to not become NA
-    # select languages with desired state or "?" in conditioned_upon_variable
-    condition_applies_strict <- filter(conditioned_upon_variable,conditioned_upon_variable[,2]==condition[2])$glottocode
-    condition_applies_q <- filter(conditioned_upon_variable,conditioned_upon_variable[,2]=="?")$glottocode
+    # if the condition in question is positive (" == "), we want to keep languages that have the desired state of conditioned_upon_feature OR which are "?" to both conditioned_upon_feature and feature_to_be_conditioned to not become NA
+    # select languages with desired state or "?" in conditioned_upon_feature
+    condition_applies_strict <- filter(conditioned_upon_feature,conditioned_upon_feature[,2]==condition[2])$glottocode
+    condition_applies_q <- filter(conditioned_upon_feature,conditioned_upon_feature[,2]=="?")$glottocode
     
-    # select languages in variable_to_be_conditioned to which condition applies (strict and q)
-    conditioned_data <- filter(variable_to_be_conditioned, glottocode %in% as.character(c(condition_applies_strict,condition_applies_q)))
-    names(conditioned_data)[2] <- "conditioned_upon_variable"
+    # select languages in feature_to_be_conditioned to which condition applies (strict and q)
+    conditioned_data <- filter(feature_to_be_conditioned, glottocode %in% as.character(c(condition_applies_strict,condition_applies_q)))
+    names(conditioned_data)[2] <- "conditioned_upon_feature"
     
-    # the languages, which are "?" to conditioned_upon_variable but specified for variable_to_be_conditioned are recoded into "?"
-    conditioned_data$conditioned_upon_variable[conditioned_data$glottocode%in%condition_applies_q] <- rep("?")
+    # the languages, which are "?" to conditioned_upon_feature but specified for feature_to_be_conditioned are recoded into "?"
+    conditioned_data$conditioned_upon_feature[conditioned_data$glottocode%in%condition_applies_q] <- rep("?")
     
   } else if (equator == " != "){ ## this applies if the condition in question is negative (" != ")
-    # if the condition in question is negative (" != "), we want to keep all languages that do not have the specified state of conditioned_upon_variable
-    # select languages which do not have the specified state in conditioned_upon_variable
-    condition_applies <- setdiff(conditioned_upon_variable$glottocode,filter(conditioned_upon_variable,conditioned_upon_variable[,2]==condition[2])$glottocode)
+    # if the condition in question is negative (" != "), we want to keep all languages that do not have the specified state of conditioned_upon_feature
+    # select languages which do not have the specified state in conditioned_upon_feature
+    condition_applies <- setdiff(conditioned_upon_feature$glottocode,filter(conditioned_upon_feature,conditioned_upon_feature[,2]==condition[2])$glottocode)
     
-    # select languages in variable_to_be_conditioned to which condition applies
-    conditioned_data <- filter(variable_to_be_conditioned, glottocode %in% as.character(condition_applies))
+    # select languages in feature_to_be_conditioned to which condition applies
+    conditioned_data <- filter(feature_to_be_conditioned, glottocode %in% as.character(condition_applies))
     
   } else if (equator == " %in% "){ ## this applies if the condition in the question is multiple --> conservative ("%in%")
     
-    # if the condition in question is multiple (" %in% "), we want to keep languages that have any of the desired state of conditioned_upon_variable OR which are "?" to both conditioned_upon_variable and variable_to_be_conditioned to not become NA
+    # if the condition in question is multiple (" %in% "), we want to keep languages that have any of the desired state of conditioned_upon_feature OR which are "?" to both conditioned_upon_feature and feature_to_be_conditioned to not become NA
     desired_states <- unlist(strsplit(condition[2],", "))
     nr_desired_states <- length(desired_states)
     
-    # select languages with desired states or "?" in conditioned_upon_variable
-    condition_applies_q <- filter(conditioned_upon_variable,conditioned_upon_variable[,2]=="?")$glottocode
-    condition_applies_desired_states <- filter(conditioned_upon_variable,conditioned_upon_variable[,2]==desired_states[1]|conditioned_upon_variable[,2]==desired_states[2])$glottocode
+    # select languages with desired states or "?" in conditioned_upon_feature
+    condition_applies_q <- filter(conditioned_upon_feature,conditioned_upon_feature[,2]=="?")$glottocode
+    condition_applies_desired_states <- filter(conditioned_upon_feature,conditioned_upon_feature[,2]==desired_states[1]|conditioned_upon_feature[,2]==desired_states[2])$glottocode
     # if there are more than 2 desired states, add the third
-    if(nr_desired_states>2){condition_applies_desired_states <- c(condition_applies_desired_states,filter(conditioned_upon_variable,conditioned_upon_variable[,2]==desired_states[3])$glottocode)}
+    if(nr_desired_states>2){condition_applies_desired_states <- c(condition_applies_desired_states,filter(conditioned_upon_feature,conditioned_upon_feature[,2]==desired_states[3])$glottocode)}
     # if there are more than 3 desired states, add the fourth
-    if(nr_desired_states>3){condition_applies_desired_states <- c(condition_applies_desired_states,filter(conditioned_upon_variable,conditioned_upon_variable[,2]==desired_states[4])$glottocode)}
+    if(nr_desired_states>3){condition_applies_desired_states <- c(condition_applies_desired_states,filter(conditioned_upon_feature,conditioned_upon_feature[,2]==desired_states[4])$glottocode)}
     # if there are more than 4 desired states, add the fifth
-    if(nr_desired_states>4){condition_applies_desired_states <- c(condition_applies_desired_states,filter(conditioned_upon_variable,conditioned_upon_variable[,2]==desired_states[5])$glottocode)}
+    if(nr_desired_states>4){condition_applies_desired_states <- c(condition_applies_desired_states,filter(conditioned_upon_feature,conditioned_upon_feature[,2]==desired_states[5])$glottocode)}
     
-    # select languages in variable_to_be_conditioned to which condition applies (strict and q)
-    conditioned_data <- filter(variable_to_be_conditioned, glottocode %in% as.character(c(condition_applies_q, condition_applies_desired_states)))
-    names(conditioned_data)[2] <- "conditioned_upon_variable"
+    # select languages in feature_to_be_conditioned to which condition applies (strict and q)
+    conditioned_data <- filter(feature_to_be_conditioned, glottocode %in% as.character(c(condition_applies_q, condition_applies_desired_states)))
+    names(conditioned_data)[2] <- "conditioned_upon_feature"
     
-    # the languages, which are "?" to conditioned_upon_variable but specified for variable_to_be_conditioned are recoded into "?"
-    conditioned_data$conditioned_upon_variable[conditioned_data$glottocode%in%condition_applies_q] <- rep("?")
+    # the languages, which are "?" to conditioned_upon_feature but specified for feature_to_be_conditioned are recoded into "?"
+    conditioned_data$conditioned_upon_feature[conditioned_data$glottocode%in%condition_applies_q] <- rep("?")
     
   } else if (equator == " !%in% "){ ## this applies if the condition in the question is multiple (but negative) --> liberal ("!%in%")
-    # if the condition in question is negative multiple (" !%in% "), we want to keep all languages that do not have the specified states of conditioned_upon_variable
-    # select languages which do not have the specified state in conditioned_upon_variable
+    # if the condition in question is negative multiple (" !%in% "), we want to keep all languages that do not have the specified states of conditioned_upon_feature
+    # select languages which do not have the specified state in conditioned_upon_feature
     undesired_states <- unlist(strsplit(condition[2],", "))
     nr_undesired_states <- length(undesired_states)
-    condition_applies_undesired_states <- filter(conditioned_upon_variable,conditioned_upon_variable[,2]==undesired_states[1]|conditioned_upon_variable[,2]==undesired_states[2])$glottocode
+    condition_applies_undesired_states <- filter(conditioned_upon_feature,conditioned_upon_feature[,2]==undesired_states[1]|conditioned_upon_feature[,2]==undesired_states[2])$glottocode
     # if there are more than 2 undesired states, add the third
-    if(nr_undesired_states>2){condition_applies_undesired_states <- c(condition_applies_undesired_states,filter(conditioned_upon_variable,conditioned_upon_variable[,2]==undesired_states[3])$glottocode)}
+    if(nr_undesired_states>2){condition_applies_undesired_states <- c(condition_applies_undesired_states,filter(conditioned_upon_feature,conditioned_upon_feature[,2]==undesired_states[3])$glottocode)}
     # if there are more than 3 undesired states, add the fourth
-    if(nr_undesired_states>3){condition_applies_undesired_states <- c(condition_applies_undesired_states,filter(conditioned_upon_variable,conditioned_upon_variable[,2]==undesired_states[4])$glottocode)}
+    if(nr_undesired_states>3){condition_applies_undesired_states <- c(condition_applies_undesired_states,filter(conditioned_upon_feature,conditioned_upon_feature[,2]==undesired_states[4])$glottocode)}
     # if there are more than 4 undesired states, add the fifth
-    if(nr_undesired_states>4){condition_applies_undesired_states <- c(condition_applies_undesired_states,filter(conditioned_upon_variable,conditioned_upon_variable[,2]==undesired_states[5])$glottocode)}
-    condition_applies <- setdiff(conditioned_upon_variable$glottocode,condition_applies_undesired_states)
-    # select languages in variable_to_be_conditioned to which condition applies
-    conditioned_data <- filter(variable_to_be_conditioned, glottocode %in% as.character(condition_applies))
+    if(nr_undesired_states>4){condition_applies_undesired_states <- c(condition_applies_undesired_states,filter(conditioned_upon_feature,conditioned_upon_feature[,2]==undesired_states[5])$glottocode)}
+    condition_applies <- setdiff(conditioned_upon_feature$glottocode,condition_applies_undesired_states)
+    # select languages in feature_to_be_conditioned to which condition applies
+    conditioned_data <- filter(feature_to_be_conditioned, glottocode %in% as.character(condition_applies))
   }
   
   return(conditioned_data)
@@ -206,11 +206,11 @@ implement_conditioning <- function(variable_to_be_conditioned, condition, equato
 # this function runs all tests
 evaluate_XOR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversity_samples, proportion_languages_must_be_in_applicable_state){
   library(lsr)
-  rslt <- slice(data.frame(nr.lgs.v1=NA,
-                           nr.lgs.v2=NA,
-                           absolute.overlap.v1.v2=NA,
-                           relative.overlap.vsmall.in.vlarge=NA,
-                           relative.overlap.vlarge.in.vsmall=NA,
+  rslt <- slice(data.frame(nr.lgs.f1=NA,
+                           nr.lgs.f2=NA,
+                           absolute.overlap.f1.f2=NA,
+                           relative.overlap.fsmall.in.flarge=NA,
+                           relative.overlap.flarge.in.fsmall=NA,
                            samples.disregarded.insufficient.lgs.applicable=NA,
                            samples.assessed=NA,
                            mean.d1.across.tested.samples=NA,
@@ -227,9 +227,9 @@ evaluate_XOR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversit
   for (i in 1:nrow(expectations)){ # we loop through all expectations
     cat("Processing expectation ", i, "\n", sep="")
     expectation <- expectations[i,] # select expectation
-    raw_data <- recoded_data %>% select(c(expectation$variable.1.for.test,expectation$variable.2.for.test,glottocode)) # subset data to relevant variables, including ? and NA
+    raw_data <- recoded_data %>% select(c(expectation$feature.1.for.test,expectation$feature.2.for.test,glottocode)) # subset data to relevant features, including ? and NA
     
-    full_tbl_withqs <- table(unlist(raw_data[,1]),unlist(raw_data[,2])) # cross-tabulate variables using full data (including ? and NA)
+    full_tbl_withqs <- table(unlist(raw_data[,1]),unlist(raw_data[,2])) # cross-tabulate features using full data (including ? and NA)
     
     # log characteristics about language overlap: for certain
     # for certain considerations,  we do not care about "?" and "NA" --> convert them to NA
@@ -237,36 +237,36 @@ evaluate_XOR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversit
     non_NAq_data[non_NAq_data =="?"] <- NA
     non_NAq_data[non_NAq_data =="NA"] <- NA
     
-    # log how many languages each variable is coded for (nrlgs1 for variable 1 and nrlgs2 for variable 2; these values are logged)
+    # log how many languages each feature is coded for (nrlgs1 for feature 1 and nrlgs2 for feature 2; these values are logged)
     nrlgs1 <- nrow(na.omit(as.data.frame(non_NAq_data[,1])))
     nrlgs2 <- nrow(na.omit(as.data.frame(non_NAq_data[,2])))
     
-    # determine the number of languages coded for both variables (this value is logged)
-    absoverlap <- non_NAq_data %>% filter(!is.na(get(expectation$variable.1.for.test))) %>% filter(!is.na(get(expectation$variable.2.for.test))) %>% nrow()
+    # determine the number of languages coded for both features (this value is logged)
+    absoverlap <- non_NAq_data %>% filter(!is.na(get(expectation$feature.1.for.test))) %>% filter(!is.na(get(expectation$feature.2.for.test))) %>% nrow()
     
-    # log the number of languages in the smaller and the number of languages in the larger variable; then determine the relative overlap of languages for the smaller and larger variable (these values are logged)
+    # log the number of languages in the smaller and the number of languages in the larger feature; then determine the relative overlap of languages for the smaller and larger feature (these values are logged)
     smaller <- sort(c(nrlgs1,nrlgs2))[1]
     larger <- sort(c(nrlgs1,nrlgs2))[2]
-    relative.overlap.vsmall.in.vlarge <- absoverlap/smaller
-    relative.overlap.vlarge.in.vsmall <- absoverlap/larger
+    relative.overlap.fsmall.in.flarge <- absoverlap/smaller
+    relative.overlap.flarge.in.fsmall <- absoverlap/larger
     
     # convert the feature values into factor format
-    non_NAq_data[,expectation$variable.1.for.test] <- as.factor(unlist(non_NAq_data[,expectation$variable.1.for.test]))
-    non_NAq_data[,expectation$variable.2.for.test] <- as.factor(unlist(non_NAq_data[,expectation$variable.2.for.test]))
+    non_NAq_data[,expectation$feature.1.for.test] <- as.factor(unlist(non_NAq_data[,expectation$feature.1.for.test]))
+    non_NAq_data[,expectation$feature.2.for.test] <- as.factor(unlist(non_NAq_data[,expectation$feature.2.for.test]))
     
-    raw_data[,expectation$variable.1.for.test] <- as.factor(unlist(raw_data[,expectation$variable.1.for.test]))
-    raw_data[,expectation$variable.2.for.test] <- as.factor(unlist(raw_data[,expectation$variable.2.for.test]))
+    raw_data[,expectation$feature.1.for.test] <- as.factor(unlist(raw_data[,expectation$feature.1.for.test]))
+    raw_data[,expectation$feature.2.for.test] <- as.factor(unlist(raw_data[,expectation$feature.2.for.test]))
     
     # prepare a table to log relevant characteristics of the crosstable for each of the diversity samples
-    expectation_assessment<-slice(data.frame(proportion_overlap_applicable_vs_non_applicable=NA, # this logs for each sample the proportion of languages coded for v2 in the relevant state of v1
-                                             overlap_sufficient_test_power_positive=NA, # this denotes for each sample whether the proportion and number of languages coded for v2 in the relevant state of v1 is sufficient, the proportion is defined by the user and denoted proportion_languages_must_be_in_applicable_state
+    expectation_assessment<-slice(data.frame(proportion_overlap_applicable_vs_non_applicable=NA, # this logs for each sample the proportion of languages coded for f2 in the relevant state of f1
+                                             overlap_sufficient_test_power_positive=NA, # this denotes for each sample whether the proportion and number of languages coded for f2 in the relevant state of f1 is sufficient, the proportion is defined by the user and denoted proportion_languages_must_be_in_applicable_state
                                              result1_XOR_AND_THEN=NA, # this denotes the proportion of languages behaving against the expectation in the THEN condition and in the first dimension of the XOR and AND conditions
                                              result2_XOR_AND=NA, # this denotes the proportion of languages behaving against the expectation in the second dimension of the XOR and AND conditions
-                                             baseline1_XOR_AND_THEN=NA, # this denotes the proportion of languages in the "unequals" state for variable 2 in the THEN condition overall or in the first dimension of the XOR condition
+                                             baseline1_XOR_AND_THEN=NA, # this denotes the proportion of languages in the "unequals" state for feature 2 in the THEN condition overall or in the first dimension of the XOR condition
                                              baseline2_XOR_AND=NA),0) # this denotes whether the expected relationship is confirmed in the subsample in accordance with the defined thresholds
     
     for (ds in 1:ncol(diversity_samples)){ # loop through all diversity samples
-      # select the subset of languages in the diversity sample for the relevant variables and tabulate for both the full data (including ? and NA) and the non-Q/NA data.
+      # select the subset of languages in the diversity sample for the relevant features and tabulate for both the full data (including ? and NA) and the non-Q/NA data.
       expectation_ds_sample_withqs <- raw_data %>% filter(glottocode%in%diversity_samples[,ds])
       sample_table_withqs <- table(unlist(expectation_ds_sample_withqs[,1]),unlist(expectation_ds_sample_withqs[,2])) # this is the table
       
@@ -274,21 +274,21 @@ evaluate_XOR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversit
       sample_table_noqs <- table(unlist(expectation_ds_sample_noqs[,1]),unlist(expectation_ds_sample_noqs[,2])) # this is the table
       
       # sanity checks
-      expect_true(all(levels(as.data.frame(sample_table_noqs)$Var1) %in% c(unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")), unlist(strsplit(as.character(unlist(expectation$v1.unequals.for.test)),", ")))))
-      expect_true(all(c(unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")), unlist(strsplit(as.character(unlist(expectation$v1.unequals.for.test)),", "))) %in% levels(as.data.frame(sample_table_noqs)$Var1)))
-      expect_true(all(c(unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", ")), unlist(strsplit(as.character(unlist(expectation$v2.unequals.for.test)),", "))) %in% levels(as.data.frame(sample_table_noqs)$Var2)))
-      expect_true(all(levels(as.data.frame(sample_table_noqs)$Var2) %in% c(unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", ")), unlist(strsplit(as.character(unlist(expectation$v2.unequals.for.test)),", ")))))
+      expect_true(all(levels(as.data.frame(sample_table_noqs)$Var1) %in% c(unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")), unlist(strsplit(as.character(unlist(expectation$f1.unequals.for.test)),", ")))))
+      expect_true(all(c(unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")), unlist(strsplit(as.character(unlist(expectation$f1.unequals.for.test)),", "))) %in% levels(as.data.frame(sample_table_noqs)$Var1)))
+      expect_true(all(c(unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", ")), unlist(strsplit(as.character(unlist(expectation$f2.unequals.for.test)),", "))) %in% levels(as.data.frame(sample_table_noqs)$Var2)))
+      expect_true(all(levels(as.data.frame(sample_table_noqs)$Var2) %in% c(unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", ")), unlist(strsplit(as.character(unlist(expectation$f2.unequals.for.test)),", ")))))
       
       if(expectation$test == "XOR"){ # for XOR-case
-        # in the XOR-case, we evaluate how many languages are coded for both variables in the first dimension (applicable1) and how many languages are coded for just the first variable in the first dimension (all1)
-        applicable1 <- sum(sample_table_withqs[unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")),c(unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$v2.unequals.for.test)),", ")))])
-        all1 <- sum(sample_table_withqs[unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")),])
+        # in the XOR-case, we evaluate how many languages are coded for both features in the first dimension (applicable1) and how many languages are coded for just the first feature in the first dimension (all1)
+        applicable1 <- sum(sample_table_withqs[unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),c(unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$f2.unequals.for.test)),", ")))])
+        all1 <- sum(sample_table_withqs[unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),])
         # this yields the relevant proportion in the first dimension
         relevant.proportion.1 <- applicable1/all1
         
-        # in the XOR-case, we also evaluate how many languages are coded for both variables in the second dimension (applicable2) and how many languages are coded for just the second variable in the second dimension (all2)
-        applicable2 <- sum(sample_table_withqs[c(unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$v1.unequals.for.test)),", "))),unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", "))])
-        all2 <- sum(sample_table_withqs[,unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", "))])
+        # in the XOR-case, we also evaluate how many languages are coded for both features in the second dimension (applicable2) and how many languages are coded for just the second feature in the second dimension (all2)
+        applicable2 <- sum(sample_table_withqs[c(unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$f1.unequals.for.test)),", "))),unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", "))])
+        all2 <- sum(sample_table_withqs[,unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", "))])
         # this yields the relevant proportion in the second dimension
         relevant.proportion.2 <- applicable2/all2
         
@@ -297,48 +297,48 @@ evaluate_XOR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversit
         expectation_assessment[ds,"proportion_overlap_applicable_vs_non_applicable"] <- relevant.proportion
         expectation_assessment[ds,"overlap_sufficient_test_power_positive"] <- relevant.proportion >= proportion_languages_must_be_in_applicable_state
         
-        # in the XOR-condition, the languages that behave against the expectation are those with the "equals" state of both variable 1 and variable 2
-        hyp.NOT.applies <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", "))]
+        # in the XOR-condition, the languages that behave against the expectation are those with the "equals" state of both feature 1 and feature 2
+        hyp.NOT.applies <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", "))]
         
-        # the languages that behave according to the expectation are those with the "equals" state of variable 1 and the "unequals" state of variable 2 (hyp.applies.1) and those with the "unequals" state of variable 1 and the "equals" state of variable 2 (hyp.applies.2)
-        hyp.applies.1 <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$v2.unequals.for.test)),", "))]
-        hyp.applies.2 <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$v1.unequals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", "))]
+        # the languages that behave according to the expectation are those with the "equals" state of feature 1 and the "unequals" state of feature 2 (hyp.applies.1) and those with the "unequals" state of feature 1 and the "equals" state of feature 2 (hyp.applies.2)
+        hyp.applies.1 <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$f2.unequals.for.test)),", "))]
+        hyp.applies.2 <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$f1.unequals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", "))]
         
-        # track the proportion of cases, in which the expectation is violated with respect to variable 1 (d1) and with respect to variable 2 (d2)
+        # track the proportion of cases, in which the expectation is violated with respect to feature 1 (d1) and with respect to feature 2 (d2)
         d1 <- sum(hyp.NOT.applies)/(sum(hyp.NOT.applies)+sum(hyp.applies.1)) 
         d2 <- sum(hyp.NOT.applies)/(sum(hyp.NOT.applies)+sum(hyp.applies.2))
         expectation_assessment[ds,"result1_XOR_AND_THEN"] <- d1
         expectation_assessment[ds,"result2_XOR_AND"] <- d2
         
-        # the proportions must be compared to the baseline expectations: these are the proportions of languages in the "unequals" state of variable 2 and variable 1 overall (independently of variable 1 or 2 being coded or not, and which state it would be in)
-        baseline1_v2_equals <- expectation_ds_sample_withqs %>% 
-          filter(get(expectation$variable.2.for.test)%in%
-                   unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", "))) %>% nrow()
-        baseline1_v2_unequals <- expectation_ds_sample_withqs %>% 
-          filter(get(expectation$variable.2.for.test)%in%
-                   unlist(strsplit(as.character(unlist(expectation$v2.unequals.for.test)),", "))) %>% nrow()
-        baseline1_v2 <- baseline1_v2_unequals/(baseline1_v2_unequals+baseline1_v2_equals)
+        # the proportions must be compared to the baseline expectations: these are the proportions of languages in the "unequals" state of feature 2 and feature 1 overall (independently of feature 1 or 2 being coded or not, and which state it would be in)
+        baseline1_f2_equals <- expectation_ds_sample_withqs %>% 
+          filter(get(expectation$feature.2.for.test)%in%
+                   unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", "))) %>% nrow()
+        baseline1_f2_unequals <- expectation_ds_sample_withqs %>% 
+          filter(get(expectation$feature.2.for.test)%in%
+                   unlist(strsplit(as.character(unlist(expectation$f2.unequals.for.test)),", "))) %>% nrow()
+        baseline1_f2 <- baseline1_f2_unequals/(baseline1_f2_unequals+baseline1_f2_equals)
         
-        baseline2_v1_equals <- expectation_ds_sample_withqs %>% 
-          filter(get(expectation$variable.1.for.test)%in%
-                   unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", "))) %>% nrow()
-        baseline2_v1_unequals <- expectation_ds_sample_withqs %>% 
-          filter(get(expectation$variable.1.for.test)%in%
-                   unlist(strsplit(as.character(unlist(expectation$v1.unequals.for.test)),", "))) %>% nrow()
-        baseline2_v1 <- baseline2_v1_unequals/(baseline2_v1_unequals+baseline2_v1_equals)
+        baseline2_f1_equals <- expectation_ds_sample_withqs %>% 
+          filter(get(expectation$feature.1.for.test)%in%
+                   unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", "))) %>% nrow()
+        baseline2_f1_unequals <- expectation_ds_sample_withqs %>% 
+          filter(get(expectation$feature.1.for.test)%in%
+                   unlist(strsplit(as.character(unlist(expectation$f1.unequals.for.test)),", "))) %>% nrow()
+        baseline2_f1 <- baseline2_f1_unequals/(baseline2_f1_unequals+baseline2_f1_equals)
         
         # log the baselines
-        expectation_assessment[ds,"baseline1_XOR_AND_THEN"] <- baseline1_v2
-        expectation_assessment[ds,"baseline2_XOR_AND"] <- baseline2_v1
+        expectation_assessment[ds,"baseline1_XOR_AND_THEN"] <- baseline1_f2
+        expectation_assessment[ds,"baseline2_XOR_AND"] <- baseline2_f1
         
       }
       else if(expectation$test == "AND"){
-        # in the AND-case, we evaluate how many languages are coded for the second variable, given the relevant state of the first variable (applicable), and how many languages are coded for the relevant state of the first variable overall (all), and vice versa.
-        applicable.1 <- sum(sample_table_withqs[unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")),c(unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$v2.unequals.for.test)),", ")))])
-        all.1 <- sum(sample_table_withqs[unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")),])
+        # in the AND-case, we evaluate how many languages are coded for the second feature, given the relevant state of the first feature (applicable), and how many languages are coded for the relevant state of the first feature overall (all), and vice versa.
+        applicable.1 <- sum(sample_table_withqs[unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),c(unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$f2.unequals.for.test)),", ")))])
+        all.1 <- sum(sample_table_withqs[unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),])
         
-        applicable.2 <- sum(sample_table_withqs[c(unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$v1.unequals.for.test)),", "))), unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", "))])
-        all.2 <- sum(sample_table_withqs[,unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", "))])
+        applicable.2 <- sum(sample_table_withqs[c(unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$f1.unequals.for.test)),", "))), unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", "))])
+        all.2 <- sum(sample_table_withqs[,unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", "))])
         
         # this yields the relevant proportion in both dimensions
         relevant.proportion.1 <- applicable.1/all.1
@@ -349,85 +349,85 @@ evaluate_XOR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversit
         expectation_assessment[ds,"proportion_overlap_applicable_vs_non_applicable"] <- relevant.proportion
         expectation_assessment[ds,"overlap_sufficient_test_power_positive"] <- relevant.proportion >= proportion_languages_must_be_in_applicable_state
         
-        # in the AND-condition, the languages that behave according to the expectation are those with the "equals" state of both variable 1 and variable 2
-        hyp.applies <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", "))]
+        # in the AND-condition, the languages that behave according to the expectation are those with the "equals" state of both feature 1 and feature 2
+        hyp.applies <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", "))]
         
-        # the languages that behave against the expectation are those with the "equals" state of variable 1 and the "unequals" state of variable 2, and vice versa
-        hyp.NOT.applies.1 <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$v2.unequals.for.test)),", "))]
-        hyp.NOT.applies.2 <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$v1.unequals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", "))]
+        # the languages that behave against the expectation are those with the "equals" state of feature 1 and the "unequals" state of feature 2, and vice versa
+        hyp.NOT.applies.1 <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$f2.unequals.for.test)),", "))]
+        hyp.NOT.applies.2 <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$f1.unequals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", "))]
         
         # track the proportion of cases, in which the expectation is violated (d1 and d2)
-        d1 <- sum(hyp.NOT.applies.1)/(sum(hyp.applies)+sum(hyp.NOT.applies.1)) # proportion of cases, in which expectation is violated with respect to variable 1
-        d2 <- sum(hyp.NOT.applies.2)/(sum(hyp.applies)+sum(hyp.NOT.applies.2)) # proportion of cases, in which expectation is violated with respect to variable 1
+        d1 <- sum(hyp.NOT.applies.1)/(sum(hyp.applies)+sum(hyp.NOT.applies.1)) # proportion of cases, in which expectation is violated with respect to feature 1
+        d2 <- sum(hyp.NOT.applies.2)/(sum(hyp.applies)+sum(hyp.NOT.applies.2)) # proportion of cases, in which expectation is violated with respect to feature 1
         expectation_assessment[ds,"result1_XOR_AND_THEN"]<-d1
         expectation_assessment[ds,"result2_XOR_AND"]<-d2
         
-        # the proportion must be compared to the baseline expectation: this is the proportion of languages in the "unequals" state of variable 2 overall (independently of variable 1 being coded or not, and which state it would be in)
-        baseline_v2_equals <- expectation_ds_sample_withqs %>% filter(get(expectation$variable.2.for.test)%in%unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", "))) %>% nrow()
-        baseline_v2_unequals <- expectation_ds_sample_withqs %>% filter(get(expectation$variable.2.for.test)%in%unlist(strsplit(as.character(unlist(expectation$v2.unequals.for.test)),", "))) %>% nrow()
-        baseline_v2 <- baseline_v2_unequals/(baseline_v2_unequals+baseline_v2_equals)
+        # the proportion must be compared to the baseline expectation: this is the proportion of languages in the "unequals" state of feature 2 overall (independently of feature 1 being coded or not, and which state it would be in)
+        baseline_f2_equals <- expectation_ds_sample_withqs %>% filter(get(expectation$feature.2.for.test)%in%unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", "))) %>% nrow()
+        baseline_f2_unequals <- expectation_ds_sample_withqs %>% filter(get(expectation$feature.2.for.test)%in%unlist(strsplit(as.character(unlist(expectation$f2.unequals.for.test)),", "))) %>% nrow()
+        baseline_f2 <- baseline_f2_unequals/(baseline_f2_unequals+baseline_f2_equals)
         
-        baseline_v1_equals <- expectation_ds_sample_withqs %>% filter(get(expectation$variable.1.for.test)%in%unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", "))) %>% nrow()
-        baseline_v1_unequals <- expectation_ds_sample_withqs %>% filter(get(expectation$variable.1.for.test)%in%unlist(strsplit(as.character(unlist(expectation$v1.unequals.for.test)),", "))) %>% nrow()
-        baseline_v1 <- baseline_v1_unequals/(baseline_v1_unequals+baseline_v1_equals)
+        baseline_f1_equals <- expectation_ds_sample_withqs %>% filter(get(expectation$feature.1.for.test)%in%unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", "))) %>% nrow()
+        baseline_f1_unequals <- expectation_ds_sample_withqs %>% filter(get(expectation$feature.1.for.test)%in%unlist(strsplit(as.character(unlist(expectation$f1.unequals.for.test)),", "))) %>% nrow()
+        baseline_f1 <- baseline_f1_unequals/(baseline_f1_unequals+baseline_f1_equals)
         
         
         # log the baseline, and whether the baseline is higher than d1
-        expectation_assessment[ds,"baseline1_XOR_AND_THEN"] <- baseline_v2
-        expectation_assessment[ds,"baseline2_XOR_AND"] <- baseline_v1
+        expectation_assessment[ds,"baseline1_XOR_AND_THEN"] <- baseline_f2
+        expectation_assessment[ds,"baseline2_XOR_AND"] <- baseline_f1
       }
       else if(expectation$test == "THEN"){
-        # in the THEN-case, we evaluate how many languages are coded for the second variable, given the relevant state of the first variable (applicable), and how many languages are coded for the relevant state of the first variable overall (all)
-        applicable <- sum(sample_table_withqs[unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")),c(unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$v2.unequals.for.test)),", ")))])
-        all <- sum(sample_table_withqs[unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")),])
+        # in the THEN-case, we evaluate how many languages are coded for the second feature, given the relevant state of the first feature (applicable), and how many languages are coded for the relevant state of the first feature overall (all)
+        applicable <- sum(sample_table_withqs[unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),c(unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$f2.unequals.for.test)),", ")))])
+        all <- sum(sample_table_withqs[unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),])
         
         # this yields the relevant proportion, which is logged
         relevant.proportion <- applicable/all
         expectation_assessment[ds,"proportion_overlap_applicable_vs_non_applicable"] <- relevant.proportion
         expectation_assessment[ds,"overlap_sufficient_test_power_positive"] <- relevant.proportion >= proportion_languages_must_be_in_applicable_state
         
-        # in the THEN-condition, the languages that behave according to the expectation are those with the "equals" state of both variable 1 and variable 2
-        hyp.applies <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", "))]
+        # in the THEN-condition, the languages that behave according to the expectation are those with the "equals" state of both feature 1 and feature 2
+        hyp.applies <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", "))]
         
-        # the languages that behave against the expectation are those with the "equals" state of variable 1 and the "unequals" state of variable 2
-        hyp.NOT.applies <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$v2.unequals.for.test)),", "))]
+        # the languages that behave against the expectation are those with the "equals" state of feature 1 and the "unequals" state of feature 2
+        hyp.NOT.applies <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$f2.unequals.for.test)),", "))]
         
         # track the proportion of cases, in which the expectation is violated (d1)
-        d1 <- sum(hyp.NOT.applies)/(sum(hyp.applies)+sum(hyp.NOT.applies)) # proportion of cases, in which expectation is violated with respect to variable 1
+        d1 <- sum(hyp.NOT.applies)/(sum(hyp.applies)+sum(hyp.NOT.applies)) # proportion of cases, in which expectation is violated with respect to feature 1
         expectation_assessment[ds,"result1_XOR_AND_THEN"]<-d1
         
-        # the proportion must be compared to the baseline expectation: this is the proportion of languages in the "unequals" state of variable 2 overall (independently of variable 1 being coded or not, and which state it would be in)
-        baseline_v2_equals <- expectation_ds_sample_withqs %>% filter(get(expectation$variable.2.for.test)%in%unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", "))) %>% nrow()
-        baseline_v2_unequals <- expectation_ds_sample_withqs %>% filter(get(expectation$variable.2.for.test)%in%unlist(strsplit(as.character(unlist(expectation$v2.unequals.for.test)),", "))) %>% nrow()
-        baseline_v2 <- baseline_v2_unequals/(baseline_v2_unequals+baseline_v2_equals)
+        # the proportion must be compared to the baseline expectation: this is the proportion of languages in the "unequals" state of feature 2 overall (independently of feature 1 being coded or not, and which state it would be in)
+        baseline_f2_equals <- expectation_ds_sample_withqs %>% filter(get(expectation$feature.2.for.test)%in%unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", "))) %>% nrow()
+        baseline_f2_unequals <- expectation_ds_sample_withqs %>% filter(get(expectation$feature.2.for.test)%in%unlist(strsplit(as.character(unlist(expectation$f2.unequals.for.test)),", "))) %>% nrow()
+        baseline_f2 <- baseline_f2_unequals/(baseline_f2_unequals+baseline_f2_equals)
         
         # log the baseline, and whether the baseline is higher than d1
-        expectation_assessment[ds,"baseline1_XOR_AND_THEN"] <- baseline_v2
+        expectation_assessment[ds,"baseline1_XOR_AND_THEN"] <- baseline_f2
       }
     }
     
     # log relevant characteristics for the expectation:  aggregated for each diversity sample
-    rslt=rbind(rslt,data.frame(nr.lgs.v1=nrlgs1, # raw
-                               nr.lgs.v2=nrlgs2, # raw
-                               absolute.overlap.v1.v2=absoverlap, # raw
-                               relative.overlap.vsmall.in.vlarge=relative.overlap.vsmall.in.vlarge, # raw
-                               relative.overlap.vlarge.in.vsmall=relative.overlap.vlarge.in.vsmall, # raw
+    rslt=rbind(rslt,data.frame(nr.lgs.f1=nrlgs1, # raw
+                               nr.lgs.f2=nrlgs2, # raw
+                               absolute.overlap.f1.f2=absoverlap, # raw
+                               relative.overlap.fsmall.in.flarge=relative.overlap.fsmall.in.flarge, # raw
+                               relative.overlap.flarge.in.fsmall=relative.overlap.flarge.in.fsmall, # raw
                                samples.disregarded.insufficient.lgs.applicable=nrow(expectation_assessment)-sum(na.omit(expectation_assessment$overlap_sufficient_test_power_positive)), # aggregation: how many subsamples were discarded?
                                samples.assessed=sum(na.omit(expectation_assessment$overlap_sufficient_test_power_positive)), # aggregation: how many subsamples could be computed?
-                               mean.d1.across.tested.samples=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result1_XOR_AND_THEN)),digits=2), # aggregation: what was the mean proportion of cases, in which the expectation was violated, across all samples? (with respect to v1 if XOR or AND)
-                               sd.d1.across.tested.samples=round(sd(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result1_XOR_AND_THEN)),digits=2), # aggregation: what was the standard deviation of the proportion of cases, in which the expectation was violated, across all samples? (with respect to v1 if XOR or AND)
-                               mean.plus.sd.d1.across.tested.samples=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result1_XOR_AND_THEN))+sd(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result1_XOR_AND_THEN)),digits=2), # aggregation: what was the sum of the mean plus one standard deviation of the proportion of cases, in which the expectation was violated, across all samples? (with respect to v1 if XOR or AND)
-                               mean.d2.across.tested.samples=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result2_XOR_AND)),digits=2), # aggregation: what was the mean proportion of cases, in which the expectation was violated, across all samples, with respect to v2? (only for XOR or AND)
-                               sd.d2.across.tested.samples=round(sd(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result2_XOR_AND)),digits=2), # aggregation: what was the standard deviation of the proportion of cases, in which the expectation was violated, across all samples, with respect to v2? (only for XOR or AND)
-                               mean.plus.sd.d2.across.tested.samples=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result2_XOR_AND))+sd(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result2_XOR_AND)),digits=2), # aggregation: what was sum of the mean plus one standard deviation of the proportion of cases, in which the expectation was violated, across all samples, with respect to v2? (only for XOR or AND)
-                               mean.baseline.1=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$baseline1_XOR_AND_THEN)),digits=2), # aggregation: what was the mean baseline probability for v2 being in the "unequals" state? (with respect to v1 for XOR and AND)
-                               mean.baseline.2=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$baseline2_XOR_AND)),digits=2), # aggregation: what was the mean baseline probability for v1 being in the "unequals" state? (only for XOR and AND)
+                               mean.d1.across.tested.samples=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result1_XOR_AND_THEN)),digits=2), # aggregation: what was the mean proportion of cases, in which the expectation was violated, across all samples? (with respect to f1 if XOR or AND)
+                               sd.d1.across.tested.samples=round(sd(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result1_XOR_AND_THEN)),digits=2), # aggregation: what was the standard deviation of the proportion of cases, in which the expectation was violated, across all samples? (with respect to f1 if XOR or AND)
+                               mean.plus.sd.d1.across.tested.samples=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result1_XOR_AND_THEN))+sd(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result1_XOR_AND_THEN)),digits=2), # aggregation: what was the sum of the mean plus one standard deviation of the proportion of cases, in which the expectation was violated, across all samples? (with respect to f1 if XOR or AND)
+                               mean.d2.across.tested.samples=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result2_XOR_AND)),digits=2), # aggregation: what was the mean proportion of cases, in which the expectation was violated, across all samples, with respect to f2? (only for XOR or AND)
+                               sd.d2.across.tested.samples=round(sd(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result2_XOR_AND)),digits=2), # aggregation: what was the standard deviation of the proportion of cases, in which the expectation was violated, across all samples, with respect to f2? (only for XOR or AND)
+                               mean.plus.sd.d2.across.tested.samples=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result2_XOR_AND))+sd(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result2_XOR_AND)),digits=2), # aggregation: what was sum of the mean plus one standard deviation of the proportion of cases, in which the expectation was violated, across all samples, with respect to f2? (only for XOR or AND)
+                               mean.baseline.1=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$baseline1_XOR_AND_THEN)),digits=2), # aggregation: what was the mean baseline probability for f2 being in the "unequals" state? (with respect to f1 for XOR and AND)
+                               mean.baseline.2=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$baseline2_XOR_AND)),digits=2), # aggregation: what was the mean baseline probability for f1 being in the "unequals" state? (only for XOR and AND)
                                d1.baseline1.cohensd=if(length(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$baseline1_XOR_AND_THEN))!=0)
                                {round(cohensD(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==TRUE)$result1_XOR_AND_THEN),na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==TRUE)$baseline1_XOR_AND_THEN), method="paired"), digits = 1)}
-                               else{NA}, # what is effect size (with respect to v1 if XOR or AND), measured by paired cohen's D
+                               else{NA}, # what is effect size (with respect to f1 if XOR or AND), measured by paired cohen's D
                                d2.baseline2.cohensd=if(length(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$baseline2_XOR_AND))!=0)
                                {round(cohensD(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==TRUE)$result2_XOR_AND),na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==TRUE)$baseline2_XOR_AND), method="paired"), digits = 1)}
-                               else{NA})) # what is effect size (with respect to v2 if XOR or AND), measured by paired cohen's D)
+                               else{NA})) # what is effect size (with respect to f2 if XOR or AND), measured by paired cohen's D)
   }
   return(rslt)
 }
@@ -465,7 +465,7 @@ compare_full_to_densified <- function(full, densified, densified2 = NULL, taxono
     nfam_densified2 <- taxonomy_matrix %>% filter(id %in% rownames(densified2)) %>% select(level1) %>% unique() %>% nrow()
   }
   
-  # number of variables
+  # number of features
   nvar_full <- ncol(full)
   nvar_densified <- ncol(densified)
   if(!is.null(densified2)){
@@ -477,22 +477,22 @@ compare_full_to_densified <- function(full, densified, densified2 = NULL, taxono
                            coding.density=c(coding_proportion_full,coding_proportion_densified),
                            nr.languages=c(nlg_full,nlg_densified),
                            nr.families=c(nfam_full,nfam_densified),
-                           nr.variables=c(nvar_full,nvar_densified),
+                           nr.features=c(nvar_full,nvar_densified),
                            coding.density.improvement=c(NA,round(coding_proportion_densified/coding_proportion_full,digits=3)),
                            proportion.languages=c(NA,round(nlg_densified/nlg_full,digits=3)),
                            proportion.families=c(NA,round(nfam_densified/nfam_full,digits=3)),
-                           proportion.variables=c(NA,round(nvar_densified/nvar_full,digits=3)))
+                           proportion.features=c(NA,round(nvar_densified/nvar_full,digits=3)))
   
   if(!is.null(densified2)){
     comparison <- data.frame(data=c("full","densified_large","densified_small"),
                              coding.density=c(coding_proportion_full,coding_proportion_densified,coding_proportion_densified2),
                              nr.languages=c(nlg_full,nlg_densified,nlg_densified2),
                              nr.families=c(nfam_full,nfam_densified,nfam_densified2),
-                             nr.variables=c(nvar_full,nvar_densified,nvar_densified2),
+                             nr.features=c(nvar_full,nvar_densified,nvar_densified2),
                              coding.density.improvement=c(NA,round(coding_proportion_densified/coding_proportion_full,digits=3),round(coding_proportion_densified2/coding_proportion_full,digits=3)),
                              proportion.languages=c(NA,round(nlg_densified/nlg_full,digits=3),round(nlg_densified2/nlg_full,digits=3)),
                              proportion.families=c(NA,round(nfam_densified/nfam_full,digits=3),round(nfam_densified2/nfam_full,digits=3)),
-                             proportion.variables=c(NA,round(nvar_densified/nvar_full,digits=3),round(nvar_densified2/nvar_full,digits=3)))
+                             proportion.features=c(NA,round(nvar_densified/nvar_full,digits=3),round(nvar_densified2/nvar_full,digits=3)))
   }
   
   # generate coding density and family distribution comparisons
@@ -508,9 +508,9 @@ compare_full_to_densified <- function(full, densified, densified2 = NULL, taxono
     geom_histogram(color="lightblue", fill="lightblue", bins=20)+
     theme_minimal()+
     xlim(c(0,1.05))+
-    labs(title="Coding density per variable, full dataset",
-         x="coding density per variable",
-         y="number of variables")
+    labs(title="Coding density per feature, full dataset",
+         x="coding density per feature",
+         y="number of features")
   
   fams_full <- as.data.frame(table(select(filter(taxonomy_matrix, id%in%rownames(full)),level1)))
   family_plot_full <-  ggplot(fams_full,aes(x=level1,y=Freq))+
@@ -536,9 +536,9 @@ compare_full_to_densified <- function(full, densified, densified2 = NULL, taxono
       theme_minimal()+
       theme(axis.line.x = element_blank())+    # Remove x-axis line
       xlim(c(0,1.05))+
-      labs(title="Coding density per variable, densified dataset (large)",
-           x="coding density per variable",
-           y="number of variables")
+      labs(title="Coding density per feature, densified dataset (large)",
+           x="coding density per feature",
+           y="number of features")
     
     fams_densified <- as.data.frame(table(select(filter(taxonomy_matrix, id%in%rownames(densified)),level1)))
     family_plot_densified <-  ggplot(fams_densified,aes(x=level1,y=Freq))+
@@ -564,9 +564,9 @@ compare_full_to_densified <- function(full, densified, densified2 = NULL, taxono
       theme_minimal()+
       theme(axis.line.x = element_blank())+    # Remove x-axis line
       xlim(c(0,1.05))+
-      labs(title="Coding density per variable, densified dataset (small)",
-           x="coding density per variable",
-           y="number of variables")
+      labs(title="Coding density per feature, densified dataset (small)",
+           x="coding density per feature",
+           y="number of features")
     
     fams_densified2 <- as.data.frame(table(select(filter(taxonomy_matrix, id%in%rownames(densified2)),level1)))
     family_plot_densified2 <-  ggplot(fams_densified2,aes(x=level1,y=Freq))+
@@ -592,9 +592,9 @@ compare_full_to_densified <- function(full, densified, densified2 = NULL, taxono
       theme_minimal()+
       theme(axis.line.x = element_blank())+    # Remove x-axis line
       xlim(c(0,1.05))+
-      labs(title="Coding density per variable, densified dataset",
-           x="coding density per variable",
-           y="number of variables")
+      labs(title="Coding density per feature, densified dataset",
+           x="coding density per feature",
+           y="number of features")
     
     fams_densified <- as.data.frame(table(select(filter(taxonomy_matrix, id%in%rownames(densified)),level1)))
     family_plot_densified <-  ggplot(fams_densified,aes(x=level1,y=Freq))+
@@ -717,7 +717,7 @@ project_data <-  function(
   y <- c(seq(-85, 0, by = 5), seq(5, 85, by = 5))
   lat_labels <- data.frame(labs=y_labs, x=labels_lat, y=y)
   
-  # subset data frames according to graticules gap input variable
+  # subset data frames according to graticules gap input feature
   long_labels <- long_labels %>%
     slice(which(x %% graticules_gap == 0))
   lat_labels <- lat_labels %>%

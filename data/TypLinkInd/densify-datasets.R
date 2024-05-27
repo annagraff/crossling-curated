@@ -38,7 +38,7 @@ statistical_lexicon_for_pruning <- statistical_for_pruning[which(apply(statistic
 
 # specify parameters for densification
 min_variability <- 3 # each variable must have at least 3 languages in its second-largest state
-scoring <- "log_odds"
+density_mean <- "log_odds"
 
 ##### densify full curation
 # comment on weights: TLI is very sparse in terms of coding density and in terms of taxonomic diversity
@@ -50,31 +50,31 @@ logical_full_log <-
   densify(data = logical_full_for_pruning,
           taxon_id = "glottocode",
           min_variability = min_variability,
-          scoring = "log_odds",
+          density_mean = density_mean,
           taxonomy = glottolog_languoids,
-          scoring_weights = list(coding = 0.999, taxonomy = 0.999))
+          density_mean_weights = list(coding = 0.999, taxonomy = 0.999))
 
 set.seed(1111)
 statistical_full_log <-
   densify(data = statistical_full_for_pruning,
-                taxon_id = "glottocode",
-                min_variability = min_variability,
-                scoring = "log_odds",
-                taxonomy = glottolog_languoids,
-                scoring_weights = list(coding = 0.999, taxonomy = 0.999))
+          taxon_id = "glottocode",
+          min_variability = min_variability,
+          density_mean = density_mean,
+          taxonomy = glottolog_languoids,
+          density_mean_weights = list(coding = 0.999, taxonomy = 0.999))
 
 # identify optima
 pruned_logical_full_large <- prune(logical_full_log,
-                                           score = n_data_points * coding_density * taxonomic_index)
+                                   scoring_function = n_data_points * coding_density * taxonomic_index)
 
 pruned_logical_full_small <- prune(logical_full_log,
-                                           score = n_data_points^3 * coding_density^3 * row_coding_density_min * taxonomic_index)
+                                   scoring_function = n_data_points^3 * coding_density^3 * row_coding_density_min * taxonomic_index)
 
 pruned_statistical_full_large <- prune(statistical_full_log,
-                                               score = n_data_points * coding_density * taxonomic_index)
+                                       scoring_function = n_data_points * coding_density * taxonomic_index)
 
 pruned_statistical_full_small <- prune(statistical_full_log,
-                                               score = n_data_points^3 * coding_density^3 * row_coding_density_min * taxonomic_index)
+                                       scoring_function = n_data_points^3 * coding_density^3 * row_coding_density_min * taxonomic_index)
 
 # retrieve corresponding data from input (to re-establish differences between ? and NA)
 pruned_logical_full_large <- logical[which(logical$glottocode%in%pruned_logical_full_large$glottocode), which(names(logical)%in%names(pruned_logical_full_large))]
@@ -98,36 +98,36 @@ logical_morphosyntax_log <-
   densify(data = logical_morphosyntax_for_pruning,
           taxon_id = "glottocode",
           min_variability = min_variability,
-          scoring = "log_odds",
+          density_mean = density_mean,
           taxonomy = glottolog_languoids,
-          scoring_weights = list(coding = 0.999, taxonomy = 0.999))
+          density_mean_weights = list(coding = 0.999, taxonomy = 0.999))
 
 set.seed(2222)
 statistical_morphosyntax_log <-
   densify(data = statistical_morphosyntax_for_pruning,
           taxon_id = "glottocode",
           min_variability = min_variability,
-          scoring = "log_odds",
+          density_mean = density_mean,
           taxonomy = glottolog_languoids,
-          scoring_weights = list(coding = 0.999, taxonomy = 0.999))
+          density_mean_weights = list(coding = 0.999, taxonomy = 0.999))
 
-# set score for identifying optimal number of iterations
+# set scoring function for identifying optimal number of iterations
 # we want to densify the matrix whilst maintaining taxonomic diversity and create two densifications, one being larger but sparser and one being smaller but denser
 # --> n_data_points * coding_density * taxonomic_index
 # --> n_data_points^3 * coding_density^3 * row_coding_density_min * taxonomic_index
 
 # identify optima
 pruned_logical_morphosyntax_large <- prune(logical_morphosyntax_log,
-                                            score = n_data_points * coding_density * taxonomic_index)
+                                            scoring_function = n_data_points * coding_density * taxonomic_index)
 
 pruned_logical_morphosyntax_small <- prune(logical_morphosyntax_log,
-                                           score = n_data_points^3 * coding_density^3 * row_coding_density_min * taxonomic_index)
+                                           scoring_function = n_data_points^3 * coding_density^3 * row_coding_density_min * taxonomic_index)
 
 pruned_statistical_morphosyntax_large <- prune(statistical_morphosyntax_log,
-                                           score = n_data_points * coding_density * taxonomic_index)
+                                               scoring_function = n_data_points * coding_density * taxonomic_index)
 
 pruned_statistical_morphosyntax_small <- prune(statistical_morphosyntax_log,
-                                           score = n_data_points^3 * coding_density^3 * row_coding_density_min * taxonomic_index)
+                                               scoring_function = n_data_points^3 * coding_density^3 * row_coding_density_min * taxonomic_index)
 
 # retrieve corresponding data from input (to re-establish differences between ? and NA)
 pruned_logical_morphosyntax_large <- logical[which(logical$glottocode%in%pruned_logical_morphosyntax_large$glottocode), which(names(logical)%in%names(pruned_logical_morphosyntax_large))]
@@ -152,26 +152,26 @@ logical_lexicon_log <-
   densify(data = logical_lexicon_for_pruning,
           taxon_id = "glottocode",
           min_variability = min_variability,
-          scoring = "log_odds",
+          density_mean = density_mean,
           taxonomy = glottolog_languoids,
-          scoring_weights = list(coding = 0.999, taxonomy = 0.999))
+          density_mean_weights = list(coding = 0.999, taxonomy = 0.999))
 
 set.seed(3333)
 statistical_lexicon_log <-
   densify(data = statistical_lexicon_for_pruning,
           taxon_id = "glottocode",
           min_variability = min_variability,
-          scoring = "log_odds",
+          density_mean = density_mean,
           taxonomy = glottolog_languoids,
-          scoring_weights = list(coding = 0.999, taxonomy = 0.999))
+          density_mean_weights = list(coding = 0.999, taxonomy = 0.999))
 
-# set score for identifying optimal number of iterations
+# set scoring function for identifying optimal number of iterations
 # we want to densify the matrix whilst maintaining taxonomic diversity; not many badly coded languages
 # --> n_data_points * coding_density * taxonomic_index
 
 # prune matrices to optima
-pruned_logical_lexicon <- prune(logical_lexicon_log, score = n_data_points * coding_density * taxonomic_index)
-pruned_statistical_lexicon <- prune(statistical_lexicon_log, score = n_data_points * coding_density * taxonomic_index)
+pruned_logical_lexicon <- prune(logical_lexicon_log, scoring_function = n_data_points * coding_density * taxonomic_index)
+pruned_statistical_lexicon <- prune(statistical_lexicon_log, scoring_function = n_data_points * coding_density * taxonomic_index)
 
 # retrieve corresponding data from input (to re-establish differences between ? and NA)
 pruned_logical_lexicon <- logical[which(logical$glottocode%in%pruned_logical_lexicon$glottocode), which(names(logical)%in%names(pruned_logical_lexicon))]
@@ -191,25 +191,25 @@ logical_phonology_log <-
   densify(data = logical_phonology_for_pruning,
           taxon_id = "glottocode",
           min_variability = min_variability,
-          scoring = "log_odds",
+          density_mean = density_mean,
           taxonomy = glottolog_languoids,
-            scoring_weights = list(coding = 0.99, taxonomy = 0.99))
+          density_mean_weights = list(coding = 0.99, taxonomy = 0.99))
 
 set.seed(4444)
 statistical_phonology_log <-
   densify(data = statistical_phonology_for_pruning,
           taxon_id = "glottocode",
           min_variability = min_variability,
-          scoring = "log_odds",
+          density_mean = density_mean,
           taxonomy = glottolog_languoids,
-          scoring_weights = list(coding = 0.99, taxonomy = 0.99))
+          density_mean_weights = list(coding = 0.99, taxonomy = 0.99))
 
-# set score for identifying optimal number of iterations
+# set scoring function for identifying optimal number of iterations
 # we want to densify the matrix whilst maintaining taxonomic diversity; the focus should strongly lie on trimming away languages from well-represented families
 # --> n_data_points * coding_density * row_coding_density_min * taxonomic_index
 
-pruned_logical_phonology <- prune(logical_phonology_log, score = n_data_points * coding_density * row_coding_density_min * taxonomic_index)
-pruned_statistical_phonology <- prune(statistical_phonology_log, score = n_data_points * coding_density * row_coding_density_min * taxonomic_index)
+pruned_logical_phonology <- prune(logical_phonology_log, scoring_function = n_data_points * coding_density * row_coding_density_min * taxonomic_index)
+pruned_statistical_phonology <- prune(statistical_phonology_log, scoring_function = n_data_points * coding_density * row_coding_density_min * taxonomic_index)
 
 # retrieve corresponding data from input (to re-establish differences between ? and NA)
 pruned_logical_phonology <- logical[which(logical$glottocode%in%pruned_logical_phonology$glottocode), which(names(logical)%in%names(pruned_logical_phonology))]
