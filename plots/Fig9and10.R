@@ -195,7 +195,9 @@ gridpointwise_entropies <- function(taxonomy_matrix,
       ggtitle(title) +
       labs(color = "Mean entropy") +
       theme_minimal() +
-      theme(panel.grid.major = element_blank())
+      theme(panel.grid.major = element_blank(),
+            axis.text = element_blank(),
+            axis.ticks = element_blank())
     
     entropy_at_point_plot
     
@@ -247,7 +249,9 @@ grid_point_comparison_horizontal <- function(baseline_gp_frame, name_baseline,
     labs(color = "Difference") +
     ggtitle("A.") +
     theme_minimal() +
-    theme(panel.grid.major = element_blank())
+    theme(panel.grid.major = element_blank(),
+          axis.text = element_blank(),
+          axis.ticks = element_blank())
   
   if(!is.null(comparison_gp_frame_2)){
     delta_entropies_2_minus_1 <- ggplot() +
@@ -258,7 +262,9 @@ grid_point_comparison_horizontal <- function(baseline_gp_frame, name_baseline,
       labs(color = "Difference") +
       ggtitle("B.") +
       theme_minimal() +
-      theme(panel.grid.major = element_blank())
+      theme(panel.grid.major = element_blank(),
+            axis.text = element_blank(),
+            axis.ticks = element_blank())
     
     delta_entropies_2_minus_0 <- ggplot() +
       geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
@@ -268,8 +274,9 @@ grid_point_comparison_horizontal <- function(baseline_gp_frame, name_baseline,
       labs(color = "Difference") +
       ggtitle("C.") +
       theme_minimal() +
-      theme(panel.grid.major = element_blank())
-  }
+      theme(panel.grid.major = element_blank(),
+            axis.text = element_blank(),
+            axis.ticks = element_blank())  }
   
   # create combined plot according to specifications
   if(!is.null(comparison_gp_frame_2)){
@@ -336,12 +343,12 @@ entropies <- plot_grid(gbi_statistical_gps[[2]],
                        lexicon_statistical_gps[[2]], 
                        align = "h", axis = "l", ncol = 1)
 
-ggsave(file="Fig9 entropies.png", entropies, dpi = 500, width = 6, height = 7, units = "in")
+ggsave(file="Fig9 entropies.png", entropies, dpi = 500, width = 8, height = 7, units = "in")
 
- # compare across curations, using Grambank
+# compare across curations, using Grambank
 gbi_comparison_plot <- grid_point_comparison_horizontal(baseline_gp_frame = gb_original_gps[[1]], 
                                                        comparison_gp_frame = gbi_logical_gps[[1]], 
                                                        comparison_gp_frame_2 = gbi_statistical_gps[[1]], 
                                                        world_map = world_map_initial)
 
-ggsave(file="Fig10 entropy-comp.png", gbi_comparison_plot[[1]], dpi = 500, width = 6, height = 7, units = "in")
+ggsave(file="Fig10 entropy-comp.png", gbi_comparison_plot[[1]], dpi = 500, width = 8, height = 7, units = "in")

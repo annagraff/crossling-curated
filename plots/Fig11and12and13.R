@@ -192,7 +192,7 @@ RGB_mapping <- function(pca.object, taxonomy_matrix, pc1flip=F, pc2flip=F, pc3fl
                                    green=rescale_mid(PC8), 
                                    blue=rescale_mid(PC9), alpha=0.8))
   geo <- subset(gg, gg[,1] %in% df$level1)
-  geo.world <- merge(df[,c('level1','pc.colors1to3', 'pc.colors4to6','pc.colors7to9')], 
+  geo.world <- merge(df, 
                      geo, by.x='level1', by.y=names(gg)[1])
   return(geo.world)
 }
@@ -227,7 +227,10 @@ dim_mapping <- function(pca.object, taxonomy_matrix, size) {
     ylab(prop2)+
     labs(subtitle = "", shape = "")+
     guides(shape = guide_legend(title = "Macroarea"), 
-           color = guide_legend(title = "Macroarea"))
+           color = guide_legend(title = "Macroarea"))+
+    theme(panel.grid.major = element_blank(),
+          axis.text = element_blank(),
+          axis.ticks = element_blank()) 
 
   # # if 3d-plot desired:
   # library(lattice)
@@ -254,7 +257,8 @@ rgb_map <- function(rgb_data_frame, world_map_initial, main, plot, size, pca.obj
     scale_fill_identity() +  # use color values as specified in the data
     scale_color_identity() +  # use color values as specified in the data
     guides(fill = "none", color = "none")+
-    theme(panel.grid.major = element_blank(), plot.title = element_text(hjust = 0.5))
+    theme(panel.grid.major = element_blank(), plot.title = element_text(hjust = 0.5),
+          axis.text = element_blank(),axis.ticks = element_blank())
   if(plot==T){
     print(pacific_centered_map)
   }
@@ -381,4 +385,19 @@ comp_plots <- grid.arrange(
 )
 ggsave("Fig13 kaylan.png", plot = comp_plots, width = 9, height = 8, dpi = 500)
 
+## correlations
+
+## GBInd full vs densified, PC1-2
+cor(c(f2d_full_gbi_logical_full$data$PC1),c(f2d_full_gbi_logical_densified$data$PC1))
+cor(c(f2d_full_gbi_logical_full$data$PC2),c(f2d_full_gbi_logical_densified$data$PC2))
+cor(c(f2d_full_gbi_logical_full$data$PC3),c(f2d_full_gbi_logical_densified$data$PC3))
+
+## TypLinkInd full vs densified, PC1-2
+tli_l <- select(f2d_full_tli_logical_large$data, c(family, PC1, PC2, PC3))
+tli_s <- select(f2d_full_tli_logical_small$data, c(family, PC1, PC2, PC3))
+tli_both <- left_join(tli_l, tli_s, by="family")
+
+cor(c(tli_both$PC1.x),c(tli_both$PC1.y), use = "complete.obs")
+cor(c(tli_both$PC2.x),c(tli_both$PC2.y), use = "complete.obs")
+cor(c(tli_both$PC3.x),c(tli_both$PC3.y), use = "complete.obs")
 
