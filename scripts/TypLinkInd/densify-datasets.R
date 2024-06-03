@@ -8,13 +8,13 @@ library(gmt)
 library(ggplot2)
 
 # read functions
-source("../functions.R")
+source("scripts/functions.R")
 
 # read in logical TLI data
-logical <- read.csv("output/logicalTLI/full/logicalTLI_full.csv") %>% select(-X)
+logical <- read.csv("curated_data/TypLinkInd/logicalTLI/full/logicalTLI_full.csv") %>% select(-X)
 
 # read in statistical TLI data
-statistical <- read.csv("output/statisticalTLI/full/statisticalTLI_full.csv") %>% select(-X)
+statistical <- read.csv("curated_data/TypLinkInd/statisticalTLI/full/statisticalTLI_full.csv") %>% select(-X)
 
 # generate taxonomy matrix
 taxonomy_matrix <- as_flat_taxonomy_matrix(glottolog_languoids)
@@ -24,13 +24,13 @@ logical_for_pruning <- na_convert(logical)
 statistical_for_pruning <- na_convert(statistical)
 
 # group both logical and statistical data in 4 sets: (1) full (morphosyntax+phonology+lexicon), (2) morphosyntax only, (3) phonology only, (4) lexicon only
-logical_parameters <- read.csv("output/logicalTLI/cldf/parameters.csv")
+logical_parameters <- read.csv("curated_data/TypLinkInd/logicalTLI/cldf/parameters.csv")
 logical_full_for_pruning <- logical_for_pruning
 logical_morphosyntax_for_pruning <- logical_for_pruning[which(apply(logical_for_pruning[which(names(logical_for_pruning)%in%filter(logical_parameters,domain == "Morphosyntax")$short.name)],1,function(x)length(na.omit(x)))>0), c(1,which(names(logical_for_pruning)%in%filter(logical_parameters,domain == "Morphosyntax")$short.name))]
 logical_phonology_for_pruning <- logical_for_pruning[which(apply(logical_for_pruning[which(names(logical_for_pruning)%in%filter(logical_parameters,domain == "Phonology")$short.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(logical_for_pruning)%in%filter(logical_parameters,domain == "Phonology")$short.name))]
 logical_lexicon_for_pruning <- logical_for_pruning[which(apply(logical_for_pruning[which(names(logical_for_pruning)%in%filter(logical_parameters,domain == "Lexicon")$short.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(logical_for_pruning)%in%filter(logical_parameters,domain == "Lexicon")$short.name))]
 
-statistical_parameters <- read.csv("output/statisticalTLI/cldf/parameters.csv")
+statistical_parameters <- read.csv("curated_data/TypLinkInd/statisticalTLI/cldf/parameters.csv")
 statistical_full_for_pruning <- statistical_for_pruning
 statistical_morphosyntax_for_pruning <- statistical_for_pruning[which(apply(statistical_for_pruning[which(names(statistical_for_pruning)%in%filter(statistical_parameters,domain == "Morphosyntax")$short.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(statistical_for_pruning)%in%filter(statistical_parameters,domain == "Morphosyntax")$short.name))]
 statistical_phonology_for_pruning <- statistical_for_pruning[which(apply(statistical_for_pruning[which(names(statistical_for_pruning)%in%filter(statistical_parameters,domain == "Phonology")$short.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(statistical_for_pruning)%in%filter(statistical_parameters,domain == "Phonology")$short.name))]
@@ -83,10 +83,10 @@ pruned_statistical_full_large <- statistical[which(statistical$glottocode%in%pru
 pruned_statistical_full_small <- statistical[which(statistical$glottocode%in%pruned_statistical_full_small$glottocode), which(names(statistical)%in%names(pruned_statistical_full_small))]
 
 # save pruned matrices
-write.csv(pruned_logical_full_large,"output/logicalTLI/full/logicalTLI_full_pruned_large.csv")
-write.csv(pruned_logical_full_small,"output/logicalTLI/full/logicalTLI_full_pruned_small.csv")
-write.csv(pruned_statistical_full_large,"output/statisticalTLI/full/statisticalTLI_full_pruned_large.csv")
-write.csv(pruned_statistical_full_small,"output/statisticalTLI/full/statisticalTLI_full_pruned_small.csv")
+write.csv(pruned_logical_full_large,"curated_data/TypLinkInd/logicalTLI/full/logicalTLI_full_pruned_large.csv")
+write.csv(pruned_logical_full_small,"curated_data/TypLinkInd/logicalTLI/full/logicalTLI_full_pruned_small.csv")
+write.csv(pruned_statistical_full_large,"curated_data/TypLinkInd/statisticalTLI/full/statisticalTLI_full_pruned_large.csv")
+write.csv(pruned_statistical_full_small,"curated_data/TypLinkInd/statisticalTLI/full/statisticalTLI_full_pruned_small.csv")
 
 ##### densify morphosyntax curation
 # comment on weights: TLI morphosyntax is very sparse in terms of coding density (much like the full dataset) and also uneven in terms of taxonomic diversity
@@ -136,10 +136,10 @@ pruned_statistical_morphosyntax_large <- statistical[which(statistical$glottocod
 pruned_statistical_morphosyntax_small <- statistical[which(statistical$glottocode%in%pruned_statistical_morphosyntax_small$glottocode), which(names(statistical)%in%names(pruned_statistical_morphosyntax_small))]
 
 # save pruned matrices
-write.csv(pruned_logical_morphosyntax_large,"output/logicalTLI/morphosyntax/logicalTLI_morphosyntax_pruned_large.csv")
-write.csv(pruned_logical_morphosyntax_small,"output/logicalTLI/morphosyntax/logicalTLI_morphosyntax_pruned_small.csv")
-write.csv(pruned_statistical_morphosyntax_large,"output/statisticalTLI/morphosyntax/statisticalTLI_morphosyntax_pruned_large.csv")
-write.csv(pruned_statistical_morphosyntax_small,"output/statisticalTLI/morphosyntax/statisticalTLI_morphosyntax_pruned_small.csv")
+write.csv(pruned_logical_morphosyntax_large,"curated_data/TypLinkInd/logicalTLI/morphosyntax/logicalTLI_morphosyntax_pruned_large.csv")
+write.csv(pruned_logical_morphosyntax_small,"curated_data/TypLinkInd/logicalTLI/morphosyntax/logicalTLI_morphosyntax_pruned_small.csv")
+write.csv(pruned_statistical_morphosyntax_large,"curated_data/TypLinkInd/statisticalTLI/morphosyntax/statisticalTLI_morphosyntax_pruned_large.csv")
+write.csv(pruned_statistical_morphosyntax_small,"curated_data/TypLinkInd/statisticalTLI/morphosyntax/statisticalTLI_morphosyntax_pruned_small.csv")
 
 ##### densify lexicon curation
 # comment on weights: TLI lexicon is quite sparse in terms of coding density (a bit less than the datasets above) and also uneven in terms of taxonomic diversity (but less strongly so than the full dataset).
@@ -178,8 +178,8 @@ pruned_logical_lexicon <- logical[which(logical$glottocode%in%pruned_logical_lex
 pruned_statistical_lexicon <- statistical[which(statistical$glottocode%in%pruned_statistical_lexicon$glottocode), which(names(statistical)%in%names(pruned_statistical_lexicon))]
 
 # save pruned matrices
-write.csv(pruned_logical_lexicon,"output/logicalTLI/lexicon/logicalTLI_lexicon_pruned.csv")
-write.csv(pruned_statistical_lexicon,"output/statisticalTLI/lexicon/statisticalTLI_lexicon_pruned.csv")
+write.csv(pruned_logical_lexicon,"curated_data/TypLinkInd/logicalTLI/lexicon/logicalTLI_lexicon_pruned.csv")
+write.csv(pruned_statistical_lexicon,"curated_data/TypLinkInd/statisticalTLI/lexicon/statisticalTLI_lexicon_pruned.csv")
 
 ##### densify phonology curation
 # comment on weights: TLI phonology is rather dense (not particularly sparse in terms of coding density), but rather uneven in terms of taxonomic diversity
@@ -216,6 +216,6 @@ pruned_logical_phonology <- logical[which(logical$glottocode%in%pruned_logical_p
 pruned_statistical_phonology <- statistical[which(statistical$glottocode%in%pruned_statistical_phonology$glottocode), which(names(statistical)%in%names(pruned_statistical_phonology))]
 
 # save pruned matrices
-write.csv(pruned_logical_phonology,"output/logicalTLI/phonology/logicalTLI_phonology_pruned.csv")
-write.csv(pruned_statistical_phonology,"output/statisticalTLI/phonology/statisticalTLI_phonology_pruned.csv")
+write.csv(pruned_logical_phonology,"curated_data/TypLinkInd/logicalTLI/phonology/logicalTLI_phonology_pruned.csv")
+write.csv(pruned_statistical_phonology,"curated_data/TypLinkInd/statisticalTLI/phonology/statisticalTLI_phonology_pruned.csv")
 

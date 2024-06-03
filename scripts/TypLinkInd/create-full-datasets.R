@@ -12,11 +12,11 @@ library(reshape2)
 library(data.table)
 
 # load functions
-source("../functions.R")
+source("scripts/functions.R")
 
 ########## load and prepare data ########## 
 # read in original features and taxonomy
-original_feature_matrix <- as.data.frame(read_csv("output/compiled_external_input_features.csv", 
+original_feature_matrix <- as.data.frame(read_csv("scripts/TypLinkInd/compiled_external_input_features.csv", 
                                                    trim_ws = FALSE, col_types = "f"))
 
 taxonomy <- as_flat_taxonomy_matrix(glottolog_languoids)
@@ -49,7 +49,7 @@ original_feature_matrix <- update_glottocode_and_data(data=original_feature_matr
 expect_false(any(select(filter(taxonomy, id %in% original_feature_matrix$glottocode), level1) == "book1242"))
 
 # read in the file specifying the maintained features, the and the recoded features with their recoding patterns
-recode_patterns <- read.csv("input/feature-recode-patterns.csv")
+recode_patterns <- read.csv("scripts/TypLinkInd/feature-recode-patterns.csv")
 
 ########## parse all recodings in the appropriate order ########## 
 ## include without modification ##
@@ -981,11 +981,11 @@ recoded_data <- full_join(sixteenth_set_rec, recoded_data, by=c(glottocode="glot
 recoded_data[is.na(recoded_data)]<-"NA"
 
 # this full set of all input and recoded features needs to be stored to perform statistical tests
-write.csv(recoded_data, "output/statisticalTLI/data_for_stats.csv")
+write.csv(recoded_data, "curated_data/TypLinkInd/statisticalTLI/data_for_stats.csv")
 
 # subset full data into original layer; logical layer and statistical layer
-recode_patterns <- read.csv("input/feature-recode-patterns.csv")
-all_decisions <- read.csv("input/decisions-log.csv")
+recode_patterns <- read.csv("scripts/TypLinkInd/feature-recode-patterns.csv")
+all_decisions <- read.csv("scripts/TypLinkInd/decisions-log.csv")
 logical_decisions <- all_decisions %>% filter(modification.type %in% c("logical","design-automated","design-manual"))
 statistical_decisions <- all_decisions %>% filter(modification.type == "statistical")
 
@@ -1181,12 +1181,12 @@ names(logical_data)[2:ncol(logical_data)] <- as.character(sapply(names(logical_d
 names(statistical_data)[2:ncol(statistical_data)] <- as.character(sapply(names(statistical_data)[2:ncol(statistical_data)],function(x)filter(recode_patterns,new.name==x)$short.name))
 
 # save logical and statistical datasets as language-feature matrices (.csv)
-write.csv(logical_data,"output/logicalTLI/full/logicalTLI_full.csv")
-write.csv(statistical_data,"output/statisticalTLI/full/statisticalTLI_full.csv")
+write.csv(logical_data,"curated_data/TypLinkInd/logicalTLI/full/logicalTLI_full.csv")
+write.csv(statistical_data,"curated_data/TypLinkInd/statisticalTLI/full/statisticalTLI_full.csv")
 
 ########## make, check and save cldf  ########## 
 # languages.csv
-lang_metadata <- read.csv("../lang-metadata.csv")
+lang_metadata <- read.csv("scripts/lang-metadata.csv")
 
 taxonomy_logical <- data.frame(glottocode = logical_data$glottocode)
 taxonomy_logical <- left_join(taxonomy_logical,lang_metadata)
@@ -1197,7 +1197,7 @@ taxonomy_statistical <- left_join(taxonomy_statistical,lang_metadata)
 taxonomy_statistical[taxonomy_statistical==""] <- NA
 
 # parameters.csv
-parameters <- read.csv("input/feature-recode-patterns.csv") %>% select(1:24)
+parameters <- read.csv("scripts/TypLinkInd/feature-recode-patterns.csv") %>% select(1:24)
 
 parameters_logical <- parameters %>% filter(design.logical==T)
 parameters_statistical <- parameters %>% filter(design.logical.statistical==T)
@@ -1223,7 +1223,7 @@ logical_codes <- logical_long %>% select(c("code_ID","short.name","value")) %>% 
 statistical_codes <- statistical_long %>% select(c("code_ID","short.name","value")) %>% unique()
 
 # modifications.csv
-modifications <- read.csv("input/decisions-log.csv")
+modifications <- read.csv("scripts/TypLinkInd/decisions-log.csv")
 
 # cldf quality checks:
 expect_true(all(unique(logical_long$glottocode) %in% taxonomy_logical$glottocode))
@@ -1247,13 +1247,13 @@ expect_true(all(modifications$modification.ID %in% c(unique(unlist(strsplit(filt
                                                      unique(unlist(strsplit(filter(parameters,associated.modification.IDs.without.resulting.action!="")$associated.modification.IDs.without.resulting.action,";"))))))
 
 # write all cldf components:
-write.csv(taxonomy_logical,"output/logicalTLI/cldf/languages.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(taxonomy_statistical,"output/statisticalTLI/cldf/languages.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(parameters_logical,"output/logicalTLI/cldf/parameters.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(parameters_statistical,"output/statisticalTLI/cldf/parameters.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(logical_long,file="output/logicalTLI/cldf/values.csv",row.names = F)
-write.csv(statistical_long,file="output/statisticalTLI/cldf/values.csv",row.names = F)
-write.csv(logical_codes,"output/logicalTLI/cldf/codes.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(statistical_codes,"output/statisticalTLI/cldf/codes.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(modifications,"output/logicalTLI/cldf/modifications.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(modifications,"output/statisticalTLI/cldf/modifications.csv",fileEncoding="UTF-8",row.names = F)
+write.csv(taxonomy_logical,"curated_data/TypLinkInd/logicalTLI/cldf/languages.csv",fileEncoding="UTF-8",row.names = F)
+write.csv(taxonomy_statistical,"curated_data/TypLinkInd/statisticalTLI/cldf/languages.csv",fileEncoding="UTF-8",row.names = F)
+write.csv(parameters_logical,"curated_data/TypLinkInd/logicalTLI/cldf/parameters.csv",fileEncoding="UTF-8",row.names = F)
+write.csv(parameters_statistical,"curated_data/TypLinkInd/statisticalTLI/cldf/parameters.csv",fileEncoding="UTF-8",row.names = F)
+write.csv(logical_long,file="curated_data/TypLinkInd/logicalTLI/cldf/values.csv",row.names = F)
+write.csv(statistical_long,file="curated_data/TypLinkInd/statisticalTLI/cldf/values.csv",row.names = F)
+write.csv(logical_codes,"curated_data/TypLinkInd/logicalTLI/cldf/codes.csv",fileEncoding="UTF-8",row.names = F)
+write.csv(statistical_codes,"curated_data/TypLinkInd/statisticalTLI/cldf/codes.csv",fileEncoding="UTF-8",row.names = F)
+write.csv(modifications,"curated_data/TypLinkInd/logicalTLI/cldf/modifications.csv",fileEncoding="UTF-8",row.names = F)
+write.csv(modifications,"curated_data/TypLinkInd/statisticalTLI/cldf/modifications.csv",fileEncoding="UTF-8",row.names = F)

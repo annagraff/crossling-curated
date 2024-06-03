@@ -8,13 +8,13 @@ library(gmt)
 library(ggplot2)
 
 # read functions
-source("../functions.R")
+source("scripts/functions.R")
 
 # read in logical GBInd data
-logical <- read.csv("output/logicalGBI/logicalGBI.csv") %>% select(-X)
+logical <- read.csv("curated_data/GBInd/logicalGBI/logicalGBI.csv") %>% select(-X)
 
 # read in statistical GBInd data
-statistical <- read.csv("output/statisticalGBI/statisticalGBI.csv") %>% select(-X)
+statistical <- read.csv("curated_data/GBInd/statisticalGBI/statisticalGBI.csv") %>% select(-X)
 
 # generate taxonomy matrix
 taxonomy_matrix <- as_flat_taxonomy_matrix(glottolog_languoids)
@@ -62,5 +62,5 @@ logical_pruned <- logical[which(logical$glottocode%in%logical_pruned$glottocode)
 statistical_pruned <- statistical[which(statistical$glottocode%in%statistical_pruned$glottocode), which(names(statistical)%in%names(statistical_pruned))]
 
 # save pruned matrices
-write.csv(logical_pruned,"output/logicalGBI/logicalGBI_pruned.csv")
-write.csv(statistical_pruned,"output/statisticalGBI/statisticalGBI_pruned.csv")
+write.csv(logical_pruned,"curated_data/GBInd/logicalGBI/logicalGBI_pruned.csv")
+write.csv(statistical_pruned,"curated_data/GBInd/statisticalGBI/statisticalGBI_pruned.csv")
