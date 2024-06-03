@@ -16,7 +16,7 @@ source("scripts/functions.R")
 
 ########## load and prepare data ########## 
 # read in original features and taxonomy
-original_feature_matrix <- as.data.frame(read_csv("scripts/TypLinkInd/compiled_external_input_features.csv", 
+original_feature_matrix <- as.data.frame(read_csv("curated_data/TypLinkInd/compiled_external_input_features.csv", 
                                                    trim_ws = FALSE, col_types = "f"))
 
 taxonomy <- as_flat_taxonomy_matrix(glottolog_languoids)
@@ -1012,7 +1012,7 @@ statistical_data <- statistical_data %>% filter(glottocode %in% statistical_lg_f
 
 ########## sanity checks ########## 
 # sanity checks for automated design decisions
-input_nas <- as.data.frame(read_csv("output/compiled_external_input_features.csv", 
+input_nas <- as.data.frame(read_csv("curated_data/TypLinkInd/compiled_external_input_features.csv", 
                                     trim_ws = FALSE, col_types = "f"))
 input_nas[input_nas=="?"] <- NA
 nrstates<-data.frame(feature=names(input_nas),
