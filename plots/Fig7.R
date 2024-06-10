@@ -12,7 +12,7 @@ for_viz <- function(ID, modifications, diversity_samples,recoded_data,taxonomy,p
   
   expectation <- filter(modifications, modification.ID == ID)
   
-  raw_data <- recoded_data %>% select(c(expectation$variable.1.for.test,expectation$variable.2.for.test,glottocode)) # subset data to relevant variables, including ? and NA
+  raw_data <- recoded_data %>% select(c(expectation$feature.1.for.test,expectation$feature.2.for.test,glottocode)) # subset data to relevant variables, including ? and NA
   
   full_tbl_withqs <- table(unlist(raw_data[,1]),unlist(raw_data[,2])) # cross-tabulate variables using full data (including ? and NA)
   
@@ -27,20 +27,20 @@ for_viz <- function(ID, modifications, diversity_samples,recoded_data,taxonomy,p
   nrlgs2 <- length(na.omit(non_NAq_data[,2]))
   
   # determine the number of languages coded for both variables (this value is logged)
-  absoverlap <- non_NAq_data %>% filter(!is.na(get(expectation$variable.1.for.test))) %>% filter(!is.na(get(expectation$variable.2.for.test))) %>% nrow()
+  absoverlap <- non_NAq_data %>% filter(!is.na(get(expectation$feature.1.for.test))) %>% filter(!is.na(get(expectation$feature.2.for.test))) %>% nrow()
   
   # log the number of languages in the smaller and the number of languages in the larger variable; then determine the relative overlap of languages for the smaller and larger variable (these values are logged)
   smaller <- sort(c(nrlgs1,nrlgs2))[1]
   larger <- sort(c(nrlgs1,nrlgs2))[2]
-  relative.overlap.vsmall.in.vlarge <- absoverlap/smaller
-  relative.overlap.vlarge.in.vsmall <- absoverlap/larger
+  relative.overlap.fsmall.in.flarge <- absoverlap/smaller
+  relative.overlap.flarge.in.fsmall <- absoverlap/larger
   
   # convert the feature values into factor format
-  non_NAq_data[,expectation$variable.1.for.test] <- as.factor(unlist(non_NAq_data[,expectation$variable.1.for.test]))
-  non_NAq_data[,expectation$variable.2.for.test] <- as.factor(unlist(non_NAq_data[,expectation$variable.2.for.test]))
+  non_NAq_data[,expectation$feature.1.for.test] <- as.factor(unlist(non_NAq_data[,expectation$feature.1.for.test]))
+  non_NAq_data[,expectation$feature.2.for.test] <- as.factor(unlist(non_NAq_data[,expectation$feature.2.for.test]))
   
-  raw_data[,expectation$variable.1.for.test] <- as.factor(unlist(raw_data[,expectation$variable.1.for.test]))
-  raw_data[,expectation$variable.2.for.test] <- as.factor(unlist(raw_data[,expectation$variable.2.for.test]))
+  raw_data[,expectation$feature.1.for.test] <- as.factor(unlist(raw_data[,expectation$feature.1.for.test]))
+  raw_data[,expectation$feature.2.for.test] <- as.factor(unlist(raw_data[,expectation$feature.2.for.test]))
   
   # prepare a table to log relevant characteristics of the crosstable for each of the diversity samples
   expectation_assessment<-slice(data.frame(proportion_overlap_applicable_vs_non_applicable=NA, # this logs for each sample the proportion of languages coded for v2 in the relevant state of v1
@@ -59,14 +59,14 @@ for_viz <- function(ID, modifications, diversity_samples,recoded_data,taxonomy,p
     sample_table_noqs <- table(unlist(expectation_ds_sample_noqs[,1]),unlist(expectation_ds_sample_noqs[,2])) # this is the table
     
     # sanity checks
-    expect_true(all(levels(as.data.frame(sample_table_noqs)$Var1) %in% c(unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")), unlist(strsplit(as.character(unlist(expectation$v1.unequals.for.test)),", ")))))
-    expect_true(all(c(unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")), unlist(strsplit(as.character(unlist(expectation$v1.unequals.for.test)),", "))) %in% levels(as.data.frame(sample_table_noqs)$Var1)))
-    expect_true(all(c(unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", ")), unlist(strsplit(as.character(unlist(expectation$v2.unequals.for.test)),", "))) %in% levels(as.data.frame(sample_table_noqs)$Var2)))
-    expect_true(all(levels(as.data.frame(sample_table_noqs)$Var2) %in% c(unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", ")), unlist(strsplit(as.character(unlist(expectation$v2.unequals.for.test)),", ")))))
+    expect_true(all(levels(as.data.frame(sample_table_noqs)$Var1) %in% c(unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")), unlist(strsplit(as.character(unlist(expectation$f1.unequals.for.test)),", ")))))
+    expect_true(all(c(unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")), unlist(strsplit(as.character(unlist(expectation$f1.unequals.for.test)),", "))) %in% levels(as.data.frame(sample_table_noqs)$Var1)))
+    expect_true(all(c(unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", ")), unlist(strsplit(as.character(unlist(expectation$f2.unequals.for.test)),", "))) %in% levels(as.data.frame(sample_table_noqs)$Var2)))
+    expect_true(all(levels(as.data.frame(sample_table_noqs)$Var2) %in% c(unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", ")), unlist(strsplit(as.character(unlist(expectation$f2.unequals.for.test)),", ")))))
     
     # in the THEN-case, we evaluate how many languages are coded for the second variable, given the relevant state of the first variable (applicable), and how many languages are coded for the relevant state of the first variable overall (all)
-    applicable <- sum(sample_table_withqs[unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")),c(unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$v2.unequals.for.test)),", ")))])
-    all <- sum(sample_table_withqs[unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")),])
+    applicable <- sum(sample_table_withqs[unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),c(unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$f2.unequals.for.test)),", ")))])
+    all <- sum(sample_table_withqs[unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),])
     
     # this yields the relevant proportion, which is logged
     relevant.proportion <- applicable/all
@@ -74,18 +74,18 @@ for_viz <- function(ID, modifications, diversity_samples,recoded_data,taxonomy,p
     expectation_assessment[ds,"overlap_sufficient_test_power_positive"] <- relevant.proportion >= proportion_languages_must_be_in_applicable_state
     
     # in the THEN-condition, the languages that behave according to the expectation are those with the "equals" state of both variable 1 and variable 2
-    hyp.applies <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", "))]
+    hyp.applies <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", "))]
     
     # the languages that behave against the expectation are those with the "equals" state of variable 1 and the "unequals" state of variable 2
-    hyp.NOT.applies <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$v1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$v2.unequals.for.test)),", "))]
+    hyp.NOT.applies <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$f2.unequals.for.test)),", "))]
     
     # track the proportion of cases, in which the expectation is violated (d1)
     d1 <- sum(hyp.NOT.applies)/(sum(hyp.applies)+sum(hyp.NOT.applies)) # proportion of cases, in which gut expectation is violated with respect to variable 1
     expectation_assessment[ds,"result1_XOR_AND_THEN"]<-d1
     
     # the proportion must be compared to the baseline expectation: this is the proportion of languages in the "unequals" state of variable 2 overall (independently of variable 1 being coded or not, and which state it would be in)
-    baseline_v2_equals <- expectation_ds_sample_withqs %>% filter(get(expectation$variable.2.for.test)%in%unlist(strsplit(as.character(unlist(expectation$v2.equals.for.test)),", "))) %>% nrow()
-    baseline_v2_unequals <- expectation_ds_sample_withqs %>% filter(get(expectation$variable.2.for.test)%in%unlist(strsplit(as.character(unlist(expectation$v2.unequals.for.test)),", "))) %>% nrow()
+    baseline_v2_equals <- expectation_ds_sample_withqs %>% filter(get(expectation$feature.2.for.test)%in%unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", "))) %>% nrow()
+    baseline_v2_unequals <- expectation_ds_sample_withqs %>% filter(get(expectation$feature.2.for.test)%in%unlist(strsplit(as.character(unlist(expectation$f2.unequals.for.test)),", "))) %>% nrow()
     baseline_v2 <- baseline_v2_unequals/(baseline_v2_unequals+baseline_v2_equals)
     
     # log the baseline
@@ -118,9 +118,9 @@ for_viz <- function(ID, modifications, diversity_samples,recoded_data,taxonomy,p
 }
 
 
-modifications <- read.csv("../data/TypLinkInd/output/statisticalTLI/cldf/modifications.csv")
-diversity_samples <- read.csv("../data/TypLinkInd/output/1000_diversity_samples.csv", row.names = 1)
-recoded_data <- read.csv("../data/TypLinkInd/output/statisticalTLI/data_for_stats.csv", row.names = "X")
+modifications <- read.csv("../curated_data/TypLinkInd/statisticalTLI/cldf/modifications.csv")
+diversity_samples <- read.csv("../curated_data/TypLinkInd/1000_diversity_samples.csv", row.names = 1)
+recoded_data <- read.csv("../curated_data/TypLinkInd/statisticalTLI/data_for_stats.csv", row.names = "X")
 names(recoded_data) <- gsub("\\.","+",names(recoded_data))
 taxonomy <- as_flat_taxonomy_matrix(glottolog_languoids)
 proportion_languages_must_be_in_applicable_state <- 1/3
