@@ -46,8 +46,8 @@ wals_data <- as.data.frame(pivot_wider(wals,
 expect_false(any(duplicated(wals_data$Glottocode)))
 
 ######### collect and compile typological data from autotyp ######### 
-autotyp_languages <- read.csv("raw_data/autotyp_v.1.1.1/languages.csv",header=TRUE, sep=",")
-autotyp_parameters <- read.csv("raw_data/autotyp_v.1.1.1/parameters.csv",header=TRUE, sep=",")
+autotyp_languages <- read.csv("../../raw_data/autotyp_v.1.1.1/languages.csv",header=TRUE, sep=",")
+autotyp_parameters <- read.csv("../../raw_data/autotyp_v.1.1.1/parameters.csv",header=TRUE, sep=",")
 autotyp_parameters <- autotyp_parameters %>% filter(dataset %in% c("Alienability",
                                                                    "AlignmentForDefaultPredicatesPerLanguage",
                                                                    "ClauseWordOrder",
@@ -70,7 +70,7 @@ autotyp_parameters <- autotyp_parameters %>% select(c("ID","Feature"))
 names(autotyp_languages)[1]<-"Language_ID"
 names(autotyp_parameters)[1]<-"Parameter_ID"
 
-autotyp_values <- read.csv("raw_data/autotyp_v.1.1.1/values.csv",header=TRUE, sep=",")
+autotyp_values <- read.csv("../../raw_data/autotyp_v.1.1.1/values.csv",header=TRUE, sep=",")
 autotyp_values <- autotyp_values %>% filter(Parameter_ID%in%unique(autotyp_parameters$Parameter_ID))
 
 autotyp_merged <- autotyp_languages %>% merge(autotyp_values, by = "Language_ID", all = TRUE) %>% 
@@ -86,9 +86,9 @@ autotyp_data<-pivot_wider(autotyp_merged,
                        values_fn = function(x){if (length(unique(x))==1){unique(x)} else ("?")})
 
 ######### collect and compile typological data from lexibank ######### 
-lexibank_lgs <- read.csv("raw_data/lexibank_v.1.0/languages.csv",header=TRUE, sep=",")
-lexibank_lexicon <- read.csv("raw_data/lexibank_v.1.0/lexicon-values.csv",header=TRUE, sep=",")
-lexibank_phonology <- read.csv("raw_data/lexibank_v.1.0/phonology-values.csv",header=TRUE, sep=",")
+lexibank_lgs <- read.csv("../../raw_data/lexibank_v.1.0/languages.csv",header=TRUE, sep=",")
+lexibank_lexicon <- read.csv("../../raw_data/lexibank_v.1.0/lexicon-values.csv",header=TRUE, sep=",")
+lexibank_phonology <- read.csv("../../raw_data/lexibank_v.1.0/phonology-values.csv",header=TRUE, sep=",")
 
 lexibank_lexicon <- lexibank_lexicon %>% filter(Parameter_ID%in%c("concepts","forms","senses")==F) %>% select(Language_ID,Value,Parameter_ID)
 lexibank_phonology <- lexibank_phonology %>% filter(Parameter_ID%in%c("concepts","forms","senses","forms_with_sounds")==F) %>% select(Language_ID,Value,Parameter_ID)
@@ -109,7 +109,7 @@ lexibank_data<-pivot_wider(lexibank_merged,
 
 phoible_data <- local({
   # load the PHOIBLE phoneme list, only take the privileged sources
-  phoible <- read_csv("raw_data/phoible_v.20230416.csv", # url("https://raw.githubusercontent.com/phoible/dev/master/data/phoible.csv") after the last commit as of January 2024 (https://github.com/phoible/dev/commit/7030ae02863f0e1ddaf67f0f950c0ea1477cd4ee)
+  phoible <- read_csv("../../raw_data/phoible_v.20230416.csv", # url("https://raw.githubusercontent.com/phoible/dev/master/data/phoible.csv") after the last commit as of January 2024 (https://github.com/phoible/dev/commit/7030ae02863f0e1ddaf67f0f950c0ea1477cd4ee)
                       col_types=c(InventoryID='i', 
                                   Marginal='l', 
                                   .default='c')) %>%
@@ -243,4 +243,4 @@ typology_merged[is.na(typology_merged)]<-"?"
 
 colnames(typology_merged)[1] <- "glottocode"
 
-write.csv(typology_merged,"curated_data/TypLinkInd/compiled_external_input_features.csv",row.names = F)
+write.csv(typology_merged,"../../curated_data/TypLinkInd/compiled_external_input_features.csv",row.names = F)

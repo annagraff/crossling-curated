@@ -10,21 +10,21 @@ library(readr)
 library(densify)
 
 # load functions
-source("scripts/functions.R")
+source("../functions.R")
 
 ### prepare data ###
 # load all formulated expectations and stored results
-expectations <- read.csv("scripts/GBInd/decisions-log.csv") %>% filter(modification.type == "statistical")
+expectations <- read.csv("decisions-log.csv") %>% filter(modification.type == "statistical")
 
 # load logical grambank data, glottolog taxonomy and glottolog macroarea data
-logical_data <- read.csv("curated_data/GBInd/logicalGBI/logicalGBI.csv") %>% select(-X)
-taxonomy <- read.csv("curated_data/GBInd/logicalGBI/cldf/languages.csv")
+logical_data <- read.csv("../../curated_data/GBInd/logicalGBI/logicalGBI.csv") %>% select(-X)
+taxonomy <- read.csv("../../curated_data/GBInd/logicalGBI/cldf/languages.csv")
 
 # subset taxonomy to languages in logical data with a macroarea-label
 lgs <- filter(taxonomy,glottocode%in%logical_data$glottocode)
 
 # load data for stats
-recoded_data <- read.csv("curated_data/GBInd/statisticalGBI/data_for_stats.csv") %>% select(-X)
+recoded_data <- read.csv("../../curated_data/GBInd/statisticalGBI/data_for_stats.csv") %>% select(-X)
 
 ### create 500 diversity samples; each row of diversity_samples is a diversity sample of 120 lgs; 1 from each family (glottolog-based) ###
 # list all six glottolog macroareas
@@ -51,7 +51,7 @@ for (smpl in 1:500){
 }
 
 # save this diversity sample
-write.csv(lg_samples_500,"curated_data/GBInd/500_diversity_samples.csv")
+write.csv(lg_samples_500,"../../curated_data/GBInd/500_diversity_samples.csv")
 
 ### rerun all tests to reproduce stored results using the input data, expectations, taxonomy and language samples
 # specify test condition, fix threshold
