@@ -12,11 +12,11 @@ library(reshape2)
 library(data.table)
 
 # load functions
-source("../functions.R")
+source("scripts/functions.R")
 
 ########## load and prepare data ########## 
 # read in original grambank data
-original_feature_matrix <- as.data.frame(read_csv("../../raw_data/grambank_v.1.0.3.csv", 
+original_feature_matrix <- as.data.frame(read_csv("raw_data/grambank_v.1.0.3.csv", 
                                                    trim_ws = FALSE, col_types = "f"))
 
 names(original_feature_matrix)[1]<-"glottocode"
@@ -25,11 +25,11 @@ names(original_feature_matrix)[1]<-"glottocode"
 original_feature_matrix[is.na(original_feature_matrix)] <- "?"
 
 # read in manual language meta-data, check all languages are documented
-lang_metadata <- read.csv("../lang-metadata.csv")
+lang_metadata <- read.csv("scripts/lang-metadata.csv")
 expect_true(all(original_feature_matrix$glottocode %in% lang_metadata$glottocode))
 
 # read in the file specifying the maintained features, the and the recoded features with their recoding patterns
-recode_patterns <- read.csv("feature-recode-patterns.csv")
+recode_patterns <- read.csv("scripts/GBInd/feature-recode-patterns.csv")
 
 ########## parse all recodings in the appropriate order ########## 
 ## include without modification ##
@@ -583,11 +583,11 @@ recoded_data <- full_join(tenth_set_rec, recoded_data, by=c(glottocode="glottoco
 recoded_data[is.na(recoded_data)]<-"NA"
 
 # this full set of all input and recoded features needs to be stored to perform statistical tests
-write.csv(recoded_data, "../../curated_data/GBInd/statisticalGBI/data_for_stats.csv")
+write.csv(recoded_data, "curated_data/GBInd/statisticalGBI/data_for_stats.csv")
 
 # subset full data into original layer; logical layer and statistical layer
-recode_patterns <- read.csv("feature-recode-patterns.csv")
-all_decisions <- read.csv("decisions-log.csv")
+recode_patterns <- read.csv("scripts/GBInd/feature-recode-patterns.csv")
+all_decisions <- read.csv("scripts/GBInd/decisions-log.csv")
 logical_decisions <- all_decisions %>% filter(modification.type %in% c("logical","design"))
 statistical_decisions <- all_decisions %>% filter(modification.type == "statistical")
 
@@ -704,12 +704,12 @@ expect_true(all(na.omit(unique(unlist(strsplit(recode_patterns$known.remaining.d
 
 ########## save data as language-feature matrices ########## 
 # save logical and statistical datasets as language-feature matrices (.csv)
-write.csv(logical_data,"../../curated_data/GBInd/logicalGBI/logicalGBI.csv")
-write.csv(statistical_data,"../../curated_data/GBInd/statisticalGBI/statisticalGBI.csv")
+write.csv(logical_data,"curated_data/GBInd/logicalGBI/logicalGBI.csv")
+write.csv(statistical_data,"curated_data/GBInd/statisticalGBI/statisticalGBI.csv")
 
 ########## make, check and save cldf  ########## 
 # languages.csv
-lang_metadata <- read.csv("../lang-metadata.csv")
+lang_metadata <- read.csv("scripts/lang-metadata.csv")
 
 taxonomy_logical <- data.frame(glottocode = logical_data$glottocode)
 taxonomy_logical <- left_join(taxonomy_logical,lang_metadata)
@@ -720,7 +720,7 @@ taxonomy_statistical <- left_join(taxonomy_statistical,lang_metadata)
 taxonomy_statistical[taxonomy_statistical==""] <- NA
 
 # parameters.csv
-parameters <- read.csv("feature-recode-patterns.csv")
+parameters <- read.csv("scripts/GBInd/feature-recode-patterns.csv")
 
 parameters_logical <- parameters %>% filter(design.logical==T)
 parameters_statistical <- parameters %>% filter(design.logical.statistical==T)
@@ -746,7 +746,7 @@ logical_codes <- logical_long %>% select(c("code_ID","new.name","value")) %>% un
 statistical_codes <- statistical_long %>% select(c("code_ID","new.name","value")) %>% unique()
 
 # modifications.csv
-modifications <- read.csv("decisions-log.csv")
+modifications <- read.csv("scripts/GBInd/decisions-log.csv")
 
 # cldf quality checks:
 expect_true(all(unique(logical_long$glottocode) %in% taxonomy_logical$glottocode))
@@ -770,13 +770,13 @@ expect_true(all(modifications$modification.ID %in% c(unique(unlist(strsplit(filt
                                                      unique(unlist(strsplit(filter(parameters,associated.modification.IDs.without.resulting.action!="")$associated.modification.IDs.without.resulting.action,";"))))))
 
 # write all cldf components:
-write.csv(taxonomy_logical,"../../curated_data/GBInd/logicalGBI/cldf/languages.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(taxonomy_statistical,"../../curated_data/GBInd/statisticalGBI/cldf/languages.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(parameters_logical,"../../curated_data/GBInd/logicalGBI/cldf/parameters.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(parameters_statistical,"../../curated_data/GBInd/statisticalGBI/cldf/parameters.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(logical_long,"../../curated_data/GBInd/logicalGBI/cldf/values.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(statistical_long,"../../curated_data/GBInd/statisticalGBI/cldf/values.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(logical_codes,"../../curated_data/GBInd/logicalGBI/cldf/codes.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(statistical_codes,"../../curated_data/GBInd/statisticalGBI/cldf/codes.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(modifications,"../../curated_data/GBInd/logicalGBI/cldf/modifications.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(modifications,"../../curated_data/GBInd/statisticalGBI/cldf/modifications.csv",fileEncoding="UTF-8",row.names = F)
+write.csv(taxonomy_logical,"curated_data/GBInd/logicalGBI/cldf/languages.csv",fileEncoding="UTF-8",row.names = F)
+write.csv(taxonomy_statistical,"curated_data/GBInd/statisticalGBI/cldf/languages.csv",fileEncoding="UTF-8",row.names = F)
+write.csv(parameters_logical,"curated_data/GBInd/logicalGBI/cldf/parameters.csv",fileEncoding="UTF-8",row.names = F)
+write.csv(parameters_statistical,"curated_data/GBInd/statisticalGBI/cldf/parameters.csv",fileEncoding="UTF-8",row.names = F)
+write.csv(logical_long,"curated_data/GBInd/logicalGBI/cldf/values.csv",fileEncoding="UTF-8",row.names = F)
+write.csv(statistical_long,"curated_data/GBInd/statisticalGBI/cldf/values.csv",fileEncoding="UTF-8",row.names = F)
+write.csv(logical_codes,"curated_data/GBInd/logicalGBI/cldf/codes.csv",fileEncoding="UTF-8",row.names = F)
+write.csv(statistical_codes,"curated_data/GBInd/statisticalGBI/cldf/codes.csv",fileEncoding="UTF-8",row.names = F)
+write.csv(modifications,"curated_data/GBInd/logicalGBI/cldf/modifications.csv",fileEncoding="UTF-8",row.names = F)
+write.csv(modifications,"curated_data/GBInd/statisticalGBI/cldf/modifications.csv",fileEncoding="UTF-8",row.names = F)
