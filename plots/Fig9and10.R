@@ -6,7 +6,7 @@ library(tidyverse)
 library(rnaturalearth)
 library(cowplot)
 
-source("../data/functions.R")
+source("../scripts/functions.R")
 
 ## Retrieve taxonomy, coordinates and map
 
@@ -14,7 +14,7 @@ source("../data/functions.R")
 taxonomy_matrix <- as_flat_taxonomy_matrix(glottolog_languoids)
 
 # link coordinates to lgs
-macroareas <- read.csv("../data/lang-metadata.csv")
+macroareas <- read.csv("../scripts/lang-metadata.csv")
 names(macroareas)[1] <- "id"
 macroareas <- na_convert(macroareas)
 taxonomy_matrix_for_plot <- merge(taxonomy_matrix,select(macroareas, c("id","latitude","longitude","glottolog.macroarea")),by="id") %>% filter(!is.na(latitude))
@@ -27,18 +27,18 @@ world_map_initial <- rbind(world_map, minor_islands)
 
 ## Grambank and GBI data: suitable given high coding densities and high number of languages
 # read in matrices (original, logical and statistical), convert all NA and ? to NA, factorize all variables
-gb_original <- read.csv("../raw/grambank_v.1.0.3.csv", row.names = "Glottocode")
+gb_original <- read.csv("../raw_data/grambank_v.1.0.3.csv", row.names = "Glottocode")
 gb_original <- na_convert(gb_original)
 gb_original <- factorise(gb_original)
 sum(!is.na(gb_original))/(nrow(gb_original)*ncol(gb_original)) # coding density: 75%
 
-gbi_logical <- read.csv("../data/GBInd/output/logicalGBI/logicalGBI.csv",row.names = "glottocode") %>% select(-X)
+gbi_logical <- read.csv("../curated_data/GBInd/logicalGBI/logicalGBI.csv",row.names = "glottocode") %>% select(-X)
 gbi_logical <- na_convert(gbi_logical)
 gbi_logical <- factorise(gbi_logical)
 gbi_logical <- gbi_logical[which(rownames(gbi_logical)%in%taxonomy_matrix_for_plot$id),]
 sum(!is.na(gbi_logical))/(nrow(gbi_logical)*ncol(gbi_logical)) # coding density: 62%
 
-gbi_statistical <- read.csv("../data/GBInd/output/statisticalGBI/statisticalGBI.csv",row.names = "glottocode") %>% select(-X)
+gbi_statistical <- read.csv("../curated_data/GBInd/statisticalGBI/statisticalGBI.csv",row.names = "glottocode") %>% select(-X)
 gbi_statistical <- na_convert(gbi_statistical)
 gbi_statistical <- factorise(gbi_statistical)
 gbi_statistical <- gbi_statistical[which(rownames(gbi_statistical)%in%taxonomy_matrix_for_plot$id),]
@@ -47,27 +47,27 @@ sum(!is.na(gbi_statistical))/(nrow(gbi_statistical)*ncol(gbi_statistical)) # cod
 ## TLI data: only phonology and lexical subsets suitable given high coding densities AND appropriately high numbers of languages
 # phonology
 # read in logical TLI data
-logical <- read.csv("../data/TypLinkInd/output/logicalTLI/full/logicalTLI_full.csv",row.names = "glottocode") %>% select(-X)
+logical <- read.csv("../curated_data/TypLinkInd/logicalTLI/full/logicalTLI_full.csv",row.names = "glottocode") %>% select(-X)
 logical <- na_convert(logical)
-logical_parameters <- read.csv("../data/TypLinkInd/output/logicalTLI/cldf/parameters.csv")
+logical_parameters <- read.csv("../curated_data/TypLinkInd/logicalTLI/cldf/parameters.csv")
 phonology_logical <- logical[which(apply(logical[which(names(logical)%in%filter(logical_parameters,domain == "Phonology")$short.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(logical)%in%filter(logical_parameters,domain == "Phonology")$short.name))]
 phonology_logical <- factorise(phonology_logical)
 sum(!is.na(phonology_logical))/(nrow(phonology_logical)*ncol(phonology_logical)) # coding density: 56% --> ok!
 
-statistical <- read.csv("../data/TypLinkInd/output/statisticalTLI/full/statisticalTLI_full.csv",row.names = "glottocode") %>% select(-X)
+statistical <- read.csv("../curated_data/TypLinkInd/statisticalTLI/full/statisticalTLI_full.csv",row.names = "glottocode") %>% select(-X)
 statistical <- na_convert(statistical)
-statistical_parameters <- read.csv("../data/TypLinkInd/output/statisticalTLI/cldf/parameters.csv")
+statistical_parameters <- read.csv("../curated_data/TypLinkInd/statisticalTLI/cldf/parameters.csv")
 phonology_statistical <- statistical[which(apply(statistical[which(names(statistical)%in%filter(statistical_parameters,domain == "Phonology")$short.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(statistical)%in%filter(statistical_parameters,domain == "Phonology")$short.name))]
 phonology_statistical <- factorise(phonology_statistical)
 sum(!is.na(phonology_statistical))/(nrow(phonology_statistical)*ncol(phonology_statistical)) # coding density: 55% --> ok!
 
 # lexicon
-lexicon_logical_pruned <- read.csv("../data/TypLinkInd/output/logicalTLI/lexicon/logicalTLI_lexicon_pruned.csv", row.names = "glottocode") %>% select(-X)
+lexicon_logical_pruned <- read.csv("../curated_data/TypLinkInd/logicalTLI/lexicon/logicalTLI_lexicon_pruned.csv", row.names = "glottocode") %>% select(-X)
 lexicon_logical_pruned <- na_convert(lexicon_logical_pruned)
 lexicon_logical_pruned <- factorise(lexicon_logical_pruned)
 sum(!is.na(lexicon_logical_pruned))/(nrow(lexicon_logical_pruned)*ncol(lexicon_logical_pruned)) # coding density: 45% --> ok!
 
-lexicon_statistical_pruned <- read.csv("../data/TypLinkInd/output/statisticalTLI/lexicon/statisticalTLI_lexicon_pruned.csv", row.names = "glottocode") %>% select(-X)
+lexicon_statistical_pruned <- read.csv("../curated_data/TypLinkInd/statisticalTLI/lexicon/statisticalTLI_lexicon_pruned.csv", row.names = "glottocode") %>% select(-X)
 lexicon_statistical_pruned <- na_convert(lexicon_statistical_pruned)
 lexicon_statistical_pruned <- factorise(lexicon_statistical_pruned)
 sum(!is.na(lexicon_statistical_pruned))/(nrow(lexicon_statistical_pruned)*ncol(lexicon_statistical_pruned)) # coding density: 45% --> ok!

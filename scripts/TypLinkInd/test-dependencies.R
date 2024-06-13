@@ -10,15 +10,15 @@ library(readr)
 library(densify)
 
 # load functions
-source("scripts/functions.R")
+source("../functions.R")
 
 ### prepare data ###
 # load all formulated expectations and stored results
-expectations <- read.csv("scripts/TypLinkInd/decisions-log.csv") %>% filter(modification.type == "statistical")
+expectations <- read.csv("decisions-log.csv") %>% filter(modification.type == "statistical")
 
 # load logical grambank data, glottolog taxonomy and glottolog macroarea data
-logical_data <- read.csv("curated_data/TypLinkInd/logicalTLI/full/logicalTLI_full.csv") %>% select(-X)
-taxonomy <- read.csv("curated_data/TypLinkInd/logicalTLI/cldf/languages.csv")
+logical_data <- read.csv("../../curated_data/TypLinkInd/logicalTLI/full/logicalTLI_full.csv") %>% select(-X)
+taxonomy <- read.csv("../../curated_data/TypLinkInd/logicalTLI/cldf/languages.csv")
 
 # to create the samples, take into consideration all glottocodes for which at least 10 features are coded (not ? or NA) in the design.logical matrix
 data_for_sample_generation <- logical_data
@@ -32,7 +32,7 @@ lgs <- as.character(data_for_sample_generation$glottocode)
 lgs <- filter(taxonomy,glottocode%in%lgs)
 
 # load data for stats
-recoded_data <- read.csv("curated_data/TypLinkInd/statisticalTLI/data_for_stats.csv") %>% select(-X)
+recoded_data <- read.csv("../../curated_data/TypLinkInd/statisticalTLI/data_for_stats.csv") %>% select(-X)
 
 # replace . by + in variable names
 names(recoded_data) <- str_replace_all(names(recoded_data), c("\\."="\\+"))
@@ -62,7 +62,7 @@ for (smpl in 1:1000){
 }
 
 # store the diversity samples
-write.csv(lg_samples_1000,"curated_data/TypLinkInd/1000_diversity_samples.csv")
+write.csv(lg_samples_1000,"../../curated_data/TypLinkInd/1000_diversity_samples.csv")
 
 ### rerun all tests to reproduce stored results using the input data, expectations, taxonomy and language samples
 # specify test condition, fix threshold
@@ -96,4 +96,3 @@ summaries1 <-  data.frame(y=apply(results,1,function(x)if(is.na(x[21])){"no"}els
 summaries2 <- data.frame(x=apply(summaries1,1,function(x)if(x[2]==x[3]&x[3]==x[4]&x[4]==x[5]&x[5]=="yes"){"yes"}else{"no"}))
 
 expect_true(all(cbind(summaries2,summaries1) == expectations[,8:13]))
-

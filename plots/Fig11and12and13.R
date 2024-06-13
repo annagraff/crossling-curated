@@ -8,7 +8,7 @@ library(cowplot)
 library(gridExtra)
 library(pcaMethods)
 
-source("../data/functions.R")
+source("../scripts/functions.R")
 
 ## Retrieve taxonomy, coordinates and map
 
@@ -16,7 +16,7 @@ source("../data/functions.R")
 taxonomy_matrix_densify <- as_flat_taxonomy_matrix(glottolog_languoids)
 
 # link coordinates to lgs
-macroareas <- read.csv("../data/lang-metadata.csv")
+macroareas <- read.csv("../scripts/lang-metadata.csv")
 names(macroareas)[1] <- "id"
 macroareas <- na_convert(macroareas)
 taxonomy_matrix <- merge(taxonomy_matrix_densify,select(macroareas, c("id","latitude","longitude","glottolog.macroarea")),by="id")
@@ -31,36 +31,36 @@ world_map_initial <- rbind(world_map, minor_islands)
 
 ## GBI logical data, full vs. densified
 # read in matrices, convert all NA and ? to NA, factorize all variables
-gbi_logical_full <- read.csv("../data/GBInd/output/logicalGBI/logicalGBI.csv",row.names = "glottocode") %>% select(-X)
+gbi_logical_full <- read.csv("../curated_data/GBInd/logicalGBI/logicalGBI.csv",row.names = "glottocode") %>% select(-X)
 gbi_logical_full <- na_convert(gbi_logical_full)
 gbi_logical_full <- factorise(gbi_logical_full)
 
-gbi_logical_densified <- read.csv("../data/GBInd/output/logicalGBI/logicalGBI_pruned.csv",row.names = "glottocode") %>% select(-X)
+gbi_logical_densified <- read.csv("../curated_data/GBInd/logicalGBI/logicalGBI_pruned.csv",row.names = "glottocode") %>% select(-X)
 gbi_logical_densified <- na_convert(gbi_logical_densified)
 gbi_logical_densified <- factorise(gbi_logical_densified)
 
 ## TLI logical data: large vs. small densified for full and morphosyntax data, densified for phonology and lexicon
 # full set of variables
-tli_logical_large <- read.csv("../data/TypLinkInd/output/logicalTLI/full/logicalTLI_full_pruned_large.csv",row.names = "glottocode") %>% select(-X)
+tli_logical_large <- read.csv("../curated_data/TypLinkInd/logicalTLI/full/logicalTLI_full_pruned_large.csv",row.names = "glottocode") %>% select(-X)
 tli_logical_large <- na_convert(tli_logical_large)
 tli_logical_large <- factorise(tli_logical_large)
 
-tli_logical_small <- read.csv("../data/TypLinkInd/output/logicalTLI/full/logicalTLI_full_pruned_small.csv",row.names = "glottocode") %>% select(-X)
+tli_logical_small <- read.csv("../curated_data/TypLinkInd/logicalTLI/full/logicalTLI_full_pruned_small.csv",row.names = "glottocode") %>% select(-X)
 tli_logical_small <- na_convert(tli_logical_small)
 tli_logical_small <- factorise(tli_logical_small)
 
 # morphosyntax
-morphosyntax_logical_large <- read.csv("../data/TypLinkInd/output/logicalTLI/morphosyntax/logicalTLI_morphosyntax_pruned_large.csv",row.names = "glottocode") %>% select(-X)
+morphosyntax_logical_large <- read.csv("../curated_data/TypLinkInd/logicalTLI/morphosyntax/logicalTLI_morphosyntax_pruned_large.csv",row.names = "glottocode") %>% select(-X)
 morphosyntax_logical_large <- na_convert(morphosyntax_logical_large)
 morphosyntax_logical_large <- factorise(morphosyntax_logical_large)
 
 # phonology
-phonology_logical_pruned <- read.csv("../data/TypLinkInd/output/logicalTLI/phonology/logicalTLI_phonology_pruned.csv",row.names = "glottocode") %>% select(-X)
+phonology_logical_pruned <- read.csv("../curated_data/TypLinkInd/logicalTLI/phonology/logicalTLI_phonology_pruned.csv",row.names = "glottocode") %>% select(-X)
 phonology_logical_pruned <- na_convert(phonology_logical_pruned)
 phonology_logical_pruned <- factorise(phonology_logical_pruned)
 
 # lexicon
-lexicon_logical_pruned <- read.csv("../data/TypLinkInd/output/logicalTLI/lexicon/logicalTLI_lexicon_pruned.csv",row.names = "glottocode") %>% select(-X)
+lexicon_logical_pruned <- read.csv("../curated_data/TypLinkInd/logicalTLI/lexicon/logicalTLI_lexicon_pruned.csv",row.names = "glottocode") %>% select(-X)
 lexicon_logical_pruned <- na_convert(lexicon_logical_pruned)
 lexicon_logical_pruned <- factorise(lexicon_logical_pruned)
 
