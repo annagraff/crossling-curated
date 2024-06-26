@@ -4,14 +4,13 @@ if(!file.exists("scripts/build-curated-datasets.R")) rlang::abort(
 )
 
 
-cat("Building curated GBInd datasets\n")
-source("scripts/GBInd/build-datasets.R")
-source("scripts/GBInd/densify-datasets.R")
-source("scripts/GBInd/test-dependencies.R")
+cat("Building curated GBI datasets\n")
+source("scripts/GBI/build-datasets.R")
+source("scripts/GBI/test-dependencies.R")
+source("scripts/GBI/densify-datasets.R")
 
-
-cat("Building curated TypLinkInd datasets\n")
-source("scripts/TypLinkInd/compile-external-input.R")
-source("scripts/TypLinkInd/build-datasets.R")
-source("scripts/TypLinkInd/densify-datasets.R")
-source("scripts/TypLinkInd/test-dependencies.R")
+cat("Building curated TLI datasets\n")
+source("scripts/TLI/compile-external-input.R")
+source("scripts/TLI/build-datasets.R")
+source("scripts/TLI/test-dependencies.R")
+source("scripts/TLI/densify-datasets.R")

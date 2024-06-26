@@ -45,10 +45,10 @@ for_viz <- function(ID, modifications, diversity_samples,recoded_data,taxonomy,p
   # prepare a table to log relevant characteristics of the crosstable for each of the diversity samples
   expectation_assessment<-slice(data.frame(proportion_overlap_applicable_vs_non_applicable=NA, # this logs for each sample the proportion of languages coded for v2 in the relevant state of v1
                                            overlap_sufficient_test_power_positive=NA, # this denotes for each sample whether the proportion and number of languages coded for v2 in the relevant state of v1 is sufficient, the proportion is defined by the user and denoted proportion_languages_must_be_in_applicable_state
-                                           result1_XOR_AND_THEN=NA, # this denotes the proportion of languages behaving against the expectation in the THEN condition and in the first dimension of the XOR and AND conditions
-                                           result2_XOR_AND=NA, # this denotes the proportion of languages behaving against the expectation in the second dimension of the XOR and AND conditions
-                                           baseline1_XOR_AND_THEN=NA, # this denotes the proportion of languages in the "unequals" state for variable 2 in the THEN condition overall or in the first dimension of the XOR condition
-                                           baseline2_XOR_AND=NA),0) # this denotes whether the expected relationship is confirmed in the subsample in accordance with the defined thresholds
+                                           result1_OR_AND_THEN=NA, # this denotes the proportion of languages behaving against the expectation in the THEN condition and in the first dimension of the OR and AND conditions
+                                           result2_OR_AND=NA, # this denotes the proportion of languages behaving against the expectation in the second dimension of the OR and AND conditions
+                                           baseline1_OR_AND_THEN=NA, # this denotes the proportion of languages in the "unequals" state for variable 2 in the THEN condition overall or in the first dimension of the OR condition
+                                           baseline2_OR_AND=NA),0) # this denotes whether the expected relationship is confirmed in the subsample in accordance with the defined thresholds
   
   for (ds in 1:ncol(diversity_samples)){ # loop through all diversity samples
     # select the subset of languages in the diversity sample for the relevant variables and tabulate for both the full data (including ? and NA) and the non-Q/NA data.
@@ -81,7 +81,7 @@ for_viz <- function(ID, modifications, diversity_samples,recoded_data,taxonomy,p
     
     # track the proportion of cases, in which the expectation is violated (d1)
     d1 <- sum(hyp.NOT.applies)/(sum(hyp.applies)+sum(hyp.NOT.applies)) # proportion of cases, in which gut expectation is violated with respect to variable 1
-    expectation_assessment[ds,"result1_XOR_AND_THEN"]<-d1
+    expectation_assessment[ds,"result1_OR_AND_THEN"]<-d1
     
     # the proportion must be compared to the baseline expectation: this is the proportion of languages in the "unequals" state of variable 2 overall (independently of variable 1 being coded or not, and which state it would be in)
     baseline_v2_equals <- expectation_ds_sample_withqs %>% filter(get(expectation$feature.2.for.test)%in%unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", "))) %>% nrow()
@@ -89,19 +89,19 @@ for_viz <- function(ID, modifications, diversity_samples,recoded_data,taxonomy,p
     baseline_v2 <- baseline_v2_unequals/(baseline_v2_unequals+baseline_v2_equals)
     
     # log the baseline
-    expectation_assessment[ds,"baseline1_XOR_AND_THEN"] <- baseline_v2
+    expectation_assessment[ds,"baseline1_OR_AND_THEN"] <- baseline_v2
   }
   
-  dd <- data.frame(Proportion=c(expectation_assessment$result1_XOR_AND_THEN,expectation_assessment$baseline1_XOR_AND_THEN), Probability = c(rep(conditional,nrow(expectation_assessment)),rep(marginal,nrow(expectation_assessment)))) %>% na.omit()
+  dd <- data.frame(Proportion=c(expectation_assessment$result1_OR_AND_THEN,expectation_assessment$baseline1_OR_AND_THEN), Probability = c(rep(conditional,nrow(expectation_assessment)),rep(marginal,nrow(expectation_assessment)))) %>% na.omit()
   
   p <- ggplot(dd, aes(x = Proportion, fill = Probability))+
     geom_density(alpha = 0.8, na.rm = TRUE,  aes(x=Proportion,fill=Probability))+
     scale_fill_manual( values = c("#FFDB6D","#4E84C4"))+
-    geom_vline(xintercept = mean(expectation_assessment$result1_XOR_AND_THEN,na.rm=T)+sd(expectation_assessment$result1_XOR_AND_THEN,na.rm=T), linetype="dotted") +
+    geom_vline(xintercept = mean(expectation_assessment$result1_OR_AND_THEN,na.rm=T)+sd(expectation_assessment$result1_OR_AND_THEN,na.rm=T), linetype="dotted") +
     geom_vline(xintercept = 0.2, linetype="dashed") +
     annotate("text", x=0.2, y=textpos, label="P = 0.2", 
              size=3, color="black") +
-    annotate("text", x=mean(expectation_assessment$result1_XOR_AND_THEN,na.rm=T)+sd(expectation_assessment$result1_XOR_AND_THEN,na.rm=T), y=textpos, label="µ+σ", 
+    annotate("text", x=mean(expectation_assessment$result1_OR_AND_THEN,na.rm=T)+sd(expectation_assessment$result1_OR_AND_THEN,na.rm=T), y=textpos, label="µ+σ", 
              size=3, color="black") +
     
     xlim(c(0,1)) +
@@ -109,18 +109,18 @@ for_viz <- function(ID, modifications, diversity_samples,recoded_data,taxonomy,p
          y="Density",
          title = title, 
          subtitle = paste("µ + σ = ", 
-                          round(mean(expectation_assessment$result1_XOR_AND_THEN,na.rm=T)+sd(expectation_assessment$result1_XOR_AND_THEN,na.rm=T),2),
-                          ", Cohen's D = ",round(cohensD(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==TRUE)$result1_XOR_AND_THEN),
-                                                         na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==TRUE)$baseline1_XOR_AND_THEN), 
+                          round(mean(expectation_assessment$result1_OR_AND_THEN,na.rm=T)+sd(expectation_assessment$result1_OR_AND_THEN,na.rm=T),2),
+                          ", Cohen's D = ",round(cohensD(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==TRUE)$result1_OR_AND_THEN),
+                                                         na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==TRUE)$baseline1_OR_AND_THEN), 
                                                          method="paired"), digits = 1),collapse = "", sep = ""))+
     theme_bw()
   return(p)
 }
 
 
-modifications <- read.csv("../curated_data/TypLinkInd/statisticalTLI/cldf/modifications.csv")
-diversity_samples <- read.csv("../curated_data/TypLinkInd/1000_diversity_samples.csv", row.names = 1)
-recoded_data <- read.csv("../curated_data/TypLinkInd/statisticalTLI/data_for_stats.csv", row.names = "X")
+modifications <- read.csv("curated_data/TLI/statisticalTLI/cldf/modifications.csv")
+diversity_samples <- read.csv("curated_data/TLI/1000_diversity_samples.csv", row.names = 1)
+recoded_data <- read.csv("curated_data/TLI/statisticalTLI/data_for_stats.csv", row.names = "X")
 names(recoded_data) <- gsub("\\.","+",names(recoded_data))
 taxonomy <- as_flat_taxonomy_matrix(glottolog_languoids)
 proportion_languages_must_be_in_applicable_state <- 1/3
@@ -169,5 +169,4 @@ plot(smor10)
 
 # arrange the plots side by side, print and save
 combined_plot_full <- grid.arrange(swoo23b,swoo23a,smor10, ncol = 1)
-
-ggsave("Fig7 associations.png", plot = combined_plot_full, width = 14, height = 8, dpi = 700)
+ggsave("plots/Fig7 associations.png", plot = combined_plot_full, width = 14, height = 8, dpi = 700)
