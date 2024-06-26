@@ -55,26 +55,26 @@ statistical_log <-
 # prune to optima
 # we include minimum row coding density, since NAs on language end should largely be random
 # we include taxonomic index since densification here explicitly seeks to increase taxonomic diversity
-logical_pruned <- prune(logical_log, 
+logical_densified <- prune(logical_log, 
                          scoring_function = n_data_points*coding_density*row_coding_density_min*taxonomic_index^3)
 
-statistical_pruned <- prune(statistical_log, 
+statistical_densified <- prune(statistical_log, 
                             scoring_function = n_data_points*coding_density*row_coding_density_min*taxonomic_index^3)
 
 # retrieve corresponding data from input (to re-establish differences between ? and NA)
-logical_pruned <- logical[which(logical$glottocode%in%logical_pruned$glottocode), which(names(logical)%in%names(logical_pruned))]
-statistical_pruned <- statistical[which(statistical$glottocode%in%statistical_pruned$glottocode), which(names(statistical)%in%names(statistical_pruned))]
+logical_densified <- logical[which(logical$glottocode%in%logical_densified$glottocode), which(names(logical)%in%names(logical_densified))]
+statistical_densified <- statistical[which(statistical$glottocode%in%statistical_densified$glottocode), which(names(statistical)%in%names(statistical_densified))]
 
-# save pruned matrices
-write.csv(logical_pruned,"curated_data/GBI/logicalGBI/logicalGBI_pruned.csv")
-write.csv(statistical_pruned,"curated_data/GBI/statisticalGBI/statisticalGBI_pruned.csv")
+# save densified matrices
+write.csv(logical_densified,"curated_data/GBI/logicalGBI/logicalGBI_densified.csv")
+write.csv(statistical_densified,"curated_data/GBI/statisticalGBI/statisticalGBI_densified.csv")
 
 # describe densified matrices and their relation to the full ones
-logical_pruned <- na_convert(logical_pruned)
-summarize_matrix(logical_pruned)
-summarize_matrix(logical_pruned)/summarize_matrix(logical_for_pruning)
+logical_densified <- na_convert(logical_densified)
+summarize_matrix(logical_densified)
+summarize_matrix(logical_densified)/summarize_matrix(logical_for_pruning)
 
-statistical_pruned <- na_convert(statistical_pruned)
-summarize_matrix(statistical_pruned)
-summarize_matrix(statistical_pruned)/summarize_matrix(statistical_for_pruning)
+statistical_densified <- na_convert(statistical_densified)
+summarize_matrix(statistical_densified)
+summarize_matrix(statistical_densified)/summarize_matrix(statistical_for_pruning)
 

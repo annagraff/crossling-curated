@@ -74,44 +74,44 @@ statistical_full_log <-
           density_mean_weights = list(coding = 0.999, taxonomy = 0.999))
 
 # identify optima
-pruned_logical_full_large <- prune(logical_full_log,
+densified_logical_full_large <- prune(logical_full_log,
                                    scoring_function = n_data_points * coding_density * taxonomic_index)
 
-pruned_logical_full_small <- prune(logical_full_log,
+densified_logical_full_small <- prune(logical_full_log,
                                    scoring_function = n_data_points^3 * coding_density^3 * row_coding_density_min * taxonomic_index)
 
-pruned_statistical_full_large <- prune(statistical_full_log,
+densified_statistical_full_large <- prune(statistical_full_log,
                                        scoring_function = n_data_points * coding_density * taxonomic_index)
 
-pruned_statistical_full_small <- prune(statistical_full_log,
+densified_statistical_full_small <- prune(statistical_full_log,
                                        scoring_function = n_data_points^3 * coding_density^3 * row_coding_density_min * taxonomic_index)
 
 # retrieve corresponding data from input (to re-establish differences between ? and NA)
-pruned_logical_full_large <- logical[which(logical$glottocode%in%pruned_logical_full_large$glottocode), which(names(logical)%in%names(pruned_logical_full_large))]
-pruned_logical_full_small <- logical[which(logical$glottocode%in%pruned_logical_full_small$glottocode), which(names(logical)%in%names(pruned_logical_full_small))]
-pruned_statistical_full_large <- statistical[which(statistical$glottocode%in%pruned_statistical_full_large$glottocode), which(names(statistical)%in%names(pruned_statistical_full_large))]
-pruned_statistical_full_small <- statistical[which(statistical$glottocode%in%pruned_statistical_full_small$glottocode), which(names(statistical)%in%names(pruned_statistical_full_small))]
+densified_logical_full_large <- logical[which(logical$glottocode%in%densified_logical_full_large$glottocode), which(names(logical)%in%names(densified_logical_full_large))]
+densified_logical_full_small <- logical[which(logical$glottocode%in%densified_logical_full_small$glottocode), which(names(logical)%in%names(densified_logical_full_small))]
+densified_statistical_full_large <- statistical[which(statistical$glottocode%in%densified_statistical_full_large$glottocode), which(names(statistical)%in%names(densified_statistical_full_large))]
+densified_statistical_full_small <- statistical[which(statistical$glottocode%in%densified_statistical_full_small$glottocode), which(names(statistical)%in%names(densified_statistical_full_small))]
 
-# save pruned matrices
-write.csv(pruned_logical_full_large,"curated_data/TLI/logicalTLI/full/logicalTLI_full_pruned_large.csv")
-write.csv(pruned_logical_full_small,"curated_data/TLI/logicalTLI/full/logicalTLI_full_pruned_small.csv")
-write.csv(pruned_statistical_full_large,"curated_data/TLI/statisticalTLI/full/statisticalTLI_full_pruned_large.csv")
-write.csv(pruned_statistical_full_small,"curated_data/TLI/statisticalTLI/full/statisticalTLI_full_pruned_small.csv")
+# save densified matrices
+write.csv(densified_logical_full_large,"curated_data/TLI/logicalTLI/full/logicalTLI_full_densified_large.csv")
+write.csv(densified_logical_full_small,"curated_data/TLI/logicalTLI/full/logicalTLI_full_densified_small.csv")
+write.csv(densified_statistical_full_large,"curated_data/TLI/statisticalTLI/full/statisticalTLI_full_densified_large.csv")
+write.csv(densified_statistical_full_small,"curated_data/TLI/statisticalTLI/full/statisticalTLI_full_densified_small.csv")
 
 # describe densified matrices and their relation to the full ones
-pruned_logical_full_large <- na_convert(pruned_logical_full_large)
-pruned_logical_full_small <- na_convert(pruned_logical_full_small)
-summarize_matrix(pruned_logical_full_large)
-summarize_matrix(pruned_logical_full_small)
-summarize_matrix(pruned_logical_full_large)/summarize_matrix(logical_full_for_pruning)
-summarize_matrix(pruned_logical_full_small)/summarize_matrix(logical_full_for_pruning)
+densified_logical_full_large <- na_convert(densified_logical_full_large)
+densified_logical_full_small <- na_convert(densified_logical_full_small)
+summarize_matrix(densified_logical_full_large)
+summarize_matrix(densified_logical_full_small)
+summarize_matrix(densified_logical_full_large)/summarize_matrix(logical_full_for_pruning)
+summarize_matrix(densified_logical_full_small)/summarize_matrix(logical_full_for_pruning)
 
-pruned_statistical_full_large <- na_convert(pruned_statistical_full_large)
-pruned_statistical_full_small <- na_convert(pruned_statistical_full_small)
-summarize_matrix(pruned_statistical_full_large)
-summarize_matrix(pruned_statistical_full_small)
-summarize_matrix(pruned_statistical_full_large)/summarize_matrix(statistical_full_for_pruning)
-summarize_matrix(pruned_statistical_full_small)/summarize_matrix(statistical_full_for_pruning)
+densified_statistical_full_large <- na_convert(densified_statistical_full_large)
+densified_statistical_full_small <- na_convert(densified_statistical_full_small)
+summarize_matrix(densified_statistical_full_large)
+summarize_matrix(densified_statistical_full_small)
+summarize_matrix(densified_statistical_full_large)/summarize_matrix(statistical_full_for_pruning)
+summarize_matrix(densified_statistical_full_small)/summarize_matrix(statistical_full_for_pruning)
 
 ##### densify grammar curation
 # comment on weights: TLI grammar is very sparse in terms of coding density (much like the full dataset) and also uneven in terms of taxonomic diversity
@@ -142,44 +142,44 @@ statistical_grammar_log <-
 # --> n_data_points^3 * coding_density^3 * row_coding_density_min * taxonomic_index
 
 # identify optima
-pruned_logical_grammar_large <- prune(logical_grammar_log,
+densified_logical_grammar_large <- prune(logical_grammar_log,
                                             scoring_function = n_data_points * coding_density * taxonomic_index)
 
-pruned_logical_grammar_small <- prune(logical_grammar_log,
+densified_logical_grammar_small <- prune(logical_grammar_log,
                                            scoring_function = n_data_points^3 * coding_density^3 * row_coding_density_min * taxonomic_index)
 
-pruned_statistical_grammar_large <- prune(statistical_grammar_log,
+densified_statistical_grammar_large <- prune(statistical_grammar_log,
                                                scoring_function = n_data_points * coding_density * taxonomic_index)
 
-pruned_statistical_grammar_small <- prune(statistical_grammar_log,
+densified_statistical_grammar_small <- prune(statistical_grammar_log,
                                                scoring_function = n_data_points^3 * coding_density^3 * row_coding_density_min * taxonomic_index)
 
 # retrieve corresponding data from input (to re-establish differences between ? and NA)
-pruned_logical_grammar_large <- logical[which(logical$glottocode%in%pruned_logical_grammar_large$glottocode), which(names(logical)%in%names(pruned_logical_grammar_large))]
-pruned_logical_grammar_small <- logical[which(logical$glottocode%in%pruned_logical_grammar_small$glottocode), which(names(logical)%in%names(pruned_logical_grammar_small))]
-pruned_statistical_grammar_large <- statistical[which(statistical$glottocode%in%pruned_statistical_grammar_large$glottocode), which(names(statistical)%in%names(pruned_statistical_grammar_large))]
-pruned_statistical_grammar_small <- statistical[which(statistical$glottocode%in%pruned_statistical_grammar_small$glottocode), which(names(statistical)%in%names(pruned_statistical_grammar_small))]
+densified_logical_grammar_large <- logical[which(logical$glottocode%in%densified_logical_grammar_large$glottocode), which(names(logical)%in%names(densified_logical_grammar_large))]
+densified_logical_grammar_small <- logical[which(logical$glottocode%in%densified_logical_grammar_small$glottocode), which(names(logical)%in%names(densified_logical_grammar_small))]
+densified_statistical_grammar_large <- statistical[which(statistical$glottocode%in%densified_statistical_grammar_large$glottocode), which(names(statistical)%in%names(densified_statistical_grammar_large))]
+densified_statistical_grammar_small <- statistical[which(statistical$glottocode%in%densified_statistical_grammar_small$glottocode), which(names(statistical)%in%names(densified_statistical_grammar_small))]
 
-# save pruned matrices
-write.csv(pruned_logical_grammar_large,"curated_data/TLI/logicalTLI/grammar/logicalTLI_grammar_pruned_large.csv")
-write.csv(pruned_logical_grammar_small,"curated_data/TLI/logicalTLI/grammar/logicalTLI_grammar_pruned_small.csv")
-write.csv(pruned_statistical_grammar_large,"curated_data/TLI/statisticalTLI/grammar/statisticalTLI_grammar_pruned_large.csv")
-write.csv(pruned_statistical_grammar_small,"curated_data/TLI/statisticalTLI/grammar/statisticalTLI_grammar_pruned_small.csv")
+# save densified matrices
+write.csv(densified_logical_grammar_large,"curated_data/TLI/logicalTLI/grammar/logicalTLI_grammar_densified_large.csv")
+write.csv(densified_logical_grammar_small,"curated_data/TLI/logicalTLI/grammar/logicalTLI_grammar_densified_small.csv")
+write.csv(densified_statistical_grammar_large,"curated_data/TLI/statisticalTLI/grammar/statisticalTLI_grammar_densified_large.csv")
+write.csv(densified_statistical_grammar_small,"curated_data/TLI/statisticalTLI/grammar/statisticalTLI_grammar_densified_small.csv")
 
 # describe densified matrices and their relation to the full ones
-pruned_logical_grammar_large <- na_convert(pruned_logical_grammar_large)
-pruned_logical_grammar_small <- na_convert(pruned_logical_grammar_small)
-summarize_matrix(pruned_logical_grammar_large)
-summarize_matrix(pruned_logical_grammar_small)
-summarize_matrix(pruned_logical_grammar_large)/summarize_matrix(logical_grammar_for_pruning)
-summarize_matrix(pruned_logical_grammar_small)/summarize_matrix(logical_grammar_for_pruning)
+densified_logical_grammar_large <- na_convert(densified_logical_grammar_large)
+densified_logical_grammar_small <- na_convert(densified_logical_grammar_small)
+summarize_matrix(densified_logical_grammar_large)
+summarize_matrix(densified_logical_grammar_small)
+summarize_matrix(densified_logical_grammar_large)/summarize_matrix(logical_grammar_for_pruning)
+summarize_matrix(densified_logical_grammar_small)/summarize_matrix(logical_grammar_for_pruning)
 
-pruned_statistical_grammar_large <- na_convert(pruned_statistical_grammar_large)
-pruned_statistical_grammar_small <- na_convert(pruned_statistical_grammar_small)
-summarize_matrix(pruned_statistical_grammar_large)
-summarize_matrix(pruned_statistical_grammar_small)
-summarize_matrix(pruned_statistical_grammar_large)/summarize_matrix(statistical_grammar_for_pruning)
-summarize_matrix(pruned_statistical_grammar_small)/summarize_matrix(statistical_grammar_for_pruning)
+densified_statistical_grammar_large <- na_convert(densified_statistical_grammar_large)
+densified_statistical_grammar_small <- na_convert(densified_statistical_grammar_small)
+summarize_matrix(densified_statistical_grammar_large)
+summarize_matrix(densified_statistical_grammar_small)
+summarize_matrix(densified_statistical_grammar_large)/summarize_matrix(statistical_grammar_for_pruning)
+summarize_matrix(densified_statistical_grammar_small)/summarize_matrix(statistical_grammar_for_pruning)
 
 
 ##### densify lexicon curation
@@ -211,25 +211,25 @@ statistical_lexicon_log <-
 # --> n_data_points * coding_density * taxonomic_index
 
 # prune matrices to optima
-pruned_logical_lexicon <- prune(logical_lexicon_log, scoring_function = n_data_points * coding_density * taxonomic_index)
-pruned_statistical_lexicon <- prune(statistical_lexicon_log, scoring_function = n_data_points * coding_density * taxonomic_index)
+densified_logical_lexicon <- prune(logical_lexicon_log, scoring_function = n_data_points * coding_density * taxonomic_index)
+densified_statistical_lexicon <- prune(statistical_lexicon_log, scoring_function = n_data_points * coding_density * taxonomic_index)
 
 # retrieve corresponding data from input (to re-establish differences between ? and NA)
-pruned_logical_lexicon <- logical[which(logical$glottocode%in%pruned_logical_lexicon$glottocode), which(names(logical)%in%names(pruned_logical_lexicon))]
-pruned_statistical_lexicon <- statistical[which(statistical$glottocode%in%pruned_statistical_lexicon$glottocode), which(names(statistical)%in%names(pruned_statistical_lexicon))]
+densified_logical_lexicon <- logical[which(logical$glottocode%in%densified_logical_lexicon$glottocode), which(names(logical)%in%names(densified_logical_lexicon))]
+densified_statistical_lexicon <- statistical[which(statistical$glottocode%in%densified_statistical_lexicon$glottocode), which(names(statistical)%in%names(densified_statistical_lexicon))]
 
-# save pruned matrices
-write.csv(pruned_logical_lexicon,"curated_data/TLI/logicalTLI/lexicon/logicalTLI_lexicon_pruned.csv")
-write.csv(pruned_statistical_lexicon,"curated_data/TLI/statisticalTLI/lexicon/statisticalTLI_lexicon_pruned.csv")
+# save densified matrices
+write.csv(densified_logical_lexicon,"curated_data/TLI/logicalTLI/lexicon/logicalTLI_lexicon_densified.csv")
+write.csv(densified_statistical_lexicon,"curated_data/TLI/statisticalTLI/lexicon/statisticalTLI_lexicon_densified.csv")
 
 # describe densified matrices and their relation to the full ones
-pruned_logical_lexicon <- na_convert(pruned_logical_lexicon)
-summarize_matrix(pruned_logical_lexicon)
-summarize_matrix(pruned_logical_lexicon)/summarize_matrix(logical_lexicon_for_pruning)
+densified_logical_lexicon <- na_convert(densified_logical_lexicon)
+summarize_matrix(densified_logical_lexicon)
+summarize_matrix(densified_logical_lexicon)/summarize_matrix(logical_lexicon_for_pruning)
 
-pruned_statistical_lexicon <- na_convert(pruned_statistical_lexicon)
-summarize_matrix(pruned_statistical_lexicon)
-summarize_matrix(pruned_statistical_lexicon)/summarize_matrix(statistical_lexicon_for_pruning)
+densified_statistical_lexicon <- na_convert(densified_statistical_lexicon)
+summarize_matrix(densified_statistical_lexicon)
+summarize_matrix(densified_statistical_lexicon)/summarize_matrix(statistical_lexicon_for_pruning)
 
 ##### densify phonology curation
 # comment on weights: TLI phonology is rather dense (not particularly sparse in terms of coding density), but rather uneven in terms of taxonomic diversity
@@ -258,23 +258,23 @@ statistical_phonology_log <-
 # we want to densify the matrix whilst maintaining taxonomic diversity; the focus should strongly lie on trimming away languages from well-represented families
 # --> n_data_points * coding_density * row_coding_density_min * taxonomic_index
 
-pruned_logical_phonology <- prune(logical_phonology_log, scoring_function = n_data_points * coding_density * row_coding_density_min * taxonomic_index)
-pruned_statistical_phonology <- prune(statistical_phonology_log, scoring_function = n_data_points * coding_density * row_coding_density_min * taxonomic_index)
+densified_logical_phonology <- prune(logical_phonology_log, scoring_function = n_data_points * coding_density * row_coding_density_min * taxonomic_index)
+densified_statistical_phonology <- prune(statistical_phonology_log, scoring_function = n_data_points * coding_density * row_coding_density_min * taxonomic_index)
 
 # retrieve corresponding data from input (to re-establish differences between ? and NA)
-pruned_logical_phonology <- logical[which(logical$glottocode%in%pruned_logical_phonology$glottocode), which(names(logical)%in%names(pruned_logical_phonology))]
-pruned_statistical_phonology <- statistical[which(statistical$glottocode%in%pruned_statistical_phonology$glottocode), which(names(statistical)%in%names(pruned_statistical_phonology))]
+densified_logical_phonology <- logical[which(logical$glottocode%in%densified_logical_phonology$glottocode), which(names(logical)%in%names(densified_logical_phonology))]
+densified_statistical_phonology <- statistical[which(statistical$glottocode%in%densified_statistical_phonology$glottocode), which(names(statistical)%in%names(densified_statistical_phonology))]
 
-# save pruned matrices
-write.csv(pruned_logical_phonology,"curated_data/TLI/logicalTLI/phonology/logicalTLI_phonology_pruned.csv")
-write.csv(pruned_statistical_phonology,"curated_data/TLI/statisticalTLI/phonology/statisticalTLI_phonology_pruned.csv")
+# save densified matrices
+write.csv(densified_logical_phonology,"curated_data/TLI/logicalTLI/phonology/logicalTLI_phonology_densified.csv")
+write.csv(densified_statistical_phonology,"curated_data/TLI/statisticalTLI/phonology/statisticalTLI_phonology_densified.csv")
 
 # describe densified matrices and their relation to the full ones
-pruned_logical_phonology <- na_convert(pruned_logical_phonology)
-summarize_matrix(pruned_logical_phonology)
-summarize_matrix(pruned_logical_phonology)/summarize_matrix(logical_phonology_for_pruning)
+densified_logical_phonology <- na_convert(densified_logical_phonology)
+summarize_matrix(densified_logical_phonology)
+summarize_matrix(densified_logical_phonology)/summarize_matrix(logical_phonology_for_pruning)
 
-pruned_statistical_phonology <- na_convert(pruned_statistical_phonology)
-summarize_matrix(pruned_statistical_phonology)
-summarize_matrix(pruned_statistical_phonology)/summarize_matrix(statistical_phonology_for_pruning)
+densified_statistical_phonology <- na_convert(densified_statistical_phonology)
+summarize_matrix(densified_statistical_phonology)
+summarize_matrix(densified_statistical_phonology)/summarize_matrix(statistical_phonology_for_pruning)
 
