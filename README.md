@@ -6,7 +6,7 @@ Cite as:
 Graff, Anna; Chousou-Polydouri, Natalia; Inman, David; Skirgård, Hedvig; Lischka, Marc; Zakharko, Taras; Barbieri, Chiara and Bickel, Balthasar (2023): Curating global datasets of structural linguistic features for independence. https://github.com/annagraff/crossling-curated.
 
 
-The `curated-data` folder contains the curated datasets described in this work. The scripts necessary to produce the curated datasets are in `scripts`. Within these folders are subfolders `GBInd` and  `TypLinkInd` that pertain to the respective datasets. You can run `scripts/build-curated-datasets.R` to build the datasets. 
+The `curated-data` folder contains the curated datasets described in this work. The scripts necessary to produce the curated datasets are in `scripts`. Within these folders are subfolders `GBI` and  `TLI` that pertain to the respective datasets. You can run `scripts/build-curated-datasets.R` to build the datasets. 
 
 The original datasets are in `raw-data`. 
 
