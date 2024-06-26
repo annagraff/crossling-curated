@@ -13,14 +13,10 @@ library(densify)
 taxonomy <- as_flat_taxonomy_matrix(glottolog_languoids)
 
 ######### collect and compile typological data from WALS ######### 
-temp <- tempfile()
-download.file("https://zenodo.org/records/7385533/files/cldf-datasets/wals-v2020.3.zip?download=1>cldf-datasets/wals-v2020.3.zip",temp)
-wals_languages <- read.csv(unz(temp, "cldf-datasets-wals-878ea47/cldf/languages.csv"))
-wals_values <- read.csv(unz(temp, "cldf-datasets-wals-878ea47/cldf/values.csv"))
-wals_parameters <- read.csv(unz(temp, "cldf-datasets-wals-878ea47/cldf/parameters.csv"))
-wals_codes <- read.csv(unz(temp, "cldf-datasets-wals-878ea47/cldf/codes.csv"))
-unlink(temp)
-rm(temp)
+wals_languages <- read.csv("raw_data/wals/languages.csv") %>% select(-X)
+wals_values <- read.csv("raw_data/wals/values.csv") %>% select(-X)
+wals_parameters <- read.csv("raw_data/wals/parameters.csv") %>% select(-X)
+wals_codes <- read.csv("raw_data/wals/codes.csv") %>% select(-X)
 
 wals_parameters$Feature <- apply(wals_parameters, 1, function(x) paste("WALS_",x[1]," ",x[2],sep=""))
 wals_parameters <- wals_parameters %>% select(c("ID","Feature"))
@@ -243,4 +239,4 @@ typology_merged[is.na(typology_merged)]<-"?"
 
 colnames(typology_merged)[1] <- "glottocode"
 
-write.csv(typology_merged,"curated_data/TypLinkInd/compiled_external_input_features.csv",row.names = F)
+write.csv(typology_merged,"curated_data/TLI/compiled_external_input_features.csv",row.names = F)

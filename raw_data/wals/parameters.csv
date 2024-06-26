@@ -1,0 +1,193 @@
+"","ID","Name","Description","ColumnSpec","Chapter_ID"
+"1","1A","Consonant Inventories",NA,NA,1
+"2","2A","Vowel Quality Inventories",NA,NA,2
+"3","3A","Consonant-Vowel Ratio",NA,NA,3
+"4","4A","Voicing in Plosives and Fricatives",NA,NA,4
+"5","5A","Voicing and Gaps in Plosive Systems",NA,NA,5
+"6","6A","Uvular Consonants",NA,NA,6
+"7","7A","Glottalized Consonants",NA,NA,7
+"8","8A","Lateral Consonants",NA,NA,8
+"9","9A","The Velar Nasal",NA,NA,9
+"10","10A","Vowel Nasalization",NA,NA,10
+"11","10B","Nasal Vowels in West Africa",NA,NA,10
+"12","11A","Front Rounded Vowels",NA,NA,11
+"13","12A","Syllable Structure",NA,NA,12
+"14","13A","Tone",NA,NA,13
+"15","14A","Fixed Stress Locations",NA,NA,14
+"16","15A","Weight-Sensitive Stress",NA,NA,15
+"17","16A","Weight Factors in Weight-Sensitive Stress Systems",NA,NA,16
+"18","17A","Rhythm Types",NA,NA,17
+"19","18A","Absence of Common Consonants",NA,NA,18
+"20","19A","Presence of Uncommon Consonants",NA,NA,19
+"21","20A","Fusion of Selected Inflectional Formatives",NA,NA,20
+"22","21A","Exponence of Selected Inflectional Formatives",NA,NA,21
+"23","21B","Exponence of Tense-Aspect-Mood Inflection",NA,NA,21
+"24","22A","Inflectional Synthesis of the Verb",NA,NA,22
+"25","23A","Locus of Marking in the Clause",NA,NA,23
+"26","24A","Locus of Marking in Possessive Noun Phrases",NA,NA,24
+"27","25A","Locus of Marking: Whole-language Typology",NA,NA,25
+"28","25B","Zero Marking of A and P Arguments",NA,NA,25
+"29","26A","Prefixing vs. Suffixing in Inflectional Morphology",NA,NA,26
+"30","27A","Reduplication",NA,NA,27
+"31","28A","Case Syncretism",NA,NA,28
+"32","29A","Syncretism in Verbal Person/Number Marking",NA,NA,29
+"33","30A","Number of Genders",NA,NA,30
+"34","31A","Sex-based and Non-sex-based Gender Systems",NA,NA,31
+"35","32A","Systems of Gender Assignment",NA,NA,32
+"36","33A","Coding of Nominal Plurality",NA,NA,33
+"37","34A","Occurrence of Nominal Plurality",NA,NA,34
+"38","35A","Plurality in Independent Personal Pronouns",NA,NA,35
+"39","36A","The Associative Plural",NA,NA,36
+"40","37A","Definite Articles",NA,NA,37
+"41","38A","Indefinite Articles",NA,NA,38
+"42","39A","Inclusive/Exclusive Distinction in Independent Pronouns",NA,NA,39
+"43","39B","Inclusive/Exclusive Forms in Pama-Nyungan",NA,NA,39
+"44","40A","Inclusive/Exclusive Distinction in Verbal Inflection",NA,NA,40
+"45","41A","Distance Contrasts in Demonstratives",NA,NA,41
+"46","42A","Pronominal and Adnominal Demonstratives",NA,NA,42
+"47","43A","Third Person Pronouns and Demonstratives",NA,NA,43
+"48","44A","Gender Distinctions in Independent Personal Pronouns",NA,NA,44
+"49","45A","Politeness Distinctions in Pronouns",NA,NA,45
+"50","46A","Indefinite Pronouns",NA,NA,46
+"51","47A","Intensifiers and Reflexive Pronouns",NA,NA,47
+"52","48A","Person Marking on Adpositions",NA,NA,48
+"53","49A","Number of Cases",NA,NA,49
+"54","50A","Asymmetrical Case-Marking",NA,NA,50
+"55","51A","Position of Case Affixes",NA,NA,51
+"56","52A","Comitatives and Instrumentals",NA,NA,52
+"57","53A","Ordinal Numerals",NA,NA,53
+"58","54A","Distributive Numerals",NA,NA,54
+"59","55A","Numeral Classifiers",NA,NA,55
+"60","56A","Conjunctions and Universal Quantifiers",NA,NA,56
+"61","57A","Position of Pronominal Possessive Affixes",NA,NA,57
+"62","58A","Obligatory Possessive Inflection",NA,NA,58
+"63","58B","Number of Possessive Nouns",NA,NA,58
+"64","59A","Possessive Classification",NA,NA,59
+"65","60A","Genitives, Adjectives and Relative Clauses",NA,NA,60
+"66","61A","Adjectives without Nouns",NA,NA,61
+"67","62A","Action Nominal Constructions",NA,NA,62
+"68","63A","Noun Phrase Conjunction",NA,NA,63
+"69","64A","Nominal and Verbal Conjunction",NA,NA,64
+"70","65A","Perfective/Imperfective Aspect",NA,NA,65
+"71","66A","The Past Tense",NA,NA,66
+"72","67A","The Future Tense",NA,NA,67
+"73","68A","The Perfect",NA,NA,68
+"74","69A","Position of Tense-Aspect Affixes",NA,NA,69
+"75","70A","The Morphological Imperative",NA,NA,70
+"76","71A","The Prohibitive",NA,NA,71
+"77","72A","Imperative-Hortative Systems",NA,NA,72
+"78","73A","The Optative",NA,NA,73
+"79","74A","Situational Possibility",NA,NA,74
+"80","75A","Epistemic Possibility",NA,NA,75
+"81","76A","Overlap between Situational and Epistemic Modal Marking",NA,NA,76
+"82","77A","Semantic Distinctions of Evidentiality",NA,NA,77
+"83","78A","Coding of Evidentiality",NA,NA,78
+"84","79A","Suppletion According to Tense and Aspect",NA,NA,79
+"85","79B","Suppletion in Imperatives and Hortatives",NA,NA,79
+"86","80A","Verbal Number and Suppletion",NA,NA,80
+"87","81A","Order of Subject, Object and Verb",NA,NA,81
+"88","81B","Languages with two Dominant Orders of Subject, Object, and Verb",NA,NA,81
+"89","82A","Order of Subject and Verb",NA,NA,82
+"90","83A","Order of Object and Verb",NA,NA,83
+"91","84A","Order of Object, Oblique, and Verb",NA,NA,84
+"92","85A","Order of Adposition and Noun Phrase",NA,NA,85
+"93","86A","Order of Genitive and Noun",NA,NA,86
+"94","87A","Order of Adjective and Noun",NA,NA,87
+"95","88A","Order of Demonstrative and Noun",NA,NA,88
+"96","89A","Order of Numeral and Noun",NA,NA,89
+"97","90A","Order of Relative Clause and Noun",NA,NA,90
+"98","90B","Prenominal relative clauses",NA,NA,90
+"99","90C","Postnominal relative clauses",NA,NA,90
+"100","90D","Internally-headed relative clauses",NA,NA,90
+"101","90E","Correlative relative clauses",NA,NA,90
+"102","90F","Adjoined relative clauses",NA,NA,90
+"103","90G","Double-headed relative clauses",NA,NA,90
+"104","91A","Order of Degree Word and Adjective",NA,NA,91
+"105","92A","Position of Polar Question Particles",NA,NA,92
+"106","93A","Position of Interrogative Phrases in Content Questions",NA,NA,93
+"107","94A","Order of Adverbial Subordinator and Clause",NA,NA,94
+"108","95A","Relationship between the Order of Object and Verb and the Order of Adposition and Noun Phrase",NA,NA,95
+"109","96A","Relationship between the Order of Object and Verb and the Order of Relative Clause and Noun",NA,NA,96
+"110","97A","Relationship between the Order of Object and Verb and the Order of Adjective and Noun",NA,NA,97
+"111","98A","Alignment of Case Marking of Full Noun Phrases",NA,NA,98
+"112","99A","Alignment of Case Marking of Pronouns",NA,NA,99
+"113","100A","Alignment of Verbal Person Marking",NA,NA,100
+"114","101A","Expression of Pronominal Subjects",NA,NA,101
+"115","102A","Verbal Person Marking",NA,NA,102
+"116","103A","Third Person Zero of Verbal Person Marking",NA,NA,103
+"117","104A","Order of Person Markers on the Verb",NA,NA,104
+"118","105A","Ditransitive Constructions: The Verb 'Give'",NA,NA,105
+"119","106A","Reciprocal Constructions",NA,NA,106
+"120","107A","Passive Constructions",NA,NA,107
+"121","108A","Antipassive Constructions",NA,NA,108
+"122","108B","Productivity of the Antipassive Construction",NA,NA,108
+"123","109A","Applicative Constructions",NA,NA,109
+"124","109B","Other Roles of Applied Objects",NA,NA,109
+"125","110A","Periphrastic Causative Constructions",NA,NA,110
+"126","111A","Nonperiphrastic Causative Constructions",NA,NA,111
+"127","112A","Negative Morphemes",NA,NA,112
+"128","113A","Symmetric and Asymmetric Standard Negation",NA,NA,113
+"129","114A","Subtypes of Asymmetric Standard Negation",NA,NA,114
+"130","115A","Negative Indefinite Pronouns and Predicate Negation",NA,NA,115
+"131","116A","Polar Questions",NA,NA,116
+"132","117A","Predicative Possession",NA,NA,117
+"133","118A","Predicative Adjectives",NA,NA,118
+"134","119A","Nominal and Locational Predication",NA,NA,119
+"135","120A","Zero Copula for Predicate Nominals",NA,NA,120
+"136","121A","Comparative Constructions",NA,NA,121
+"137","122A","Relativization on Subjects",NA,NA,122
+"138","123A","Relativization on Obliques",NA,NA,123
+"139","124A","'Want' Complement Subjects",NA,NA,124
+"140","125A","Purpose Clauses",NA,NA,125
+"141","126A","'When' Clauses",NA,NA,126
+"142","127A","Reason Clauses",NA,NA,127
+"143","128A","Utterance Complement Clauses",NA,NA,128
+"144","129A","Hand and Arm",NA,NA,129
+"145","130A","Finger and Hand",NA,NA,130
+"146","130B","Cultural Categories of Languages with Identity of 'Finger' and 'Hand'",NA,NA,130
+"147","131A","Numeral Bases",NA,NA,131
+"148","132A","Number of Non-Derived Basic Colour Categories",NA,NA,132
+"149","133A","Number of Basic Colour Categories",NA,NA,133
+"150","134A","Green and Blue",NA,NA,134
+"151","135A","Red and Yellow",NA,NA,135
+"152","136A","M-T Pronouns",NA,NA,136
+"153","136B","M in First Person Singular",NA,NA,136
+"154","137A","N-M Pronouns",NA,NA,137
+"155","137B","M in Second Person Singular",NA,NA,137
+"156","138A","Tea",NA,NA,138
+"157","139A","Irregular Negatives in Sign Languages",NA,NA,139
+"158","140A","Question Particles in Sign Languages",NA,NA,140
+"159","141A","Writing Systems",NA,NA,141
+"160","142A","Para-Linguistic Usages of Clicks",NA,NA,142
+"161","143A","Order of Negative Morpheme and Verb",NA,NA,143
+"162","143B","Obligatory Double Negation",NA,NA,143
+"163","143C","Optional Double Negation",NA,NA,143
+"164","143D","Optional Triple Negation",NA,NA,143
+"165","143E","Preverbal Negative Morphemes",NA,NA,143
+"166","143F","Postverbal Negative Morphemes",NA,NA,143
+"167","143G","Minor morphological means of signaling negation",NA,NA,143
+"168","144A","Position of Negative Word With Respect to Subject, Object, and Verb",NA,NA,144
+"169","144B","Position of negative words relative to beginning and end of clause and with respect to adjacency to verb",NA,NA,144
+"170","144C","Languages with different word order in negative clauses",NA,NA,144
+"171","144D","The Position of Negative Morphemes in SVO Languages",NA,NA,144
+"172","144E","Multiple Negative Constructions in SVO Languages",NA,NA,144
+"173","144F","Obligatory Double Negation in SVO languages",NA,NA,144
+"174","144G","Optional Double Negation in SVO languages",NA,NA,144
+"175","144H","NegSVO Order",NA,NA,144
+"176","144I","SNegVO Order",NA,NA,144
+"177","144J","SVNegO Order",NA,NA,144
+"178","144K","SVONeg Order",NA,NA,144
+"179","144L","The Position of Negative Morphemes in SOV Languages",NA,NA,144
+"180","144M","Multiple Negative Constructions in SOV Languages",NA,NA,144
+"181","144N","Obligatory Double Negation in SOV languages",NA,NA,144
+"182","144O","Optional Double Negation in SOV languages",NA,NA,144
+"183","144P","NegSOV Order",NA,NA,144
+"184","144Q","SNegOV Order",NA,NA,144
+"185","144R","SONegV Order",NA,NA,144
+"186","144S","SOVNeg Order",NA,NA,144
+"187","144T","The Position of Negative Morphemes in Verb-Initial Languages",NA,NA,144
+"188","144U","Double negation in verb-initial languages",NA,NA,144
+"189","144V","Verb-Initial with Preverbal Negative",NA,NA,144
+"190","144W","Verb-Initial with Negative that is Immediately Postverbal or between Subject and Object",NA,NA,144
+"191","144X","Verb-Initial with Clause-Final Negative",NA,NA,144
+"192","144Y","The Position of Negative Morphemes in Object-Initial Languages",NA,NA,144
