@@ -6,7 +6,7 @@ library(tidyverse)
 library(rnaturalearth)
 library(cowplot)
 
-source("../scripts/functions.R")
+source("scripts/functions.R")
 
 ## Retrieve taxonomy, coordinates and map
 
@@ -14,7 +14,7 @@ source("../scripts/functions.R")
 taxonomy_matrix <- as_flat_taxonomy_matrix(glottolog_languoids)
 
 # link coordinates to lgs
-macroareas <- read.csv("../scripts/lang-metadata.csv")
+macroareas <- read.csv("scripts/lang-metadata.csv")
 names(macroareas)[1] <- "id"
 macroareas <- na_convert(macroareas)
 taxonomy_matrix_for_plot <- merge(taxonomy_matrix,select(macroareas, c("id","latitude","longitude","glottolog.macroarea")),by="id") %>% filter(!is.na(latitude))
@@ -27,18 +27,18 @@ world_map_initial <- rbind(world_map, minor_islands)
 
 ## Grambank and GBI data: suitable given high coding densities and high number of languages
 # read in matrices (original, logical and statistical), convert all NA and ? to NA, factorize all variables
-gb_original <- read.csv("../raw_data/grambank_v.1.0.3.csv", row.names = "Glottocode")
+gb_original <- read.csv("raw_data/grambank_v.1.0.3.csv", row.names = "Glottocode")
 gb_original <- na_convert(gb_original)
 gb_original <- factorise(gb_original)
 sum(!is.na(gb_original))/(nrow(gb_original)*ncol(gb_original)) # coding density: 75%
 
-gbi_logical <- read.csv("../curated_data/GBInd/logicalGBI/logicalGBI.csv",row.names = "glottocode") %>% select(-X)
+gbi_logical <- read.csv("curated_data/GBI/logicalGBI/logicalGBI.csv",row.names = "glottocode") %>% select(-X)
 gbi_logical <- na_convert(gbi_logical)
 gbi_logical <- factorise(gbi_logical)
 gbi_logical <- gbi_logical[which(rownames(gbi_logical)%in%taxonomy_matrix_for_plot$id),]
 sum(!is.na(gbi_logical))/(nrow(gbi_logical)*ncol(gbi_logical)) # coding density: 62%
 
-gbi_statistical <- read.csv("../curated_data/GBInd/statisticalGBI/statisticalGBI.csv",row.names = "glottocode") %>% select(-X)
+gbi_statistical <- read.csv("curated_data/GBI/statisticalGBI/statisticalGBI.csv",row.names = "glottocode") %>% select(-X)
 gbi_statistical <- na_convert(gbi_statistical)
 gbi_statistical <- factorise(gbi_statistical)
 gbi_statistical <- gbi_statistical[which(rownames(gbi_statistical)%in%taxonomy_matrix_for_plot$id),]
@@ -47,30 +47,30 @@ sum(!is.na(gbi_statistical))/(nrow(gbi_statistical)*ncol(gbi_statistical)) # cod
 ## TLI data: only phonology and lexical subsets suitable given high coding densities AND appropriately high numbers of languages
 # phonology
 # read in logical TLI data
-logical <- read.csv("../curated_data/TypLinkInd/logicalTLI/full/logicalTLI_full.csv",row.names = "glottocode") %>% select(-X)
+logical <- read.csv("curated_data/TLI/logicalTLI/full/logicalTLI_full.csv",row.names = "glottocode") %>% select(-X)
 logical <- na_convert(logical)
-logical_parameters <- read.csv("../curated_data/TypLinkInd/logicalTLI/cldf/parameters.csv")
-phonology_logical <- logical[which(apply(logical[which(names(logical)%in%filter(logical_parameters,domain == "Phonology")$short.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(logical)%in%filter(logical_parameters,domain == "Phonology")$short.name))]
+logical_parameters <- read.csv("curated_data/TLI/logicalTLI/cldf/parameters.csv")
+phonology_logical <- logical[which(apply(logical[which(names(logical)%in%filter(logical_parameters,grouping %in% c("Phonology", "Phonology_segmental_c", "Phonology_segmental_v", "Phonology_prosodic"))$short.name)],1,function(x)length(na.omit(x)))>0),c(which(names(logical)%in%filter(logical_parameters,grouping %in% c("Phonology", "Phonology_segmental_c", "Phonology_segmental_v", "Phonology_prosodic"))$short.name))]
 phonology_logical <- factorise(phonology_logical)
 sum(!is.na(phonology_logical))/(nrow(phonology_logical)*ncol(phonology_logical)) # coding density: 56% --> ok!
 
-statistical <- read.csv("../curated_data/TypLinkInd/statisticalTLI/full/statisticalTLI_full.csv",row.names = "glottocode") %>% select(-X)
+statistical <- read.csv("curated_data/TLI/statisticalTLI/full/statisticalTLI_full.csv",row.names = "glottocode") %>% select(-X)
 statistical <- na_convert(statistical)
-statistical_parameters <- read.csv("../curated_data/TypLinkInd/statisticalTLI/cldf/parameters.csv")
-phonology_statistical <- statistical[which(apply(statistical[which(names(statistical)%in%filter(statistical_parameters,domain == "Phonology")$short.name)],1,function(x)length(na.omit(x)))>0),c(1,which(names(statistical)%in%filter(statistical_parameters,domain == "Phonology")$short.name))]
+statistical_parameters <- read.csv("curated_data/TLI/statisticalTLI/cldf/parameters.csv")
+phonology_statistical <- statistical[which(apply(statistical[which(names(statistical)%in%filter(statistical_parameters,grouping %in% c("Phonology", "Phonology_segmental_c", "Phonology_segmental_v", "Phonology_prosodic"))$short.name)],1,function(x)length(na.omit(x)))>0),c(which(names(statistical)%in%filter(statistical_parameters,grouping %in% c("Phonology", "Phonology_segmental_c", "Phonology_segmental_v", "Phonology_prosodic"))$short.name))]
 phonology_statistical <- factorise(phonology_statistical)
 sum(!is.na(phonology_statistical))/(nrow(phonology_statistical)*ncol(phonology_statistical)) # coding density: 55% --> ok!
 
 # lexicon
-lexicon_logical_pruned <- read.csv("../curated_data/TypLinkInd/logicalTLI/lexicon/logicalTLI_lexicon_pruned.csv", row.names = "glottocode") %>% select(-X)
+lexicon_logical_pruned <- read.csv("curated_data/TLI/logicalTLI/lexicon/logicalTLI_lexicon_pruned.csv", row.names = "glottocode") %>% select(-X)
 lexicon_logical_pruned <- na_convert(lexicon_logical_pruned)
 lexicon_logical_pruned <- factorise(lexicon_logical_pruned)
-sum(!is.na(lexicon_logical_pruned))/(nrow(lexicon_logical_pruned)*ncol(lexicon_logical_pruned)) # coding density: 45% --> ok!
+sum(!is.na(lexicon_logical_pruned))/(nrow(lexicon_logical_pruned)*ncol(lexicon_logical_pruned)) # coding density: 39% --> ok!
 
-lexicon_statistical_pruned <- read.csv("../curated_data/TypLinkInd/statisticalTLI/lexicon/statisticalTLI_lexicon_pruned.csv", row.names = "glottocode") %>% select(-X)
+lexicon_statistical_pruned <- read.csv("curated_data/TLI/statisticalTLI/lexicon/statisticalTLI_lexicon_pruned.csv", row.names = "glottocode") %>% select(-X)
 lexicon_statistical_pruned <- na_convert(lexicon_statistical_pruned)
 lexicon_statistical_pruned <- factorise(lexicon_statistical_pruned)
-sum(!is.na(lexicon_statistical_pruned))/(nrow(lexicon_statistical_pruned)*ncol(lexicon_statistical_pruned)) # coding density: 45% --> ok!
+sum(!is.na(lexicon_statistical_pruned))/(nrow(lexicon_statistical_pruned)*ncol(lexicon_statistical_pruned)) # coding density: 40% --> ok!
 
 ## Grid points and entropies at grid points
 
@@ -191,7 +191,7 @@ gridpointwise_entropies <- function(taxonomy_matrix,
       geom_sf(data = shifted2$base_map, fill = "white", color = "darkgrey") +
       # geom_sf(data = shifted$language_locations, color = "darkgreen", shape = 1, size = 0.2, alpha = 0.3) + # these are the language locations
       geom_sf(data = grid_points_with_data, aes(colour = mean.feature.entropy)) +
-      scale_color_viridis(option = "magma", direction = -1, na.value = "lightgrey") + 
+      scale_color_viridis_c(option = "magma", direction = -1, na.value = "lightgrey", limits = c(0,1)) + 
       ggtitle(title) +
       labs(color = "Mean entropy") +
       theme_minimal() +
@@ -294,7 +294,7 @@ grid_point_comparison_horizontal <- function(baseline_gp_frame, name_baseline,
 }
 
 
-## maps for Grambank and GBInd:
+## maps for Grambank and GBI:
 # coordinate_scaling 20 yields ~750 grid points if buffer_distance is 150'000, changing coordinate_scaling gives more or less grid points
 coordinate_scaling <- 20  # ~750 grid points if coordinate_scaling=20 and buffer_distance=150000
 buffer_distance <- 150000  # defining buffer distance for map for some Pacific islands to be kept
@@ -320,7 +320,7 @@ gbi_statistical_gps <- gridpointwise_entropies(taxonomy_matrix = gbi_statistical
                                            buffer_distance = buffer_distance, 
                                            verbose = T, plot = T, title = "A.")
 
-## maps for statistical curation of suitable TypLinkInd subsets
+## maps for statistical curation of suitable TLI subsets
 # phonology
 phonology_statistical_gps <- gridpointwise_entropies(taxonomy_matrix = phonology_statistical_taxonomy,
                                                      data_trimmed_to_lgs_with_coords = phonology_statistical_with_lg_coords, 
@@ -343,7 +343,7 @@ entropies <- plot_grid(gbi_statistical_gps[[2]],
                        lexicon_statistical_gps[[2]], 
                        align = "h", axis = "l", ncol = 1)
 
-ggsave(file="Fig9 entropies.png", entropies, dpi = 500, width = 8, height = 7, units = "in")
+ggsave(file="plots/Fig9.pdf", entropies, dpi = 500, width = 8, height = 7, units = "in")
 
 # compare across curations, using Grambank
 gbi_comparison_plot <- grid_point_comparison_horizontal(baseline_gp_frame = gb_original_gps[[1]], 
@@ -351,4 +351,4 @@ gbi_comparison_plot <- grid_point_comparison_horizontal(baseline_gp_frame = gb_o
                                                        comparison_gp_frame_2 = gbi_statistical_gps[[1]], 
                                                        world_map = world_map_initial)
 
-ggsave(file="Fig10 entropy-comp.png", gbi_comparison_plot[[1]], dpi = 500, width = 8, height = 7, units = "in")
+ggsave(file="plots/Fig10.pdf", gbi_comparison_plot[[1]], dpi = 500, width = 8, height = 7, units = "in")

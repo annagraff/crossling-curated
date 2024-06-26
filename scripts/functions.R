@@ -204,7 +204,7 @@ implement_conditioning <- function(feature_to_be_conditioned, condition, equator
 }
 
 # this function runs all tests
-evaluate_XOR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversity_samples, proportion_languages_must_be_in_applicable_state){
+evaluate_OR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversity_samples, proportion_languages_must_be_in_applicable_state){
   library(lsr)
   rslt <- slice(data.frame(nr.lgs.f1=NA,
                            nr.lgs.f2=NA,
@@ -260,10 +260,10 @@ evaluate_XOR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversit
     # prepare a table to log relevant characteristics of the crosstable for each of the diversity samples
     expectation_assessment<-slice(data.frame(proportion_overlap_applicable_vs_non_applicable=NA, # this logs for each sample the proportion of languages coded for f2 in the relevant state of f1
                                              overlap_sufficient_test_power_positive=NA, # this denotes for each sample whether the proportion and number of languages coded for f2 in the relevant state of f1 is sufficient, the proportion is defined by the user and denoted proportion_languages_must_be_in_applicable_state
-                                             result1_XOR_AND_THEN=NA, # this denotes the proportion of languages behaving against the expectation in the THEN condition and in the first dimension of the XOR and AND conditions
-                                             result2_XOR_AND=NA, # this denotes the proportion of languages behaving against the expectation in the second dimension of the XOR and AND conditions
-                                             baseline1_XOR_AND_THEN=NA, # this denotes the proportion of languages in the "unequals" state for feature 2 in the THEN condition overall or in the first dimension of the XOR condition
-                                             baseline2_XOR_AND=NA),0) # this denotes whether the expected relationship is confirmed in the subsample in accordance with the defined thresholds
+                                             result1_OR_AND_THEN=NA, # this denotes the proportion of languages behaving against the expectation in the THEN condition and in the first dimension of the OR and AND conditions
+                                             result2_OR_AND=NA, # this denotes the proportion of languages behaving against the expectation in the second dimension of the OR and AND conditions
+                                             baseline1_OR_AND_THEN=NA, # this denotes the proportion of languages in the "unequals" state for feature 2 in the THEN condition overall or in the first dimension of the OR condition
+                                             baseline2_OR_AND=NA),0) # this denotes whether the expected relationship is confirmed in the subsample in accordance with the defined thresholds
     
     for (ds in 1:ncol(diversity_samples)){ # loop through all diversity samples
       # select the subset of languages in the diversity sample for the relevant features and tabulate for both the full data (including ? and NA) and the non-Q/NA data.
@@ -279,14 +279,14 @@ evaluate_XOR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversit
       expect_true(all(c(unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", ")), unlist(strsplit(as.character(unlist(expectation$f2.unequals.for.test)),", "))) %in% levels(as.data.frame(sample_table_noqs)$Var2)))
       expect_true(all(levels(as.data.frame(sample_table_noqs)$Var2) %in% c(unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", ")), unlist(strsplit(as.character(unlist(expectation$f2.unequals.for.test)),", ")))))
       
-      if(expectation$test == "XOR"){ # for XOR-case
-        # in the XOR-case, we evaluate how many languages are coded for both features in the first dimension (applicable1) and how many languages are coded for just the first feature in the first dimension (all1)
+      if(expectation$test == "OR"){ # for OR-case
+        # in the OR-case, we evaluate how many languages are coded for both features in the first dimension (applicable1) and how many languages are coded for just the first feature in the first dimension (all1)
         applicable1 <- sum(sample_table_withqs[unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),c(unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$f2.unequals.for.test)),", ")))])
         all1 <- sum(sample_table_withqs[unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),])
         # this yields the relevant proportion in the first dimension
         relevant.proportion.1 <- applicable1/all1
         
-        # in the XOR-case, we also evaluate how many languages are coded for both features in the second dimension (applicable2) and how many languages are coded for just the second feature in the second dimension (all2)
+        # in the OR-case, we also evaluate how many languages are coded for both features in the second dimension (applicable2) and how many languages are coded for just the second feature in the second dimension (all2)
         applicable2 <- sum(sample_table_withqs[c(unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$f1.unequals.for.test)),", "))),unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", "))])
         all2 <- sum(sample_table_withqs[,unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", "))])
         # this yields the relevant proportion in the second dimension
@@ -297,7 +297,7 @@ evaluate_XOR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversit
         expectation_assessment[ds,"proportion_overlap_applicable_vs_non_applicable"] <- relevant.proportion
         expectation_assessment[ds,"overlap_sufficient_test_power_positive"] <- relevant.proportion >= proportion_languages_must_be_in_applicable_state
         
-        # in the XOR-condition, the languages that behave against the expectation are those with the "equals" state of both feature 1 and feature 2
+        # in the OR-condition, the languages that behave against the expectation are those with the "equals" state of both feature 1 and feature 2
         hyp.NOT.applies <- sample_table_noqs[unlist(strsplit(as.character(unlist(expectation$f1.equals.for.test)),", ")),unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", "))]
         
         # the languages that behave according to the expectation are those with the "equals" state of feature 1 and the "unequals" state of feature 2 (hyp.applies.1) and those with the "unequals" state of feature 1 and the "equals" state of feature 2 (hyp.applies.2)
@@ -307,8 +307,8 @@ evaluate_XOR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversit
         # track the proportion of cases, in which the expectation is violated with respect to feature 1 (d1) and with respect to feature 2 (d2)
         d1 <- sum(hyp.NOT.applies)/(sum(hyp.NOT.applies)+sum(hyp.applies.1)) 
         d2 <- sum(hyp.NOT.applies)/(sum(hyp.NOT.applies)+sum(hyp.applies.2))
-        expectation_assessment[ds,"result1_XOR_AND_THEN"] <- d1
-        expectation_assessment[ds,"result2_XOR_AND"] <- d2
+        expectation_assessment[ds,"result1_OR_AND_THEN"] <- d1
+        expectation_assessment[ds,"result2_OR_AND"] <- d2
         
         # the proportions must be compared to the baseline expectations: these are the proportions of languages in the "unequals" state of feature 2 and feature 1 overall (independently of feature 1 or 2 being coded or not, and which state it would be in)
         baseline1_f2_equals <- expectation_ds_sample_withqs %>% 
@@ -328,8 +328,8 @@ evaluate_XOR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversit
         baseline2_f1 <- baseline2_f1_unequals/(baseline2_f1_unequals+baseline2_f1_equals)
         
         # log the baselines
-        expectation_assessment[ds,"baseline1_XOR_AND_THEN"] <- baseline1_f2
-        expectation_assessment[ds,"baseline2_XOR_AND"] <- baseline2_f1
+        expectation_assessment[ds,"baseline1_OR_AND_THEN"] <- baseline1_f2
+        expectation_assessment[ds,"baseline2_OR_AND"] <- baseline2_f1
         
       }
       else if(expectation$test == "AND"){
@@ -359,8 +359,8 @@ evaluate_XOR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversit
         # track the proportion of cases, in which the expectation is violated (d1 and d2)
         d1 <- sum(hyp.NOT.applies.1)/(sum(hyp.applies)+sum(hyp.NOT.applies.1)) # proportion of cases, in which expectation is violated with respect to feature 1
         d2 <- sum(hyp.NOT.applies.2)/(sum(hyp.applies)+sum(hyp.NOT.applies.2)) # proportion of cases, in which expectation is violated with respect to feature 1
-        expectation_assessment[ds,"result1_XOR_AND_THEN"]<-d1
-        expectation_assessment[ds,"result2_XOR_AND"]<-d2
+        expectation_assessment[ds,"result1_OR_AND_THEN"]<-d1
+        expectation_assessment[ds,"result2_OR_AND"]<-d2
         
         # the proportion must be compared to the baseline expectation: this is the proportion of languages in the "unequals" state of feature 2 overall (independently of feature 1 being coded or not, and which state it would be in)
         baseline_f2_equals <- expectation_ds_sample_withqs %>% filter(get(expectation$feature.2.for.test)%in%unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", "))) %>% nrow()
@@ -373,8 +373,8 @@ evaluate_XOR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversit
         
         
         # log the baseline, and whether the baseline is higher than d1
-        expectation_assessment[ds,"baseline1_XOR_AND_THEN"] <- baseline_f2
-        expectation_assessment[ds,"baseline2_XOR_AND"] <- baseline_f1
+        expectation_assessment[ds,"baseline1_OR_AND_THEN"] <- baseline_f2
+        expectation_assessment[ds,"baseline2_OR_AND"] <- baseline_f1
       }
       else if(expectation$test == "THEN"){
         # in the THEN-case, we evaluate how many languages are coded for the second feature, given the relevant state of the first feature (applicable), and how many languages are coded for the relevant state of the first feature overall (all)
@@ -394,7 +394,7 @@ evaluate_XOR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversit
         
         # track the proportion of cases, in which the expectation is violated (d1)
         d1 <- sum(hyp.NOT.applies)/(sum(hyp.applies)+sum(hyp.NOT.applies)) # proportion of cases, in which expectation is violated with respect to feature 1
-        expectation_assessment[ds,"result1_XOR_AND_THEN"]<-d1
+        expectation_assessment[ds,"result1_OR_AND_THEN"]<-d1
         
         # the proportion must be compared to the baseline expectation: this is the proportion of languages in the "unequals" state of feature 2 overall (independently of feature 1 being coded or not, and which state it would be in)
         baseline_f2_equals <- expectation_ds_sample_withqs %>% filter(get(expectation$feature.2.for.test)%in%unlist(strsplit(as.character(unlist(expectation$f2.equals.for.test)),", "))) %>% nrow()
@@ -402,7 +402,7 @@ evaluate_XOR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversit
         baseline_f2 <- baseline_f2_unequals/(baseline_f2_unequals+baseline_f2_equals)
         
         # log the baseline, and whether the baseline is higher than d1
-        expectation_assessment[ds,"baseline1_XOR_AND_THEN"] <- baseline_f2
+        expectation_assessment[ds,"baseline1_OR_AND_THEN"] <- baseline_f2
       }
     }
     
@@ -414,20 +414,20 @@ evaluate_XOR_AND_THEN <- function(recoded_data, expectations, taxonomy, diversit
                                relative.overlap.flarge.in.fsmall=relative.overlap.flarge.in.fsmall, # raw
                                samples.disregarded.insufficient.lgs.applicable=nrow(expectation_assessment)-sum(na.omit(expectation_assessment$overlap_sufficient_test_power_positive)), # aggregation: how many subsamples were discarded?
                                samples.assessed=sum(na.omit(expectation_assessment$overlap_sufficient_test_power_positive)), # aggregation: how many subsamples could be computed?
-                               mean.d1.across.tested.samples=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result1_XOR_AND_THEN)),digits=2), # aggregation: what was the mean proportion of cases, in which the expectation was violated, across all samples? (with respect to f1 if XOR or AND)
-                               sd.d1.across.tested.samples=round(sd(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result1_XOR_AND_THEN)),digits=2), # aggregation: what was the standard deviation of the proportion of cases, in which the expectation was violated, across all samples? (with respect to f1 if XOR or AND)
-                               mean.plus.sd.d1.across.tested.samples=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result1_XOR_AND_THEN))+sd(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result1_XOR_AND_THEN)),digits=2), # aggregation: what was the sum of the mean plus one standard deviation of the proportion of cases, in which the expectation was violated, across all samples? (with respect to f1 if XOR or AND)
-                               mean.d2.across.tested.samples=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result2_XOR_AND)),digits=2), # aggregation: what was the mean proportion of cases, in which the expectation was violated, across all samples, with respect to f2? (only for XOR or AND)
-                               sd.d2.across.tested.samples=round(sd(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result2_XOR_AND)),digits=2), # aggregation: what was the standard deviation of the proportion of cases, in which the expectation was violated, across all samples, with respect to f2? (only for XOR or AND)
-                               mean.plus.sd.d2.across.tested.samples=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result2_XOR_AND))+sd(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result2_XOR_AND)),digits=2), # aggregation: what was sum of the mean plus one standard deviation of the proportion of cases, in which the expectation was violated, across all samples, with respect to f2? (only for XOR or AND)
-                               mean.baseline.1=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$baseline1_XOR_AND_THEN)),digits=2), # aggregation: what was the mean baseline probability for f2 being in the "unequals" state? (with respect to f1 for XOR and AND)
-                               mean.baseline.2=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$baseline2_XOR_AND)),digits=2), # aggregation: what was the mean baseline probability for f1 being in the "unequals" state? (only for XOR and AND)
-                               d1.baseline1.cohensd=if(length(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$baseline1_XOR_AND_THEN))!=0)
-                               {round(cohensD(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==TRUE)$result1_XOR_AND_THEN),na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==TRUE)$baseline1_XOR_AND_THEN), method="paired"), digits = 1)}
-                               else{NA}, # what is effect size (with respect to f1 if XOR or AND), measured by paired cohen's D
-                               d2.baseline2.cohensd=if(length(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$baseline2_XOR_AND))!=0)
-                               {round(cohensD(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==TRUE)$result2_XOR_AND),na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==TRUE)$baseline2_XOR_AND), method="paired"), digits = 1)}
-                               else{NA})) # what is effect size (with respect to f2 if XOR or AND), measured by paired cohen's D)
+                               mean.d1.across.tested.samples=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result1_OR_AND_THEN)),digits=2), # aggregation: what was the mean proportion of cases, in which the expectation was violated, across all samples? (with respect to f1 if OR or AND)
+                               sd.d1.across.tested.samples=round(sd(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result1_OR_AND_THEN)),digits=2), # aggregation: what was the standard deviation of the proportion of cases, in which the expectation was violated, across all samples? (with respect to f1 if OR or AND)
+                               mean.plus.sd.d1.across.tested.samples=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result1_OR_AND_THEN))+sd(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result1_OR_AND_THEN)),digits=2), # aggregation: what was the sum of the mean plus one standard deviation of the proportion of cases, in which the expectation was violated, across all samples? (with respect to f1 if OR or AND)
+                               mean.d2.across.tested.samples=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result2_OR_AND)),digits=2), # aggregation: what was the mean proportion of cases, in which the expectation was violated, across all samples, with respect to f2? (only for OR or AND)
+                               sd.d2.across.tested.samples=round(sd(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result2_OR_AND)),digits=2), # aggregation: what was the standard deviation of the proportion of cases, in which the expectation was violated, across all samples, with respect to f2? (only for OR or AND)
+                               mean.plus.sd.d2.across.tested.samples=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result2_OR_AND))+sd(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$result2_OR_AND)),digits=2), # aggregation: what was sum of the mean plus one standard deviation of the proportion of cases, in which the expectation was violated, across all samples, with respect to f2? (only for OR or AND)
+                               mean.baseline.1=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$baseline1_OR_AND_THEN)),digits=2), # aggregation: what was the mean baseline probability for f2 being in the "unequals" state? (with respect to f1 for OR and AND)
+                               mean.baseline.2=round(mean(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$baseline2_OR_AND)),digits=2), # aggregation: what was the mean baseline probability for f1 being in the "unequals" state? (only for OR and AND)
+                               d1.baseline1.cohensd=if(length(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$baseline1_OR_AND_THEN))!=0)
+                               {round(cohensD(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==TRUE)$result1_OR_AND_THEN),na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==TRUE)$baseline1_OR_AND_THEN), method="paired"), digits = 1)}
+                               else{NA}, # what is effect size (with respect to f1 if OR or AND), measured by paired cohen's D
+                               d2.baseline2.cohensd=if(length(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==T)$baseline2_OR_AND))!=0)
+                               {round(cohensD(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==TRUE)$result2_OR_AND),na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==TRUE)$baseline2_OR_AND), method="paired"), digits = 1)}
+                               else{NA})) # what is effect size (with respect to f2 if OR or AND), measured by paired cohen's D)
   }
   return(rslt)
 }
@@ -788,4 +788,13 @@ project_data <-  function(
               base_plot = base_plot))
 }
 
+# function to summarize matrices
+summarize_matrix <- function(matrix){
+  nfam <- as_flat_taxonomy_matrix(glottolog_languoids) %>% filter (id %in% matrix$glottocode) %>% select(level1) %>% unique() %>% nrow()
+  bare_matrix <- matrix %>% select(-glottocode)
+  nlg <- nrow(bare_matrix)
+  nvar <- ncol(bare_matrix)
+  prop <- sum(!is.na(bare_matrix))/(nlg*nvar)
+  return(c(nlg=nlg, nvar=nvar, nfam=nfam, prop=prop))
+}
 
