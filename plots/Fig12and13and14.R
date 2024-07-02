@@ -1,4 +1,4 @@
-# code for Figs 11, 12 and 13
+# code for Figs 12, 13 and 14
 rm(list=ls())
 
 library(densify)
@@ -35,34 +35,34 @@ gbi_logical_full <- read.csv("curated_data/GBI/logicalGBI/logicalGBI.csv",row.na
 gbi_logical_full <- na_convert(gbi_logical_full)
 gbi_logical_full <- factorise(gbi_logical_full)
 
-gbi_logical_densified <- read.csv("curated_data/GBI/logicalGBI/logicalGBI_pruned.csv",row.names = "glottocode") %>% select(-X)
+gbi_logical_densified <- read.csv("curated_data/GBI/logicalGBI/logicalGBI_densified.csv",row.names = "glottocode") %>% select(-X)
 gbi_logical_densified <- na_convert(gbi_logical_densified)
 gbi_logical_densified <- factorise(gbi_logical_densified)
 
 ## TLI logical data: large vs. small densified for full and grammar data, densified for phonology and lexicon
 # full set of variables
-tli_logical_large <- read.csv("curated_data/TLI/logicalTLI/full/logicalTLI_full_pruned_large.csv",row.names = "glottocode") %>% select(-X)
+tli_logical_large <- read.csv("curated_data/TLI/logicalTLI/full/logicalTLI_full_densified_large.csv",row.names = "glottocode") %>% select(-X)
 tli_logical_large <- na_convert(tli_logical_large)
 tli_logical_large <- factorise(tli_logical_large)
 
-tli_logical_small <- read.csv("curated_data/TLI/logicalTLI/full/logicalTLI_full_pruned_small.csv",row.names = "glottocode") %>% select(-X)
+tli_logical_small <- read.csv("curated_data/TLI/logicalTLI/full/logicalTLI_full_densified_small.csv",row.names = "glottocode") %>% select(-X)
 tli_logical_small <- na_convert(tli_logical_small)
 tli_logical_small <- factorise(tli_logical_small)
 
 # grammar
-grammar_logical_large <- read.csv("curated_data/TLI/logicalTLI/grammar/logicalTLI_grammar_pruned_large.csv",row.names = "glottocode") %>% select(-X)
+grammar_logical_large <- read.csv("curated_data/TLI/logicalTLI/grammar/logicalTLI_grammar_densified_large.csv",row.names = "glottocode") %>% select(-X)
 grammar_logical_large <- na_convert(grammar_logical_large)
 grammar_logical_large <- factorise(grammar_logical_large)
 
 # phonology
-phonology_logical_pruned <- read.csv("curated_data/TLI/logicalTLI/phonology/logicalTLI_phonology_pruned.csv",row.names = "glottocode") %>% select(-X)
-phonology_logical_pruned <- na_convert(phonology_logical_pruned)
-phonology_logical_pruned <- factorise(phonology_logical_pruned)
+phonology_logical_densified <- read.csv("curated_data/TLI/logicalTLI/phonology/logicalTLI_phonology_densified.csv",row.names = "glottocode") %>% select(-X)
+phonology_logical_densified <- na_convert(phonology_logical_densified)
+phonology_logical_densified <- factorise(phonology_logical_densified)
 
 # lexicon
-lexicon_logical_pruned <- read.csv("curated_data/TLI/logicalTLI/lexicon/logicalTLI_lexicon_pruned.csv",row.names = "glottocode") %>% select(-X)
-lexicon_logical_pruned <- na_convert(lexicon_logical_pruned)
-lexicon_logical_pruned <- factorise(lexicon_logical_pruned)
+lexicon_logical_densified <- read.csv("curated_data/TLI/logicalTLI/lexicon/logicalTLI_lexicon_densified.csv",row.names = "glottocode") %>% select(-X)
+lexicon_logical_densified <- na_convert(lexicon_logical_densified)
+lexicon_logical_densified <- factorise(lexicon_logical_densified)
 
 ## define functions
 # create per family proportion table for pca
@@ -272,8 +272,8 @@ proportions_gbi_logical_densified <- generate_per_family_prop_table(data = gbi_l
 proportions_tli_logical_large <- generate_per_family_prop_table(data = tli_logical_large, taxonomy_matrix = taxonomy_matrix)
 proportions_tli_logical_small <- generate_per_family_prop_table(data = tli_logical_small, taxonomy_matrix = taxonomy_matrix)
 proportions_grammar_logical_large <- generate_per_family_prop_table(data = grammar_logical_large, taxonomy_matrix = taxonomy_matrix)
-proportions_phonology_logical_pruned <- generate_per_family_prop_table(data = phonology_logical_pruned, taxonomy_matrix = taxonomy_matrix)
-proportions_lexicon_logical_pruned <- generate_per_family_prop_table(data = lexicon_logical_pruned, taxonomy_matrix = taxonomy_matrix)
+proportions_phonology_logical_densified <- generate_per_family_prop_table(data = phonology_logical_densified, taxonomy_matrix = taxonomy_matrix)
+proportions_lexicon_logical_densified <- generate_per_family_prop_table(data = lexicon_logical_densified, taxonomy_matrix = taxonomy_matrix)
 
 # # proportions of NA per family
 # boxplot(apply(proportions_tli_logical_large,1,function(x)sum(is.na(x))/ncol(proportions_tli_logical_large)))
@@ -285,16 +285,16 @@ proportions_gbi_logical_densified[proportions_gbi_logical_densified=="NaN"]<-NA
 proportions_tli_logical_large[proportions_tli_logical_large=="NaN"]<-NA
 proportions_tli_logical_small[proportions_tli_logical_small=="NaN"]<-NA
 proportions_grammar_logical_large[proportions_grammar_logical_large=="NaN"]<-NA
-proportions_phonology_logical_pruned[proportions_phonology_logical_pruned=="NaN"]<-NA
-proportions_lexicon_logical_pruned[proportions_lexicon_logical_pruned=="NaN"]<-NA
+proportions_phonology_logical_densified[proportions_phonology_logical_densified=="NaN"]<-NA
+proportions_lexicon_logical_densified[proportions_lexicon_logical_densified=="NaN"]<-NA
 
 per_family_props_PCA_gbi_logical_full <- pca(proportions_gbi_logical_full, method='rnipals', nPcs=10)
 per_family_props_PCA_gbi_logical_densified <- pca(proportions_gbi_logical_densified, method='rnipals', nPcs=10)
 per_family_props_PCA_tli_logical_large <- pca(proportions_tli_logical_large, method='rnipals', nPcs=10)
 per_family_props_PCA_tli_logical_small <- pca(proportions_tli_logical_small, method='rnipals', nPcs=10)
 per_family_props_PCA_grammar_logical_large <- pca(proportions_grammar_logical_large, method='rnipals', nPcs=10)
-per_family_props_PCA_phonology_logical_pruned <- pca(proportions_phonology_logical_pruned, method='rnipals', nPcs=10)
-per_family_props_PCA_lexicon_logical_pruned <- pca(proportions_lexicon_logical_pruned, method='rnipals', nPcs=10)
+per_family_props_PCA_phonology_logical_densified <- pca(proportions_phonology_logical_densified, method='rnipals', nPcs=10)
+per_family_props_PCA_lexicon_logical_densified <- pca(proportions_lexicon_logical_densified, method='rnipals', nPcs=10)
 
 # explained variances and R2 among all PCs
 explained_variance(per_family_props_PCA_gbi_logical_full)[,1:10]
@@ -302,8 +302,8 @@ explained_variance(per_family_props_PCA_gbi_logical_densified)[,1:10]
 explained_variance(per_family_props_PCA_tli_logical_large)[,1:10]
 explained_variance(per_family_props_PCA_tli_logical_small)[,1:10]
 explained_variance(per_family_props_PCA_grammar_logical_large)[,1:10]
-explained_variance(per_family_props_PCA_phonology_logical_pruned)[,1:10]
-explained_variance(per_family_props_PCA_lexicon_logical_pruned)[,1:10]
+explained_variance(per_family_props_PCA_phonology_logical_densified)[,1:10]
+explained_variance(per_family_props_PCA_lexicon_logical_densified)[,1:10]
 
 # most relevant loadings
 # report_loadings(per_family_props_PCA_full_logical_large, dataset = "GBI", directory = "logicalGBI", pc = 1, nr_variables_from_top_and_bottom = 5)
@@ -339,8 +339,8 @@ rgb_mapping_gbi_logical_densified_panel11 <- RGB_mapping(per_family_props_PCA_gb
 rgb_mapping_tli_logical_large <- RGB_mapping(per_family_props_PCA_tli_logical_large,taxonomy_matrix_for_plot, pc1flip = F, pc2flip = T, pc3flip = T) %>% filter(id%in%rownames(tli_logical_large)) %>% na.omit()
 rgb_mapping_tli_logical_small <- RGB_mapping(per_family_props_PCA_tli_logical_small,taxonomy_matrix_for_plot, pc1flip = F, pc2flip = T, pc3flip = T) %>% filter(id%in%rownames(tli_logical_small)) %>% na.omit()
 rgb_mapping_grammar_logical_large <- RGB_mapping(per_family_props_PCA_grammar_logical_large,taxonomy_matrix_for_plot, pc1flip = T, pc2flip = F, pc3flip = F) %>% filter(id%in%rownames(grammar_logical_large)) %>% na.omit()
-rgb_mapping_phonology_logical_pruned <- RGB_mapping(per_family_props_PCA_phonology_logical_pruned,taxonomy_matrix_for_plot, pc1flip = T, pc2flip = T, pc3flip = T) %>% filter(id%in%rownames(phonology_logical_pruned)) %>% na.omit()
-rgb_mapping_lexicon_logical_pruned <- RGB_mapping(per_family_props_PCA_lexicon_logical_pruned,taxonomy_matrix_for_plot, pc1flip = F, pc2flip = F, pc3flip = F) %>% filter(id%in%rownames(lexicon_logical_pruned)) %>% na.omit()
+rgb_mapping_phonology_logical_densified <- RGB_mapping(per_family_props_PCA_phonology_logical_densified,taxonomy_matrix_for_plot, pc1flip = T, pc2flip = T, pc3flip = T) %>% filter(id%in%rownames(phonology_logical_densified)) %>% na.omit()
+rgb_mapping_lexicon_logical_densified <- RGB_mapping(per_family_props_PCA_lexicon_logical_densified,taxonomy_matrix_for_plot, pc1flip = F, pc2flip = F, pc3flip = F) %>% filter(id%in%rownames(lexicon_logical_densified)) %>% na.omit()
 
 # global PC maps for PCs 1-3
 rgb_map_gbi_logical_full_kalyan <- rgb_map(rgb_mapping_gbi_logical_full_kalyan, world_map_initial, main="GBI logical (PC1 and PC3 flipped)", plot=F, size = 1.2, pca.object = per_family_props_PCA_gbi_logical_full)
@@ -350,8 +350,8 @@ rgb_map_gbi_logical_densified_panel11 <- rgb_map(rgb_mapping_gbi_logical_densifi
 rgb_map_tli_logical_large <- rgb_map(rgb_mapping_tli_logical_large, world_map_initial, main="TLI logical (large densified)", plot=F, size = 1.2, pca.object = per_family_props_PCA_tli_logical_large)
 rgb_map_tli_logical_small <- rgb_map(rgb_mapping_tli_logical_small, world_map_initial, main="TLI logical (small densified)", plot=F, size = 1.2, pca.object = per_family_props_PCA_tli_logical_small)
 rgb_map_grammar_logical_large <- rgb_map(rgb_mapping_grammar_logical_large, world_map_initial, main="TLI logical [grammar]", plot=F, size = 1.2, pca.object = per_family_props_PCA_grammar_logical_large)
-rgb_map_phonology_logical_pruned <- rgb_map(rgb_mapping_phonology_logical_pruned, world_map_initial, main="TLI logical [phonology]", plot=F, size = 1.2, pca.object = per_family_props_PCA_phonology_logical_pruned)
-rgb_map_lexicon_logical_pruned <- rgb_map(rgb_mapping_lexicon_logical_pruned, world_map_initial, main="TLI logical [lexicon]", plot=F, size = 1.2, per_family_props_PCA_lexicon_logical_pruned) 
+rgb_map_phonology_logical_densified <- rgb_map(rgb_mapping_phonology_logical_densified, world_map_initial, main="TLI logical [phonology]", plot=F, size = 1.2, pca.object = per_family_props_PCA_phonology_logical_densified)
+rgb_map_lexicon_logical_densified <- rgb_map(rgb_mapping_lexicon_logical_densified, world_map_initial, main="TLI logical [lexicon]", plot=F, size = 1.2, per_family_props_PCA_lexicon_logical_densified) 
 
 
 #### family relationships to one another in PC-space, by macroarea
@@ -360,30 +360,30 @@ f2d_full_gbi_logical_densified <- dim_mapping(pca.object = per_family_props_PCA_
 f2d_full_tli_logical_large <- dim_mapping(pca.object = per_family_props_PCA_tli_logical_large, taxonomy_matrix = taxonomy_matrix_for_plot, size = 1.2)
 f2d_full_tli_logical_small <- dim_mapping(pca.object = per_family_props_PCA_tli_logical_small, taxonomy_matrix = taxonomy_matrix_for_plot, size = 1.2)
 f2d_grammar_logical_large <- dim_mapping(pca.object = per_family_props_PCA_grammar_logical_large, taxonomy_matrix = taxonomy_matrix_for_plot, size = 1.2)
-f2d_phonology_logical_pruned <- dim_mapping(pca.object = per_family_props_PCA_phonology_logical_pruned, taxonomy_matrix = taxonomy_matrix_for_plot, size = 1.2)
-f2d_lexicon_logical_pruned <- dim_mapping(pca.object = per_family_props_PCA_lexicon_logical_pruned, taxonomy_matrix = taxonomy_matrix_for_plot, size = 1.2)
+f2d_phonology_logical_densified <- dim_mapping(pca.object = per_family_props_PCA_phonology_logical_densified, taxonomy_matrix = taxonomy_matrix_for_plot, size = 1.2)
+f2d_lexicon_logical_densified <- dim_mapping(pca.object = per_family_props_PCA_lexicon_logical_densified, taxonomy_matrix = taxonomy_matrix_for_plot, size = 1.2)
 
 # arrange the plots side by side, print and save
 logical_plots <- grid.arrange(
   arrangeGrob(rgb_map_gbi_logical_full_panel11, f2d_full_gbi_logical_full, nrow = 1, ncol = 2, widths=c(3,2)), 
   arrangeGrob(rgb_map_grammar_logical_large, f2d_grammar_logical_large, nrow = 1, ncol = 2, widths=c(3,2)), 
-  arrangeGrob(rgb_map_phonology_logical_pruned, f2d_phonology_logical_pruned, nrow = 1, ncol = 2, widths=c(3,2)), 
-  arrangeGrob(rgb_map_lexicon_logical_pruned, f2d_lexicon_logical_pruned, nrow = 1, ncol = 2, widths=c(3,2)), 
+  arrangeGrob(rgb_map_phonology_logical_densified, f2d_phonology_logical_densified, nrow = 1, ncol = 2, widths=c(3,2)), 
+  arrangeGrob(rgb_map_lexicon_logical_densified, f2d_lexicon_logical_densified, nrow = 1, ncol = 2, widths=c(3,2)), 
   nrow = 4
 )
-ggsave("plots/Fig11.pdf", plot = logical_plots, width = 14, height = 8*2, dpi = 500)
+ggsave("plots/Fig12.pdf", plot = logical_plots, width = 14, height = 8*2, dpi = 500)
 
 logical_plots_densify <- grid.arrange(
   arrangeGrob(rgb_map_gbi_logical_full_panel11, f2d_full_gbi_logical_full, rgb_map_gbi_logical_densified_panel11, f2d_full_gbi_logical_densified, nrow = 2, ncol = 2, widths=c(3,2)),
   arrangeGrob(rgb_map_tli_logical_large, f2d_full_tli_logical_large, rgb_map_tli_logical_small, f2d_full_tli_logical_small, nrow = 2, ncol = 2, widths=c(3,2)),
   nrow = 2
 )
-ggsave("plots/Fig12.pdf", plot = logical_plots_densify, width = 14, height = 8*2, dpi = 500)
+ggsave("plots/Fig13.pdf", plot = logical_plots_densify, width = 14, height = 8*2, dpi = 500)
 
 comp_plots <- grid.arrange(
   arrangeGrob(rgb_map_gbi_logical_full_panel11, rgb_map_gbi_logical_full_kalyan, nrow = 2, ncol = 1)
 )
-ggsave("plots/Fig13.pdf", plot = comp_plots, width = 9, height = 8, dpi = 500)
+ggsave("plots/Fig14.pdf", plot = comp_plots, width = 9, height = 8, dpi = 500)
 
 ## correlations
 

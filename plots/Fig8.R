@@ -1,4 +1,4 @@
-# code for Fig 7
+# code for Fig 8
 rm(list=ls())
 library(tidyverse)
 library(ggplot2)
@@ -169,4 +169,4 @@ plot(smor10)
 
 # arrange the plots side by side, print and save
 combined_plot_full <- grid.arrange(swoo23b,swoo23a,smor10, ncol = 1)
-ggsave("plots/Fig7 associations.png", plot = combined_plot_full, width = 14, height = 8, dpi = 700)
+ggsave("plots/Fig8 associations.png", plot = combined_plot_full, width = 14, height = 8, dpi = 700)

@@ -1,4 +1,4 @@
-# code for Figs 9 and 10
+# code for Figs 10 and 11
 rm(list=ls())
 
 library(densify)
@@ -62,15 +62,15 @@ phonology_statistical <- factorise(phonology_statistical)
 sum(!is.na(phonology_statistical))/(nrow(phonology_statistical)*ncol(phonology_statistical)) # coding density: 55% --> ok!
 
 # lexicon
-lexicon_logical_pruned <- read.csv("curated_data/TLI/logicalTLI/lexicon/logicalTLI_lexicon_pruned.csv", row.names = "glottocode") %>% select(-X)
-lexicon_logical_pruned <- na_convert(lexicon_logical_pruned)
-lexicon_logical_pruned <- factorise(lexicon_logical_pruned)
-sum(!is.na(lexicon_logical_pruned))/(nrow(lexicon_logical_pruned)*ncol(lexicon_logical_pruned)) # coding density: 39% --> ok!
+lexicon_logical_densified <- read.csv("curated_data/TLI/logicalTLI/lexicon/logicalTLI_lexicon_densified.csv", row.names = "glottocode") %>% select(-X)
+lexicon_logical_densified <- na_convert(lexicon_logical_densified)
+lexicon_logical_densified <- factorise(lexicon_logical_densified)
+sum(!is.na(lexicon_logical_densified))/(nrow(lexicon_logical_densified)*ncol(lexicon_logical_densified)) # coding density: 39% --> ok!
 
-lexicon_statistical_pruned <- read.csv("curated_data/TLI/statisticalTLI/lexicon/statisticalTLI_lexicon_pruned.csv", row.names = "glottocode") %>% select(-X)
-lexicon_statistical_pruned <- na_convert(lexicon_statistical_pruned)
-lexicon_statistical_pruned <- factorise(lexicon_statistical_pruned)
-sum(!is.na(lexicon_statistical_pruned))/(nrow(lexicon_statistical_pruned)*ncol(lexicon_statistical_pruned)) # coding density: 40% --> ok!
+lexicon_statistical_densified <- read.csv("curated_data/TLI/statisticalTLI/lexicon/statisticalTLI_lexicon_densified.csv", row.names = "glottocode") %>% select(-X)
+lexicon_statistical_densified <- na_convert(lexicon_statistical_densified)
+lexicon_statistical_densified <- factorise(lexicon_statistical_densified)
+sum(!is.na(lexicon_statistical_densified))/(nrow(lexicon_statistical_densified)*ncol(lexicon_statistical_densified)) # coding density: 40% --> ok!
 
 ## Grid points and entropies at grid points
 
@@ -82,8 +82,8 @@ gbi_statistical_taxonomy <- taxonomy_matrix_for_plot %>% filter(id %in% rownames
 phonology_logical_taxonomy <- taxonomy_matrix_for_plot %>% filter(id %in% rownames(phonology_logical)) %>% filter(!is.na(lon))
 phonology_statistical_taxonomy <- taxonomy_matrix_for_plot %>% filter(id %in% rownames(phonology_statistical)) %>% filter(!is.na(lon))
 
-lexicon_logical_taxonomy <- taxonomy_matrix_for_plot %>% filter(id %in% rownames(lexicon_logical_pruned)) %>% filter(!is.na(lon))
-lexicon_statistical_taxonomy <- taxonomy_matrix_for_plot %>% filter(id %in% rownames(lexicon_statistical_pruned)) %>% filter(!is.na(lon))
+lexicon_logical_taxonomy <- taxonomy_matrix_for_plot %>% filter(id %in% rownames(lexicon_logical_densified)) %>% filter(!is.na(lon))
+lexicon_statistical_taxonomy <- taxonomy_matrix_for_plot %>% filter(id %in% rownames(lexicon_statistical_densified)) %>% filter(!is.na(lon))
 
 # trim data to appropriate languages
 gb_original_with_lg_coords <- gb_original[which(rownames(gb_original)%in%gbi_logical_taxonomy$id),]
@@ -93,8 +93,8 @@ gbi_statistical_with_lg_coords <- gbi_statistical[which(rownames(gbi_statistical
 phonology_logical_with_lg_coords <- phonology_logical[which(rownames(phonology_logical)%in%phonology_logical_taxonomy$id),]
 phonology_statistical_with_lg_coords <- phonology_statistical[which(rownames(phonology_statistical)%in%phonology_statistical_taxonomy$id),]
 
-lexicon_logical_with_lg_coords <- lexicon_logical_pruned[which(rownames(lexicon_logical_pruned)%in%lexicon_logical_taxonomy$id),]
-lexicon_statistical_with_lg_coords <- lexicon_statistical_pruned[which(rownames(lexicon_statistical_pruned)%in%lexicon_statistical_taxonomy$id),]
+lexicon_logical_with_lg_coords <- lexicon_logical_densified[which(rownames(lexicon_logical_densified)%in%lexicon_logical_taxonomy$id),]
+lexicon_statistical_with_lg_coords <- lexicon_statistical_densified[which(rownames(lexicon_statistical_densified)%in%lexicon_statistical_taxonomy$id),]
 
 # define function that create a network of grid points, associated to a map and a taxonomy matrix of coordinates, and maps mean feature entropies per grid point
 gridpointwise_entropies <- function(taxonomy_matrix, 
@@ -343,7 +343,7 @@ entropies <- plot_grid(gbi_statistical_gps[[2]],
                        lexicon_statistical_gps[[2]], 
                        align = "h", axis = "l", ncol = 1)
 
-ggsave(file="plots/Fig9.pdf", entropies, dpi = 500, width = 8, height = 7, units = "in")
+ggsave(file="plots/Fig10.pdf", entropies, dpi = 500, width = 8, height = 7, units = "in")
 
 # compare across curations, using Grambank
 gbi_comparison_plot <- grid_point_comparison_horizontal(baseline_gp_frame = gb_original_gps[[1]], 
@@ -351,4 +351,4 @@ gbi_comparison_plot <- grid_point_comparison_horizontal(baseline_gp_frame = gb_o
                                                        comparison_gp_frame_2 = gbi_statistical_gps[[1]], 
                                                        world_map = world_map_initial)
 
-ggsave(file="plots/Fig10.pdf", gbi_comparison_plot[[1]], dpi = 500, width = 8, height = 7, units = "in")
+ggsave(file="plots/Fig11.pdf", gbi_comparison_plot[[1]], dpi = 500, width = 8, height = 7, units = "in")
