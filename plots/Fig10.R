@@ -1,4 +1,4 @@
-# code for Figs 10 and 11
+# code for Fig 10
 rm(list=ls())
 
 library(densify)
@@ -44,34 +44,6 @@ gbi_statistical <- factorise(gbi_statistical)
 gbi_statistical <- gbi_statistical[which(rownames(gbi_statistical)%in%taxonomy_matrix_for_plot$id),]
 sum(!is.na(gbi_statistical))/(nrow(gbi_statistical)*ncol(gbi_statistical)) # coding density: 58%
 
-## TLI data: only phonology and lexical subsets suitable given high coding densities AND appropriately high numbers of languages
-# phonology
-# read in logical TLI data
-logical <- read.csv("curated_data/TLI/logicalTLI/full/logicalTLI_full.csv",row.names = "glottocode") %>% select(-X)
-logical <- na_convert(logical)
-logical_parameters <- read.csv("curated_data/TLI/logicalTLI/cldf/parameters.csv")
-phonology_logical <- logical[which(apply(logical[which(names(logical)%in%filter(logical_parameters,grouping %in% c("Phonology", "Phonology_segmental_c", "Phonology_segmental_v", "Phonology_prosodic"))$short.name)],1,function(x)length(na.omit(x)))>0),c(which(names(logical)%in%filter(logical_parameters,grouping %in% c("Phonology", "Phonology_segmental_c", "Phonology_segmental_v", "Phonology_prosodic"))$short.name))]
-phonology_logical <- factorise(phonology_logical)
-sum(!is.na(phonology_logical))/(nrow(phonology_logical)*ncol(phonology_logical)) # coding density: 56% --> ok!
-
-statistical <- read.csv("curated_data/TLI/statisticalTLI/full/statisticalTLI_full.csv",row.names = "glottocode") %>% select(-X)
-statistical <- na_convert(statistical)
-statistical_parameters <- read.csv("curated_data/TLI/statisticalTLI/cldf/parameters.csv")
-phonology_statistical <- statistical[which(apply(statistical[which(names(statistical)%in%filter(statistical_parameters,grouping %in% c("Phonology", "Phonology_segmental_c", "Phonology_segmental_v", "Phonology_prosodic"))$short.name)],1,function(x)length(na.omit(x)))>0),c(which(names(statistical)%in%filter(statistical_parameters,grouping %in% c("Phonology", "Phonology_segmental_c", "Phonology_segmental_v", "Phonology_prosodic"))$short.name))]
-phonology_statistical <- factorise(phonology_statistical)
-sum(!is.na(phonology_statistical))/(nrow(phonology_statistical)*ncol(phonology_statistical)) # coding density: 55% --> ok!
-
-# lexicon
-lexicon_logical_densified <- read.csv("curated_data/TLI/logicalTLI/lexicon/logicalTLI_lexicon_densified.csv", row.names = "glottocode") %>% select(-X)
-lexicon_logical_densified <- na_convert(lexicon_logical_densified)
-lexicon_logical_densified <- factorise(lexicon_logical_densified)
-sum(!is.na(lexicon_logical_densified))/(nrow(lexicon_logical_densified)*ncol(lexicon_logical_densified)) # coding density: 39% --> ok!
-
-lexicon_statistical_densified <- read.csv("curated_data/TLI/statisticalTLI/lexicon/statisticalTLI_lexicon_densified.csv", row.names = "glottocode") %>% select(-X)
-lexicon_statistical_densified <- na_convert(lexicon_statistical_densified)
-lexicon_statistical_densified <- factorise(lexicon_statistical_densified)
-sum(!is.na(lexicon_statistical_densified))/(nrow(lexicon_statistical_densified)*ncol(lexicon_statistical_densified)) # coding density: 40% --> ok!
-
 ## Grid points and entropies at grid points
 
 # trim taxonomy to appropriate languages
@@ -79,22 +51,10 @@ gb_original_taxonomy <- taxonomy_matrix_for_plot %>% filter(id %in% rownames(gb_
 gbi_logical_taxonomy <- taxonomy_matrix_for_plot %>% filter(id %in% rownames(gbi_logical)) %>% filter(!is.na(lon))
 gbi_statistical_taxonomy <- taxonomy_matrix_for_plot %>% filter(id %in% rownames(gbi_statistical)) %>% filter(!is.na(lon))
 
-phonology_logical_taxonomy <- taxonomy_matrix_for_plot %>% filter(id %in% rownames(phonology_logical)) %>% filter(!is.na(lon))
-phonology_statistical_taxonomy <- taxonomy_matrix_for_plot %>% filter(id %in% rownames(phonology_statistical)) %>% filter(!is.na(lon))
-
-lexicon_logical_taxonomy <- taxonomy_matrix_for_plot %>% filter(id %in% rownames(lexicon_logical_densified)) %>% filter(!is.na(lon))
-lexicon_statistical_taxonomy <- taxonomy_matrix_for_plot %>% filter(id %in% rownames(lexicon_statistical_densified)) %>% filter(!is.na(lon))
-
 # trim data to appropriate languages
 gb_original_with_lg_coords <- gb_original[which(rownames(gb_original)%in%gbi_logical_taxonomy$id),]
 gbi_logical_with_lg_coords <- gbi_logical[which(rownames(gbi_logical)%in%gbi_logical_taxonomy$id),]
 gbi_statistical_with_lg_coords <- gbi_statistical[which(rownames(gbi_statistical)%in%gbi_statistical_taxonomy$id),]
-
-phonology_logical_with_lg_coords <- phonology_logical[which(rownames(phonology_logical)%in%phonology_logical_taxonomy$id),]
-phonology_statistical_with_lg_coords <- phonology_statistical[which(rownames(phonology_statistical)%in%phonology_statistical_taxonomy$id),]
-
-lexicon_logical_with_lg_coords <- lexicon_logical_densified[which(rownames(lexicon_logical_densified)%in%lexicon_logical_taxonomy$id),]
-lexicon_statistical_with_lg_coords <- lexicon_statistical_densified[which(rownames(lexicon_statistical_densified)%in%lexicon_statistical_taxonomy$id),]
 
 # define function that create a network of grid points, associated to a map and a taxonomy matrix of coordinates, and maps mean feature entropies per grid point
 gridpointwise_entropies <- function(taxonomy_matrix, 
@@ -238,29 +198,28 @@ grid_point_comparison_horizontal <- function(baseline_gp_frame, name_baseline,
     min_delta_entropy <- min(min(na.omit(delta$delta.1.minus.0.mean.feature.entropy)), min(na.omit(delta$delta.2.minus.1.mean.feature.entropy)), min(na.omit(delta$delta.2.minus.0.mean.feature.entropy)))
   }
   
+  boundaries <- sort(c(max_delta_entropy, 0-min_delta_entropy))[2]
+  
   col_strip <- brewer.pal(11, "RdBu")
 
   # delta entropies maps
   delta_entropies_1_minus_0 <- ggplot() +
     geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
     geom_sf(data = delta, aes(colour = delta.1.minus.0.mean.feature.entropy)) +
-    scale_color_gradientn(colors = rev(col_strip), na.value = "lightgrey", limits = c(min_delta_entropy, max_delta_entropy)) +
-    #scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_entropy, max_delta_entropy)) +
+    scale_color_gradientn(colors = rev(col_strip), na.value = "lightgrey", limits = c(0-boundaries, boundaries)) +
     labs(color = "Difference") +
-    ggtitle("A.") +
+    ggtitle("B.") +
     theme_minimal() +
     theme(panel.grid.major = element_blank(),
           axis.text = element_blank(),
           axis.ticks = element_blank())
-  
   if(!is.null(comparison_gp_frame_2)){
     delta_entropies_2_minus_1 <- ggplot() +
       geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
       geom_sf(data = delta, aes(colour = delta.2.minus.1.mean.feature.entropy)) +
-      scale_color_gradientn(colors = rev(col_strip), na.value = "lightgrey", limits = c(min_delta_entropy, max_delta_entropy)) +
-      #scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_entropy, max_delta_entropy)) +
+      scale_color_gradientn(colors = rev(col_strip), na.value = "lightgrey", limits = c(0-boundaries, boundaries)) +
       labs(color = "Difference") +
-      ggtitle("B.") +
+      ggtitle("C.") +
       theme_minimal() +
       theme(panel.grid.major = element_blank(),
             axis.text = element_blank(),
@@ -269,10 +228,9 @@ grid_point_comparison_horizontal <- function(baseline_gp_frame, name_baseline,
     delta_entropies_2_minus_0 <- ggplot() +
       geom_sf(data = shifted$base_map, fill = "white", color = "darkgrey") +
       geom_sf(data = delta, aes(colour = delta.2.minus.0.mean.feature.entropy)) +
-      scale_color_gradientn(colors = rev(col_strip), na.value = "lightgrey", limits = c(min_delta_entropy, max_delta_entropy)) +
-      #scale_color_gradient2(low="blue",mid = "white", high = "red", na.value = "lightgrey", limits = c(min_delta_entropy, max_delta_entropy)) +
+      scale_color_gradientn(colors = rev(col_strip), na.value = "lightgrey", limits = c(0-boundaries, boundaries)) +
       labs(color = "Difference") +
-      ggtitle("C.") +
+      ggtitle("D.") +
       theme_minimal() +
       theme(panel.grid.major = element_blank(),
             axis.text = element_blank(),
@@ -320,35 +278,18 @@ gbi_statistical_gps <- gridpointwise_entropies(taxonomy_matrix = gbi_statistical
                                            buffer_distance = buffer_distance, 
                                            verbose = T, plot = T, title = "A.")
 
-## maps for statistical curation of suitable TLI subsets
-# phonology
-phonology_statistical_gps <- gridpointwise_entropies(taxonomy_matrix = phonology_statistical_taxonomy,
-                                                     data_trimmed_to_lgs_with_coords = phonology_statistical_with_lg_coords, 
-                                                     world_map = world_map_initial, 
-                                                     coordinate_scaling = coordinate_scaling, 
-                                                     buffer_distance = buffer_distance, 
-                                                     verbose = T, plot = T, title = "B.")
-
-# lexicon
-lexicon_statistical_gps <- gridpointwise_entropies(taxonomy_matrix = lexicon_statistical_taxonomy,
-                                                   data_trimmed_to_lgs_with_coords = lexicon_statistical_with_lg_coords, 
-                                                   world_map = world_map_initial, 
-                                                   coordinate_scaling = coordinate_scaling, 
-                                                   buffer_distance = buffer_distance, 
-                                                   verbose = T, plot = T, title = "C.")
-
+# compare across curations
+gbi_comparison_plot <- grid_point_comparison_horizontal(baseline_gp_frame = gb_original_gps[[1]], 
+                                                        comparison_gp_frame = gbi_logical_gps[[1]], 
+                                                        comparison_gp_frame_2 = gbi_statistical_gps[[1]], 
+                                                        world_map = world_map_initial)
 # plot
 entropies <- plot_grid(gbi_statistical_gps[[2]],
-                       phonology_statistical_gps[[2]],
-                       lexicon_statistical_gps[[2]], 
-                       align = "h", axis = "l", ncol = 1)
+          gbi_comparison_plot[[2]],
+          gbi_comparison_plot[[3]],
+          gbi_comparison_plot[[4]], ncol = 1)
 
-ggsave(file="plots/Fig10.pdf", entropies, dpi = 500, width = 8, height = 7, units = "in")
 
-# compare across curations, using Grambank
-gbi_comparison_plot <- grid_point_comparison_horizontal(baseline_gp_frame = gb_original_gps[[1]], 
-                                                       comparison_gp_frame = gbi_logical_gps[[1]], 
-                                                       comparison_gp_frame_2 = gbi_statistical_gps[[1]], 
-                                                       world_map = world_map_initial)
+ggsave(file="plots/Fig10.pdf", entropies, dpi = 500, width = 8, height = 9, units = "in")
 
-ggsave(file="plots/Fig11.pdf", gbi_comparison_plot[[1]], dpi = 500, width = 8, height = 7, units = "in")
+
