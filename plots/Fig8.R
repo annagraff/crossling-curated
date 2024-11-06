@@ -113,7 +113,8 @@ for_viz <- function(ID, modifications, diversity_samples,recoded_data,taxonomy,p
                           ", Cohen's D = ",round(cohensD(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==TRUE)$result1_OR_AND_THEN),
                                                          na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==TRUE)$baseline1_OR_AND_THEN), 
                                                          method="paired"), digits = 1),collapse = "", sep = ""))+
-    theme_bw()
+    theme_bw()+
+    theme(plot.title=element_text(face="bold"))
   return(p)
 }
 
@@ -131,7 +132,7 @@ swoo23a <- for_viz(ID = "S-WOO-23a",
                    recoded_data = recoded_data,
                    taxonomy = taxonomy,
                    proportion_languages_must_be_in_applicable_state = proportion_languages_must_be_in_applicable_state,
-                   title = "B. 'if prepositions, then word order noun-genitive'",
+                   title = "b. 'if prepositions, then word order noun-genitive'",
                    conditional = "conditional: P(prepositions | genitive-noun)",
                    marginal = "marginal: P(genitive-noun)",
                    xlab = "",
@@ -145,7 +146,7 @@ swoo23b <- for_viz(ID = "S-WOO-23b",
                    recoded_data = recoded_data,
                    taxonomy = taxonomy,
                    proportion_languages_must_be_in_applicable_state = proportion_languages_must_be_in_applicable_state,
-                   title = "A. 'if postpositions, then word order genitive-noun'",
+                   title = "a. 'if postpositions, then word order genitive-noun'",
                    conditional = "conditional: P(postpositions | noun-genitive)",
                    marginal = "marginal: P(noun-genitive)",
                    xlab = "",
@@ -159,7 +160,7 @@ smor10 <- for_viz(ID = "S-MOR-10",
                   recoded_data = recoded_data,
                   taxonomy = taxonomy,
                   proportion_languages_must_be_in_applicable_state = proportion_languages_must_be_in_applicable_state,
-                  title = "C. 'if verb agreement, then tense-aspect inflection'",
+                  title = "c. 'if verb agreement, then tense-aspect inflection'",
                   conditional = "conditional: P(agreement | no TA-inflection)",
                   marginal = "marginal: P(no TA-inflection)",
                   xlab = "Probability distributions across 1000 samples",
@@ -169,4 +170,4 @@ plot(smor10)
 
 # arrange the plots side by side, print and save
 combined_plot_full <- grid.arrange(swoo23b,swoo23a,smor10, ncol = 1)
-ggsave("plots/Fig8 associations.png", plot = combined_plot_full, width = 14, height = 8, dpi = 700)
+ggsave("plots/Fig8 associations.jpg", plot = combined_plot_full, width = 14, height = 8, dpi = 700)

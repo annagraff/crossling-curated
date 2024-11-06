@@ -155,7 +155,8 @@ gridpointwise_entropies <- function(taxonomy_matrix,
       ggtitle(title) +
       labs(color = "Mean entropy") +
       theme_minimal() +
-      theme(panel.grid.major = element_blank(),
+      theme(plot.title = element_text(face = "bold"),
+            panel.grid.major = element_blank(),
             axis.text = element_blank(),
             axis.ticks = element_blank())
     
@@ -208,9 +209,10 @@ grid_point_comparison_horizontal <- function(baseline_gp_frame, name_baseline,
     geom_sf(data = delta, aes(colour = delta.1.minus.0.mean.feature.entropy)) +
     scale_color_gradientn(colors = rev(col_strip), na.value = "lightgrey", limits = c(0-boundaries, boundaries)) +
     labs(color = "Difference") +
-    ggtitle("B.") +
+    ggtitle("b.") +
     theme_minimal() +
-    theme(panel.grid.major = element_blank(),
+    theme(plot.title = element_text(face = "bold"),
+          panel.grid.major = element_blank(),
           axis.text = element_blank(),
           axis.ticks = element_blank())
   if(!is.null(comparison_gp_frame_2)){
@@ -219,9 +221,10 @@ grid_point_comparison_horizontal <- function(baseline_gp_frame, name_baseline,
       geom_sf(data = delta, aes(colour = delta.2.minus.1.mean.feature.entropy)) +
       scale_color_gradientn(colors = rev(col_strip), na.value = "lightgrey", limits = c(0-boundaries, boundaries)) +
       labs(color = "Difference") +
-      ggtitle("C.") +
+      ggtitle("c.") +
       theme_minimal() +
-      theme(panel.grid.major = element_blank(),
+      theme(plot.title = element_text(face = "bold"),
+            panel.grid.major = element_blank(),
             axis.text = element_blank(),
             axis.ticks = element_blank())
     
@@ -230,9 +233,10 @@ grid_point_comparison_horizontal <- function(baseline_gp_frame, name_baseline,
       geom_sf(data = delta, aes(colour = delta.2.minus.0.mean.feature.entropy)) +
       scale_color_gradientn(colors = rev(col_strip), na.value = "lightgrey", limits = c(0-boundaries, boundaries)) +
       labs(color = "Difference") +
-      ggtitle("D.") +
+      ggtitle("d.") +
       theme_minimal() +
-      theme(panel.grid.major = element_blank(),
+      theme(plot.title = element_text(face = "bold"),
+            panel.grid.major = element_blank(),
             axis.text = element_blank(),
             axis.ticks = element_blank())  }
   
@@ -276,7 +280,7 @@ gbi_statistical_gps <- gridpointwise_entropies(taxonomy_matrix = gbi_statistical
                                            world_map = world_map_initial, 
                                            coordinate_scaling = coordinate_scaling, 
                                            buffer_distance = buffer_distance, 
-                                           verbose = T, plot = T, title = "A.")
+                                           verbose = T, plot = T, title = "a.")
 
 # compare across curations
 gbi_comparison_plot <- grid_point_comparison_horizontal(baseline_gp_frame = gb_original_gps[[1]], 
