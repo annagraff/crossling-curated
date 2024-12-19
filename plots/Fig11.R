@@ -236,8 +236,8 @@ dim_mapping <- function(pca.object, taxonomy_matrix, size) {
 }
 
 # plotting RGB map 
-rgb_map <- function(rgb_data_frame, world_map_initial, main, plot, size, pca.object){
-  main <- paste(main,", PC1-PC3 (",round(pca.object@R2cum[3],4)*100,"%)",sep="")
+rgb_map <- function(rgb_data_frame, world_map_initial, plot, size, pca.object, main){
+  #main <- paste(main,", PC1-PC3 (",round(pca.object@R2cum[3],4)*100,"%)",sep="")
   rgb_shifted <- project_data(df = rgb_data_frame, world_map_initial = world_map_initial)
   pacific_centered_map <- rgb_shifted$base_plot +
     geom_sf(data = rgb_shifted$data, aes(fill = pc.colors1to3, color = pc.colors1to3), shape = 21, size = size) +
@@ -246,7 +246,7 @@ rgb_map <- function(rgb_data_frame, world_map_initial, main, plot, size, pca.obj
     scale_fill_identity() +  # use color values as specified in the data
     scale_color_identity() +  # use color values as specified in the data
     guides(fill = "none", color = "none")+
-    theme(panel.grid.major = element_blank(), plot.title = element_text(hjust = 0.5),
+    theme(panel.grid.major = element_blank(), plot.title = element_text(face="bold"),
           axis.text = element_blank(),axis.ticks = element_blank())
   if(plot==T){
     print(pacific_centered_map)
@@ -316,11 +316,11 @@ rgb_mapping_tli_logical_large <- RGB_mapping(per_family_props_PCA_tli_logical_la
 rgb_mapping_tli_logical_small <- RGB_mapping(per_family_props_PCA_tli_logical_small,taxonomy_matrix_for_plot, pc1flip = F, pc2flip = T, pc3flip = F) %>% filter(id%in%rownames(tli_logical_small)) %>% na.omit()
 
 # global PC maps for PCs 1-3
-rgb_map_gbi_logical_full <- rgb_map(rgb_mapping_gbi_logical_full, world_map_initial, main="GBI-logical (full)", plot=F, size = 0.8, pca.object = per_family_props_PCA_gbi_logical_full)
-rgb_map_gbi_logical_densified <- rgb_map(rgb_mapping_gbi_logical_densified, world_map_initial, main="GBI-logical (densified)", plot=F, size = 0.8, pca.object = per_family_props_PCA_gbi_logical_full)
-rgb_map_tli_logical_full <- rgb_map(rgb_mapping_tli_logical_full, world_map_initial, main="TLI-logical (full)", plot=F, size = 0.8, pca.object = per_family_props_PCA_tli_logical_large)
-rgb_map_tli_logical_large <- rgb_map(rgb_mapping_tli_logical_large, world_map_initial, main="TLI-logical (large densified)", plot=F, size = 0.8, pca.object = per_family_props_PCA_tli_logical_large)
-rgb_map_tli_logical_small <- rgb_map(rgb_mapping_tli_logical_small, world_map_initial, main="TLI-logical (small densified)", plot=F, size = 0.8, pca.object = per_family_props_PCA_tli_logical_small)
+rgb_map_gbi_logical_full <- rgb_map(rgb_mapping_gbi_logical_full, world_map_initial, plot=F, size = 0.8, pca.object = per_family_props_PCA_gbi_logical_full, main = "a.")
+rgb_map_gbi_logical_densified <- rgb_map(rgb_mapping_gbi_logical_densified, world_map_initial, plot=F, size = 0.8, pca.object = per_family_props_PCA_gbi_logical_full, main = "b.")
+rgb_map_tli_logical_full <- rgb_map(rgb_mapping_tli_logical_full, world_map_initial, plot=F, size = 0.8, pca.object = per_family_props_PCA_tli_logical_large, main = "c.")
+rgb_map_tli_logical_large <- rgb_map(rgb_mapping_tli_logical_large, world_map_initial, plot=F, size = 0.8, pca.object = per_family_props_PCA_tli_logical_large, main="TLI-logical (large densified)")
+rgb_map_tli_logical_small <- rgb_map(rgb_mapping_tli_logical_small, world_map_initial, plot=F, size = 0.8, pca.object = per_family_props_PCA_tli_logical_small, main = "d.")
 
 #### family relationships to one another in PC-space, by macroarea
 f2d_full_gbi_logical_full <- dim_mapping(pca.object = per_family_props_PCA_gbi_logical_full, taxonomy_matrix = taxonomy_matrix_for_plot, size = 1.2)

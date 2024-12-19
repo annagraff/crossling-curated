@@ -8,7 +8,7 @@ library(lsr)
 library(gridExtra)
 
 # this function generates expectation_assessment for each expectation
-for_viz <- function(ID, modifications, diversity_samples,recoded_data,taxonomy,proportion_languages_must_be_in_applicable_state, title, textpos, conditional, marginal, xlab){
+for_viz <- function(ID, modifications, diversity_samples,recoded_data,taxonomy,proportion_languages_must_be_in_applicable_state, title, subtitle, textpos, conditional, marginal, xlab){
   
   expectation <- filter(modifications, modification.ID == ID)
   
@@ -108,7 +108,8 @@ for_viz <- function(ID, modifications, diversity_samples,recoded_data,taxonomy,p
     labs(x=xlab,
          y="Density",
          title = title, 
-         subtitle = paste("µ + σ = ", 
+         subtitle = paste(#subtitle, "\n",
+                          "µ + σ = ", 
                           round(mean(expectation_assessment$result1_OR_AND_THEN,na.rm=T)+sd(expectation_assessment$result1_OR_AND_THEN,na.rm=T),2),
                           ", Cohen's D = ",round(cohensD(na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==TRUE)$result1_OR_AND_THEN),
                                                          na.omit(filter(expectation_assessment,overlap_sufficient_test_power_positive==TRUE)$baseline1_OR_AND_THEN), 
@@ -132,8 +133,9 @@ swoo23a <- for_viz(ID = "S-WOO-23a",
                    recoded_data = recoded_data,
                    taxonomy = taxonomy,
                    proportion_languages_must_be_in_applicable_state = proportion_languages_must_be_in_applicable_state,
-                   title = "b. 'if prepositions, then word order noun-genitive'",
-                   conditional = "conditional: P(prepositions | genitive-noun)",
+                   title = "b.",
+                   subtitle = "'if prepositions, then word order noun-genitive'",
+                   conditional = "conditional: P(genitive-noun | prepositions)",
                    marginal = "marginal: P(genitive-noun)",
                    xlab = "",
                    textpos = 8.25)
@@ -146,8 +148,9 @@ swoo23b <- for_viz(ID = "S-WOO-23b",
                    recoded_data = recoded_data,
                    taxonomy = taxonomy,
                    proportion_languages_must_be_in_applicable_state = proportion_languages_must_be_in_applicable_state,
-                   title = "a. 'if postpositions, then word order genitive-noun'",
-                   conditional = "conditional: P(postpositions | noun-genitive)",
+                   title = "a.",
+                   subtitle = "'if postpositions, then word order genitive-noun'",
+                   conditional = "conditional: P(noun-genitive | postpositions)",
                    marginal = "marginal: P(noun-genitive)",
                    xlab = "",
                    textpos = 32)
@@ -160,8 +163,9 @@ smor10 <- for_viz(ID = "S-MOR-10",
                   recoded_data = recoded_data,
                   taxonomy = taxonomy,
                   proportion_languages_must_be_in_applicable_state = proportion_languages_must_be_in_applicable_state,
-                  title = "c. 'if verb agreement, then tense-aspect inflection'",
-                  conditional = "conditional: P(agreement | no TA-inflection)",
+                  title = "c.",
+                  subtitle = "'if verb agreement, then tense-aspect inflection'",
+                  conditional = "conditional: P(no TA-inflection | agreement)",
                   marginal = "marginal: P(no TA-inflection)",
                   xlab = "Probability distributions across 1000 samples",
                   textpos = 14)
@@ -170,4 +174,4 @@ plot(smor10)
 
 # arrange the plots side by side, print and save
 combined_plot_full <- grid.arrange(swoo23b,swoo23a,smor10, ncol = 1)
-ggsave("plots/Fig8 associations.jpg", plot = combined_plot_full, width = 14, height = 8, dpi = 700)
+ggsave("plots/Fig8.jpg", plot = combined_plot_full, width = 14, height = 8, dpi = 700)
