@@ -583,7 +583,7 @@ recoded_data <- full_join(tenth_set_rec, recoded_data, by=c(glottocode="glottoco
 recoded_data[is.na(recoded_data)]<-"NA"
 
 # this full set of all input and recoded features needs to be stored to perform statistical tests
-write.csv(recoded_data, "curated_data/GBI/statisticalGBI/data_for_stats.csv")
+write.csv(recoded_data, "curated_data/GBI/statisticalGBI/data_for_stats.csv", na = "")
 
 # subset full data into original layer; logical layer and statistical layer
 recode_patterns <- read.csv("scripts/GBI/feature-recode-patterns.csv")
@@ -704,8 +704,8 @@ expect_true(all(na.omit(unique(unlist(strsplit(recode_patterns$known.remaining.d
 
 ########## save data as language-feature matrices ########## 
 # save logical and statistical datasets as language-feature matrices (.csv)
-write.csv(logical_data,"curated_data/GBI/logicalGBI/logicalGBI.csv")
-write.csv(statistical_data,"curated_data/GBI/statisticalGBI/statisticalGBI.csv")
+write.csv(logical_data,"curated_data/GBI/logicalGBI/logicalGBI.csv", na = "")
+write.csv(statistical_data,"curated_data/GBI/statisticalGBI/statisticalGBI.csv", na = "")
 
 ########## make, check and save cldf  ########## 
 # languages.csv
@@ -774,9 +774,9 @@ write.csv(taxonomy_logical,"curated_data/GBI/logicalGBI/cldf/languages.csv",file
 write.csv(taxonomy_statistical,"curated_data/GBI/statisticalGBI/cldf/languages.csv",fileEncoding="UTF-8",row.names = F)
 write.csv(parameters_logical,"curated_data/GBI/logicalGBI/cldf/parameters.csv",fileEncoding="UTF-8",row.names = F)
 write.csv(parameters_statistical,"curated_data/GBI/statisticalGBI/cldf/parameters.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(logical_long,"curated_data/GBI/logicalGBI/cldf/values.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(statistical_long,"curated_data/GBI/statisticalGBI/cldf/values.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(logical_codes,"curated_data/GBI/logicalGBI/cldf/codes.csv",fileEncoding="UTF-8",row.names = F)
-write.csv(statistical_codes,"curated_data/GBI/statisticalGBI/cldf/codes.csv",fileEncoding="UTF-8",row.names = F)
+write.csv(logical_long,"curated_data/GBI/logicalGBI/cldf/values.csv",fileEncoding="UTF-8",row.names = F, na = "")
+write.csv(statistical_long,"curated_data/GBI/statisticalGBI/cldf/values.csv",fileEncoding="UTF-8",row.names = F, na = "")
+write.csv(logical_codes,"curated_data/GBI/logicalGBI/cldf/codes.csv",fileEncoding="UTF-8",row.names = F, na = "")
+write.csv(statistical_codes,"curated_data/GBI/statisticalGBI/cldf/codes.csv",fileEncoding="UTF-8",row.names = F, na = "")
 write.csv(modifications,"curated_data/GBI/logicalGBI/cldf/modifications.csv",fileEncoding="UTF-8",row.names = F)
 write.csv(modifications,"curated_data/GBI/statisticalGBI/cldf/modifications.csv",fileEncoding="UTF-8",row.names = F)
