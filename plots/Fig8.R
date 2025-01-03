@@ -21,6 +21,8 @@ for_viz <- function(ID, modifications, diversity_samples,recoded_data,taxonomy,p
   non_NAq_data <- raw_data
   non_NAq_data[non_NAq_data =="?"] <- NA
   non_NAq_data[non_NAq_data =="NA"] <- NA
+  non_NAq_data[non_NAq_data =="N/A"] <- NA
+  
   
   # log how many languages each variable is coded for (nrlgs1 for variable 1 and nrlgs2 for variable 2; these values are logged)
   nrlgs1 <- length(na.omit(non_NAq_data[,1]))
