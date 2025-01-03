@@ -4,6 +4,7 @@
 na_convert <- function(data){
   data[data=="?"]<-NA
   data[data=="NA"]<-NA
+  data[data=="N/A"]<-NA
   data[data==""]<-NA
   data[is.na(data)]<-NA
   return(data)
