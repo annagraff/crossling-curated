@@ -579,8 +579,8 @@ tenth_set_rec <- rowwise(tenth_set) %>% do({
 # merge new features with recoded_data for further use
 recoded_data <- full_join(tenth_set_rec, recoded_data, by=c(glottocode="glottocode"))
 
-# replace all NA as explicit "NA"
-recoded_data[is.na(recoded_data)]<-"NA"
+# replace all NA as explicit "N/A"
+recoded_data[is.na(recoded_data)]<-"N/A"
 
 # this full set of all input and recoded features needs to be stored to perform statistical tests
 write.csv(recoded_data, "curated_data/GBI/statisticalGBI/data_for_stats.csv", na = "")
@@ -641,7 +641,7 @@ for (id in ids){
   if (type == "statistical"){
     # check that each instance of a modification ID in the spreadsheet ("is") is foreseen in the decisions_log ("should") and vice versa
     should_all <- all_decisions %>% filter(modification.ID == id) %>% select(c("feature.1.for.test","feature.2.for.test","resulting.added.features","resulting.removed.features")) %>% as.character() %>% unique()
-    should_all <- na.omit(unique(unlist(strsplit(should_all[should_all!="NA"],", "))))
+    should_all <- na.omit(unique(unlist(strsplit(should_all[should_all!="N/A"],", "))))
     is_all <- recode_patterns %>% slice(c(which(grepl(id,recode_patterns$modification.IDs)),which(grepl(id,recode_patterns$associated.modification.IDs.without.resulting.action))))
     is_all <- is_all$new.name
     expect_true(all(is_all%in%should_all))
@@ -649,7 +649,7 @@ for (id in ids){
     
     # check that each instance of a modification ID WITH EFFECT in the spreadsheet ("is") is foreseen in the decisions_log ("should") and vice versa
     should_actedupon <- all_decisions %>% filter(modification.ID == id) %>% select(c("resulting.added.features","resulting.removed.features")) %>% as.character() %>% unique()
-    should_actedupon <- na.omit(unique(unlist(strsplit(should_actedupon[should_actedupon!="NA"],", "))))
+    should_actedupon <- na.omit(unique(unlist(strsplit(should_actedupon[should_actedupon!="N/A"],", "))))
     is_actedupon <- recode_patterns %>% slice(which(grepl(id,recode_patterns$modification.IDs)))
     is_actedupon <- is_actedupon$new.name
     expect_true(all(is_actedupon%in%should_actedupon))
@@ -657,7 +657,7 @@ for (id in ids){
     
     # check that each instance of a modification ID WITHOUT EFFECT in the spreadsheet ("is") is foreseen in the decisions_log ("should") and vice versa
     should_associated <- all_decisions %>% filter(modification.ID == id) %>% select(c("feature.1.for.test","feature.2.for.test")) %>% as.character() %>% unique()
-    should_associated <- setdiff(na.omit(unique(unlist(strsplit(should_associated[should_associated!="NA"],", ")))),is_actedupon)
+    should_associated <- setdiff(na.omit(unique(unlist(strsplit(should_associated[should_associated!="N/A"],", ")))),is_actedupon)
     is_associated <- recode_patterns %>% slice(which(grepl(id,recode_patterns$associated.modification.IDs.without.resulting.action)))
     is_associated <- is_associated$new.name
     expect_true(all(is_associated%in%should_associated))
@@ -666,7 +666,7 @@ for (id in ids){
   else if (type %in% c("logical","design-automated","design-manual")){ 
     # check that each instance of a modification ID in the spreadsheet ("is") is foreseen in the decisions_log ("should") and vice versa
     should_all <- all_decisions %>% filter(modification.ID == id) %>% select(c("relevant.features","resulting.added.features","resulting.removed.features")) %>% as.character() %>% unique()
-    should_all <- na.omit(unique(unlist(strsplit(should_all[should_all!="NA"],", "))))
+    should_all <- na.omit(unique(unlist(strsplit(should_all[should_all!="N/A"],", "))))
     is_all <- recode_patterns %>% slice(c(which(grepl(id,recode_patterns$modification.IDs)),which(grepl(id,recode_patterns$associated.modification.IDs.without.resulting.action))))
     is_all <- is_all$new.name
     expect_true(all(is_all%in%should_all))
@@ -674,7 +674,7 @@ for (id in ids){
     
     # check that each instance of a modification ID WITH EFFECT in the spreadsheet ("is") is foreseen in the decisions_log ("should") and vice versa
     should_actedupon <- all_decisions %>% filter(modification.ID == id) %>% select(c("resulting.added.features","resulting.removed.features")) %>% as.character() %>% unique()
-    should_actedupon <- na.omit(unique(unlist(strsplit(should_actedupon[should_actedupon!="NA"],", "))))
+    should_actedupon <- na.omit(unique(unlist(strsplit(should_actedupon[should_actedupon!="N/A"],", "))))
     is_actedupon <- recode_patterns %>% slice(which(grepl(id,recode_patterns$modification.IDs)))
     is_actedupon <- is_actedupon$new.name
     expect_true(all(is_actedupon%in%should_actedupon))
@@ -682,7 +682,7 @@ for (id in ids){
     
     # check that each instance of a modification ID WITHOUT EFFECT in the spreadsheet ("is") is foreseen in the decisions_log ("should") and vice versa
     should_associated <- all_decisions %>% filter(modification.ID == id) %>% select("relevant.features") %>% as.character() %>% unique()
-    should_associated <- setdiff(na.omit(unique(unlist(strsplit(should_associated[should_associated!="NA"],", ")))),is_actedupon)
+    should_associated <- setdiff(na.omit(unique(unlist(strsplit(should_associated[should_associated!="N/A"],", ")))),is_actedupon)
     is_associated <- recode_patterns %>% slice(which(grepl(id,recode_patterns$associated.modification.IDs.without.resulting.action)))
     is_associated <- is_associated$new.name
     expect_true(all(is_associated%in%should_associated))
